@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "danielutils"
+version = "0.9.62"
+authors = [
+    { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
+]
+dependencies = ["tqdm"]
+keywords = ['functions', 'decorators', 'methods', 'classes', 'metaclasses']
+license = { "file" = "LISENCE" }
+description = "A python utils library for things I find useful"
+readme = "README.md"
+requires-python = ">=3.8.17"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    # "Operating system :: Unix",
+    # "Operating system :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/danielnachumdev/danielutils"
+"Bug Tracker" = "https://github.com/danielnachumdev/danielutils/issues"
