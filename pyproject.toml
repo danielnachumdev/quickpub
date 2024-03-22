@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quickpub"
-version = "0.5.0"
+version = "0.5.1"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
 dependencies = ['twine', 'danielutils']
-keywords = []
+keywords = ['Utils', 'PyPi', 'Publish', 'Quick']
 license = { "file" = "LISENCE" }
 description = "A python package to quickly configure and publish a new package"
 readme = "README.md"

@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional, Union, cast
 from danielutils import get_python_version
 from .publish import build, upload, commit, metrics
 from .structures import Version, Config
@@ -22,12 +22,13 @@ def publish(
         config: Optional[Config] = None
 ) -> None:
     if version is None:
-        version: Version = None  # type: ignore
+        version = Version(0, 0, 1)
     else:
         version: Version = version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
 
     if min_python is None:
         min_python = Version(*get_python_version())
+
     if keywords is None:
         keywords = []
 

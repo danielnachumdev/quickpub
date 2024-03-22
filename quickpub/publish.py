@@ -1,3 +1,4 @@
+import sys
 from danielutils import info, error
 
 from .proxy import cm
@@ -150,7 +151,7 @@ def build(
     ret, stdout, stderr = cm("python", "setup.py", "sdist")
     if ret != 0:
         error(stderr.decode(encoding="utf8"))
-        exit(1)
+        sys.exit(1)
 
 
 def upload(
@@ -164,7 +165,7 @@ def upload(
     ret, stdout, stderr = cm("wt.exe", "twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
     if ret != 0:
         error(stderr.decode(encoding="utf8"))
-        exit(1)
+        sys.exit(1)
 
 
 def commit(
