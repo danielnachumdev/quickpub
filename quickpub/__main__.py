@@ -47,7 +47,7 @@ def publish(
         classifiers=[
             DevelopmentStatusClassifier.Alpha,
             IntendedAudienceClassifier.Developers,
-            ProgramingLanguageClassifier.Python3,
+            ProgrammingLanguageClassifier.Python3,
             OperatingSystemClassifier.MicrosoftWindows
         ],
         min_python=min_python

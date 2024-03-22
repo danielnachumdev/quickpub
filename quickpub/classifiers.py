@@ -55,7 +55,7 @@ class IntendedAudienceClassifier(Classifier):
     Developers = "Developers"
 
 
-class ProgramingLanguageClassifier(Classifier):
+class ProgrammingLanguageClassifier(Classifier):
     Python3 = "Python :: 3"
 
 
@@ -67,6 +67,6 @@ __all__ = [
     "Classifier",
     "DevelopmentStatusClassifier",
     "IntendedAudienceClassifier",
-    "ProgramingLanguageClassifier",
+    "ProgrammingLanguageClassifier",
     "OperatingSystemClassifier"
 ]

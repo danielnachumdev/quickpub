@@ -17,7 +17,7 @@ requires-python = ">=3.10.13"
 classifiers = [
 	"Development Status :: 3 - Alpha",
 	"Intended Audience :: Developers",
-	"Programing Language :: Python :: 3",
+	"Programming Language :: Python :: 3",
 	"Operating System :: Microsoft :: Windows"
 ]
 
