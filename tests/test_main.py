@@ -1,14 +1,18 @@
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from quickpub import publish
-import danielutils
+
+
+def _cm(*args, **kwargs):
+    return 0, "", ""
 
 
 class TestMain(unittest.TestCase):
-    def setUp(self):
-        self.cm_mock = Mock()
-        danielutils.cm = self.cm_mock
 
+    def setUp(self):
+        pass
+
+    @patch("danielutils.cm", new=_cm)
     def test_main(self):
         publish(
             name="quickpub",
