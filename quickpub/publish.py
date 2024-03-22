@@ -1,5 +1,6 @@
-from danielutils import cm, info, error
+from danielutils import info, error
 
+from .proxy import cm
 from .structures import Version
 
 

@@ -1,6 +1,7 @@
 import unittest
 from unittest.mock import Mock, patch
 from quickpub import publish
+import quickpub
 
 
 def _cm(*args, **kwargs):
@@ -10,7 +11,7 @@ def _cm(*args, **kwargs):
 class TestMain(unittest.TestCase):
 
     def setUp(self):
-        pass
+        quickpub.proxy.__dict__["cm"] = _cm
 
     @patch("quickpub.proxy.cm", new=_cm)
     def test_main(self):
