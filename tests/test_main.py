@@ -4,7 +4,7 @@ from quickpub import publish
 
 
 def _cm(*args, **kwargs):
-    return 0, "", ""
+    return 0, b"", b""
 
 
 class TestMain(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestMain(unittest.TestCase):
     def setUp(self):
         pass
 
-    @patch("danielutils.cm", new=_cm)
+    @patch("quickpub.proxy.cm", new=_cm)
     def test_main(self):
         publish(
             name="quickpub",
