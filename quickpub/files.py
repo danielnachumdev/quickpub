@@ -2,11 +2,13 @@ from typing import Optional
 
 from .classifiers import Classifier
 from .structures import Version
+from danielutils import get_files
 
 
 def create_toml(
         *,
         name: str,
+        src: str,
         version: Version,
         author: str,
         author_email: str,
@@ -20,6 +22,13 @@ def create_toml(
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
+    py_typed = ""
+    for file in get_files(src):
+        if file == "py.typed":
+            py_typed = f"""[tool.setuptools.package-data]
+"{name}" = ["py.typed"]"""
+            break
+
     s = f"""[build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
@@ -40,6 +49,7 @@ classifiers = [{classifiers_string}]
 
 [tool.setuptools]
 packages = ["{name}"]
+{py_typed}
 
 [project.urls]
 "Homepage" = "{homepage}"

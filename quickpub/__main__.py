@@ -9,6 +9,7 @@ from .classifiers import *
 def publish(
         *,
         name: str,
+        src: str,
         version: Optional[Union[Version, str]] = None,
         author: str,
         author_email: str,
@@ -38,6 +39,7 @@ def publish(
     create_setup()
     create_toml(
         name=name,
+        src=src,
         version=version,
         author=author,
         author_email=author_email,

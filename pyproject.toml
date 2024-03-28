@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quickpub"
-version = "0.5.2"
+version = "0.5.5"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
@@ -23,6 +23,8 @@ classifiers = [
 
 [tool.setuptools]
 packages = ["quickpub"]
+[tool.setuptools.package-data]
+"quickpub" = ["py.typed"]
 
 [project.urls]
 "Homepage" = "https://github.com/danielnachumdev/quickpub"
