@@ -2,6 +2,7 @@ from typing import Optional, Union
 
 from danielutils import get_python_version
 
+from .custom_types import Path
 from .structures import Version
 
 
@@ -29,6 +30,12 @@ def validate_dependencies(dependencies: Optional[list[str]]) -> list[str]:
     if dependencies is None:
         return []
     return dependencies
+
+
+def validate_source(name: str, src: Optional[Path] = None) -> Path:
+    if src is not None:
+        return src
+    return f"./{name}"
 
 
 __all__ = [
