@@ -60,6 +60,8 @@ def publish(
     create_toml(
         name=name,
         src=src,
+        readme=readme,
+        license = license,
         version=version,
         author=author,
         author_email=author_email,
