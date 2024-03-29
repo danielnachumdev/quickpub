@@ -166,10 +166,10 @@ def upload(
 ) -> None:
     if verbose:
         info("Uploading")
-    ret, stdout, stderr = cm("wt.exe", "twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
+    ret, stdout, stderr = cm("twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
     exit_if(
         ret != 0,
-        stderr.decode(encoding="utf8")
+        f"Failed uploading the package to pypi. Try running the following command manually:\n\ttwine upload --config-file .pypirc dist/{name}-{version}.tar.gz"
     )
 
 
