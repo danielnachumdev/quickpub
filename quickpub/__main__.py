@@ -1,16 +1,18 @@
-from typing import Optional, Union, cast
-from danielutils import error, get_python_version, get_files, directory_exists
+from typing import Optional, Union
+
+from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies
 from .publish import build, upload, commit, metrics
 from .structures import Version, Config
 from .files import create_toml, create_setup
 from .classifiers import *
-from .enforce_version import enforce_correct_version
+from .enforcers import enforce_correct_version, enforce_pypirc_exists
+from .custom_types import Path
 
 
 def publish(
         *,
         name: str,
-        src: str,
+        src: Path,
         version: Optional[Union[Version, str]] = None,
         author: str,
         author_email: str,
@@ -23,21 +25,12 @@ def publish(
         dependencies: Optional[list[str]] = None,
         config: Optional[Config] = None
 ) -> None:
-    if version is None:
-        version = Version(0, 0, 1)
-    else:
-        version: Version = version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
-
+    enforce_pypirc_exists()
+    version = validate_version(version)
     enforce_correct_version(name, version)
-
-    if min_python is None:
-        min_python = Version(*get_python_version())
-
-    if keywords is None:
-        keywords = []
-
-    if dependencies is None:
-        dependencies = []
+    min_python = validate_python_version(min_python)
+    keywords = validate_keywords(keywords)
+    dependencies = validate_dependencies(dependencies)
 
     create_setup()
     create_toml(

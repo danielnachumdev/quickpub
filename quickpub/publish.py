@@ -1,6 +1,9 @@
 import sys
+from typing import Optional, Literal
+
 from danielutils import info, error
 
+from .enforcers import exit_if
 from .proxy import cm
 from .structures import Version
 
@@ -149,9 +152,10 @@ def build(
     if verbose:
         info("Creating new distribution...")
     ret, stdout, stderr = cm("python", "setup.py", "sdist")
-    if ret != 0:
-        error(stderr.decode(encoding="utf8"))
-        sys.exit(1)
+    exit_if(
+        ret != 0,
+        stderr.decode(encoding="utf8")
+    )
 
 
 def upload(
@@ -163,9 +167,10 @@ def upload(
     if verbose:
         info("Uploading")
     ret, stdout, stderr = cm("wt.exe", "twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
-    if ret != 0:
-        error(stderr.decode(encoding="utf8"))
-        sys.exit(1)
+    exit_if(
+        ret != 0,
+        stderr.decode(encoding="utf8")
+    )
 
 
 def commit(
@@ -176,16 +181,28 @@ def commit(
     if verbose:
         info("Git")
         info("\tStaging")
-    cm("git add .")
+    ret, stdout, stderr = cm("git add .")
+    exit_if(
+        ret != 0,
+        stderr.decode(encoding="utf8")
+    )
     if verbose:
         info("\tCommitting")
-    cm(f"git commit -m \"updated to version {version}\"")
+    ret, stdout, stderr = cm(f"git commit -m \"updated to version {version}\"")
+    exit_if(
+        ret != 0,
+        stderr.decode(encoding="utf8")
+    )
     if verbose:
         info("\tPushing")
-    cm("git push")
+    ret, stdout, stderr = cm("git push")
+    exit_if(
+        ret != 0,
+        stderr.decode(encoding="utf8")
+    )
 
 
-def metrics():
+def metrics(testing_client: Optional[Literal["pytest", "unitest"]] = None):
     pass
 
 
