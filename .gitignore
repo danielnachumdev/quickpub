@@ -1,8 +1,8 @@
 main.py
 .pypirc
-tests/pyproject.toml
+tests/*
+!tests/*.py
 tests/setup.py
-tests/quickpub
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

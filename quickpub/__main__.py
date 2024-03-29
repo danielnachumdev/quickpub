@@ -2,7 +2,7 @@ from typing import Optional, Union
 from danielutils import warning, file_exists
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
-from .publish import build, upload, commit, metrics
+from .functions import build, upload, commit, metrics
 from .structures import Version, Config
 from .files import create_toml, create_setup
 from .classifiers import *

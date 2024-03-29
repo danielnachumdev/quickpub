@@ -4,9 +4,8 @@ from typing import Optional, Literal
 from danielutils import info, error
 
 from .enforcers import exit_if
-from .proxy import cm
 from .structures import Version
-
+import quickpub.proxy
 
 def prev_main():
     import re
@@ -151,7 +150,7 @@ def build(
 ) -> None:
     if verbose:
         info("Creating new distribution...")
-    ret, stdout, stderr = cm("python", "setup.py", "sdist")
+    ret, stdout, stderr = quickpub.proxy.cm("python", "setup.py", "sdist")
     exit_if(
         ret != 0,
         stderr.decode(encoding="utf8")
@@ -166,7 +165,7 @@ def upload(
 ) -> None:
     if verbose:
         info("Uploading")
-    ret, stdout, stderr = cm("twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
+    ret, stdout, stderr = quickpub.proxy.cm("twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
     exit_if(
         ret != 0,
         f"Failed uploading the package to pypi. Try running the following command manually:\n\ttwine upload --config-file .pypirc dist/{name}-{version}.tar.gz"
@@ -181,21 +180,21 @@ def commit(
     if verbose:
         info("Git")
         info("\tStaging")
-    ret, stdout, stderr = cm("git add .")
+    ret, stdout, stderr = quickpub.proxy.cm("git add .")
     exit_if(
         ret != 0,
         stderr.decode(encoding="utf8")
     )
     if verbose:
         info("\tCommitting")
-    ret, stdout, stderr = cm(f"git commit -m \"updated to version {version}\"")
+    ret, stdout, stderr = quickpub.proxy.cm(f"git commit -m \"updated to version {version}\"")
     exit_if(
         ret != 0,
         stderr.decode(encoding="utf8")
     )
     if verbose:
         info("\tPushing")
-    ret, stdout, stderr = cm("git push")
+    ret, stdout, stderr = quickpub.proxy.cm("git push")
     exit_if(
         ret != 0,
         stderr.decode(encoding="utf8")
