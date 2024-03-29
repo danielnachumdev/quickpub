@@ -1,5 +1,4 @@
-from typing import Optional
-
+from .custom_types import Path
 from .classifiers import Classifier
 from .structures import Version
 from danielutils import get_files
@@ -8,7 +7,9 @@ from danielutils import get_files
 def create_toml(
         *,
         name: str,
-        src: str,
+        src: Path,
+        readme: Path,
+        license: Path,
         version: Version,
         author: str,
         author_email: str,
@@ -41,9 +42,9 @@ authors = [
 ]
 dependencies = {dependencies}
 keywords = {keywords}
-license = {{ "file" = "LISENCE" }}
+license = {{ "file" = "{license}" }}
 description = "{description}"
-readme = "README.md"
+readme = "{readme}"
 requires-python = ">={min_python}"
 classifiers = [{classifiers_string}]
 

@@ -1,12 +1,12 @@
 from typing import Optional, Union
-from danielutils import warning
+from danielutils import warning, file_exists
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .publish import build, upload, commit, metrics
 from .structures import Version, Config
 from .files import create_toml, create_setup
 from .classifiers import *
-from .enforcers import enforce_correct_version, enforce_pypirc_exists
+from .enforcers import enforce_correct_version, enforce_pypirc_exists, exit_if
 from .custom_types import Path
 
 
@@ -19,6 +19,8 @@ def publish(
         author_email: str,
         description: str,
         homepage: str,
+        readme: Path = "./README.md",
+        license: Path = "./LICENSE",
 
         min_python: Optional[Union[Version, str]] = None,
 
@@ -46,6 +48,8 @@ def publish(
     if src != f"./{name}":
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
+    exit_if(not file_exists(readme), f"Could not find readme file at {readme}")
+    exit_if(not file_exists(license), f"Could not find license file at {license}")
     version = validate_version(version)
     enforce_correct_version(name, version)
     min_python = validate_python_version(min_python)
