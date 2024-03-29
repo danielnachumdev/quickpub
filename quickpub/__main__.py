@@ -13,12 +13,12 @@ from .custom_types import Path
 def publish(
         *,
         name: str,
-        src: Optional[Path] = None,
-        version: Optional[Union[Version, str]] = None,
         author: str,
         author_email: str,
         description: str,
         homepage: str,
+        src: Optional[Path] = None,
+        version: Optional[Union[Version, str]] = None,
         readme: Path = "./README.md",
         license: Path = "./LICENSE",
 
@@ -28,20 +28,22 @@ def publish(
         dependencies: Optional[list[str]] = None,
         config: Optional[Config] = None
 ) -> None:
-    """
+    """The main function of this package. will do all the heavy lifting in order for you to publish your package.
 
-    :param name: The display name of the package
-    :param src: The source folder of the package, Defaults to CWD/<name>
-    :param version:
-    :param author:
-    :param author_email:
-    :param description:
-    :param homepage:
-    :param min_python:
-    :param keywords:
-    :param dependencies:
-    :param config:
-    :return:
+    Args:
+        name (str): The name of the package
+        author (str): The name of the author
+        author_email (str): The email of the author
+        description (str): A short description for the package
+        homepage (str): The homepage for the package. URL to the github repo is a good option.
+        src (Optional[Path], optional): The path to the source code of the package. if None defaults to CWD/<name>
+        version (Optional[Union[Version, str]], optional): The version to create the new distribution. if None defaults to 0.0.1
+        readme (Path, optional): The path to the readme file. Defaults to "./README.md".
+        license (Path, optional): The path to the license file . Defaults to "./LICENSE".
+        min_python (Optional[Union[Version, str]], optional): The minimum version of python required for this package to run. Defaults to the version of python running this script.
+        keywords (Optional[list[str]], optional): A list of keywords to describe areas of interests of this package. Defaults to None.
+        dependencies (Optional[list[str]], optional): A list of the dependencies for this package. Defaults to None.
+        config (Optional[Config], optional): reserved for future use. Defaults to None.
     """
     enforce_pypirc_exists()
     src = validate_source(name, src)
@@ -49,7 +51,8 @@ def publish(
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
     exit_if(not file_exists(readme), f"Could not find readme file at {readme}")
-    exit_if(not file_exists(license), f"Could not find license file at {license}")
+    exit_if(not file_exists(license),
+            f"Could not find license file at {license}")
     version = validate_version(version)
     enforce_correct_version(name, version)
     min_python = validate_python_version(min_python)
@@ -61,7 +64,7 @@ def publish(
         name=name,
         src=src,
         readme=readme,
-        license = license,
+        license=license,
         version=version,
         author=author,
         author_email=author_email,
