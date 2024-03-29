@@ -1,9 +1,10 @@
 from typing import Optional, Union, cast
-from danielutils import get_python_version
+from danielutils import error, get_python_version, get_files, directory_exists
 from .publish import build, upload, commit, metrics
 from .structures import Version, Config
 from .files import create_toml, create_setup
 from .classifiers import *
+from .enforce_version import enforce_correct_version
 
 
 def publish(
@@ -26,6 +27,8 @@ def publish(
         version = Version(0, 0, 1)
     else:
         version: Version = version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
+
+    enforce_correct_version(name, version)
 
     if min_python is None:
         min_python = Version(*get_python_version())

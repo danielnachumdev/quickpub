@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass
+@dataclass(order=True)
 class Version:
     @staticmethod
     def from_str(version_str: str) -> "Version":
@@ -19,7 +19,6 @@ class Version:
 class Config:
     pylint: bool = False
     mypy: bool = False
-
 
 
 __all__ = [
