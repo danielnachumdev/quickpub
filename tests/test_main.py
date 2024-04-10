@@ -67,18 +67,8 @@ class TestMain(unittest.TestCase):
 
     @patch("quickpub.proxy.cm", return_value=(0, b"", b""))
     def test_main_wrong_version(self, mock_func):
-        v = "0.0.1"
         create_directory("dist")
-        create_file(f"dist/{PACAKGE}-{v}.tar.gz")
+        create_file(f"dist/{PACAKGE}-0.0.1.tar.gz")
         with self.assertRaises(SystemExit) as se:
-            publish(
-                name=PACAKGE,
-                version=v,
-                author="danielnachumdev",
-                author_email="danielnachumdev@gmail.com",
-                description="A python package to quickly configure and publish a new package",
-                homepage="https://github.com/danielnachumdev/quickpub",
-                dependencies=["twine", "danielutils"]
-            )
+            f()
         self.assertEqual(se.exception.code, 1)
-
