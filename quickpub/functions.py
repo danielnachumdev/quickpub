@@ -7,6 +7,7 @@ from .enforcers import exit_if
 from .structures import Version
 import quickpub.proxy
 
+
 def prev_main():
     import re
     from danielutils import cmrt, cm, read_file, get_files, directory_exists, create_directory  # type:ignore
@@ -165,7 +166,8 @@ def upload(
 ) -> None:
     if verbose:
         info("Uploading")
-    ret, stdout, stderr = quickpub.proxy.cm("twine", "upload", "--config-file", ".pypirc", f"dist/{name}-{version}.tar.gz")
+    ret, stdout, stderr = quickpub.proxy.cm("twine", "upload", "--config-file", ".pypirc",
+                                            f"dist/{name}-{version}.tar.gz")
     exit_if(
         ret != 0,
         f"Failed uploading the package to pypi. Try running the following command manually:\n\ttwine upload --config-file .pypirc dist/{name}-{version}.tar.gz"

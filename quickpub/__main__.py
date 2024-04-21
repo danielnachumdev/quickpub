@@ -4,7 +4,7 @@ from .validators import validate_version, validate_python_version, validate_keyw
     validate_source
 from .functions import build, upload, commit, metrics
 from .structures import Version, Config
-from .files import create_toml, create_setup
+from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .enforcers import enforce_correct_version, enforce_pypirc_exists, exit_if
 from .custom_types import Path
@@ -55,7 +55,7 @@ def publish(
             f"Could not find license file at {license}")
     version = validate_version(version)
     enforce_correct_version(name, version)
-    min_python = validate_python_version(min_python)
+    min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     dependencies = validate_dependencies(dependencies)
 
@@ -80,6 +80,7 @@ def publish(
         ],
         min_python=min_python
     )
+    create_manifest(name=name)
 
     build()
     upload(

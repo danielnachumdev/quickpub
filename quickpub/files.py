@@ -44,7 +44,7 @@ dependencies = {dependencies}
 keywords = {keywords}
 license = {{ "file" = "{license}" }}
 description = "{description}"
-readme = "{readme}"
+readme = {{file = "{readme}", content-type = "text/markdown"}}
 requires-python = ">={min_python}"
 classifiers = [{classifiers_string}]
 
@@ -63,7 +63,9 @@ packages = ["{name}"]
 def create_setup() -> None:
     with open("./setup.py", "w", encoding="utf8") as f:
         f.write("from setuptools import setup\n\nsetup()\n")
-
+def create_manifest(*,name:str)->None:
+    with open("./MANIFEST.in", "w", encoding="utf8") as f:
+        f.write(f"recursive-include {name} *.py")
 
 __all__ = [
     "create_setup",
