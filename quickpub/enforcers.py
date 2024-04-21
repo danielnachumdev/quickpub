@@ -6,14 +6,9 @@ from .structures import Version
 
 
 def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str) -> None:
-    if isinstance(predicate, bool):
-        if predicate:
-            error(msg)
-            sys.exit(1)
-    else:
-        if predicate():
-            error(msg)
-            sys.exit(1)
+    if isinstance(predicate, bool) and predicate or predicate():
+        error(msg)
+        sys.exit(1)
 
 
 def enforce_correct_version(name: str, version: Version) -> None:

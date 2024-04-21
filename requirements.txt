@@ -1,4 +1,4 @@
 twine
-danielutils
+danielutils==0.9.76
 pylint
 mypy
