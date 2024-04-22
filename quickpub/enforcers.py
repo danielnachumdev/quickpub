@@ -6,7 +6,7 @@ from .structures import Version
 
 
 def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str) -> None:
-    if isinstance(predicate, bool) and predicate or predicate():
+    if (isinstance(predicate, bool) and predicate) or (callable(predicate) and predicate()):
         error(msg)
         sys.exit(1)
 
