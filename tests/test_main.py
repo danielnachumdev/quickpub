@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import Mock, patch, MagicMock
-from quickpub import publish
-from danielutils import create_file, delete_file, create_directory, delete_directory
+from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators
 from requests import Response
+
+from quickpub import publish
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"
@@ -22,8 +23,6 @@ def f() -> None:
         dependencies=["twine", "danielutils"]
     )
 
-
-from danielutils import chain_decorators
 
 mock_response = Response()
 multipatch = chain_decorators(

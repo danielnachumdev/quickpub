@@ -2,7 +2,7 @@ import sys
 from typing import Union, Callable
 
 import requests
-from bs4 import BeautifulSoup
+# from bs4 import BeautifulSoup
 from danielutils import directory_exists, get_files, error, file_exists
 from .structures import Version
 from .proxy import get
