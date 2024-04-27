@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .config import StaticAnalyzersConfig, Bound
+from .config import StaticAnalyzersConfig
 from .analyzer_factory import AnalyzerFactory
 
 
@@ -8,6 +8,7 @@ def analyze(*, analyzer_configurations: Optional[list[StaticAnalyzersConfig]] = 
     if analyzer_configurations is None:
         return
     from ..enforcers import exit_if
+    from ..structures import Bound
     for config in analyzer_configurations:
         target = config.src_folder_path if config.src_folder_path is not None else default_src_path
         analyzer = AnalyzerFactory.get_analyzer(config.name, args=[config.executable_path, config.config_file_path])
