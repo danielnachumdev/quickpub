@@ -9,11 +9,11 @@ authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
 dependencies = ['twine', 'danielutils']
-keywords = ['Utils', 'PyPi', 'Publish', 'Quick']
+keywords = []
 license = { "file" = "./LICENSE" }
 description = "A python package to quickly configure and publish a new package"
 readme = {file = "./README.md", content-type = "text/markdown"}
-requires-python = ">=3.10.13"
+requires-python = ">=3.10.11"
 classifiers = [
 	"Development Status :: 3 - Alpha",
 	"Intended Audience :: Developers",

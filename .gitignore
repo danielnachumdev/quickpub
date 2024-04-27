@@ -1,4 +1,3 @@
-main.py
 .pypirc
 tests/*
 !tests/*.py

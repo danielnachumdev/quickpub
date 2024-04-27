@@ -6,7 +6,7 @@ from .functions import build, upload, commit, metrics
 from .structures import Version, Config
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
-from .enforcers import enforce_correct_version, enforce_pypirc_exists, exit_if
+from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if,enforce_remote_correct_version
 from .custom_types import Path
 
 
@@ -54,10 +54,11 @@ def publish(
     exit_if(not file_exists(license),
             f"Could not find license file at {license}")
     version = validate_version(version)
-    enforce_correct_version(name, version)
+    enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     dependencies = validate_dependencies(dependencies)
+    enforce_remote_correct_version(name,version)
 
     create_setup()
     create_toml(

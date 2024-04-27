@@ -2,3 +2,5 @@ twine
 danielutils==0.9.76
 pylint
 mypy
+requests
+beautifulsoup4

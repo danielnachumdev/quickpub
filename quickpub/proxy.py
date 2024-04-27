@@ -1,9 +1,14 @@
 import danielutils
+import requests
 
 
 # need it like this for the testing
 def cm(*args, **kwargs) -> tuple[int, bytes, bytes]:
     return danielutils.cm(*args, **kwargs)
+
+
+def get(*args, **kwargs):
+    return requests.get(*args, **kwargs)
 
 
 def add_verbose_keyword(func):
@@ -16,5 +21,6 @@ def add_verbose_keyword(func):
 
 __all__ = [
     "cm",
+    "get",
     'add_verbose_keyword'
 ]
