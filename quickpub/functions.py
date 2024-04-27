@@ -1,11 +1,12 @@
 import sys
 from typing import Optional, Literal
-
-from danielutils import info, error
+from danielutils import info
 
 from .enforcers import exit_if
 from .structures import Version
 import quickpub.proxy
+
+
 
 
 def prev_main():

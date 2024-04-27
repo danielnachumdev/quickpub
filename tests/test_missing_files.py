@@ -31,7 +31,7 @@ multipatch = chain_decorators(
 )
 
 
-class TestMain(unittest.TestCase):
+class TestMissingFiles(unittest.TestCase):
 
     def setUp(self):
         create_file(PYPIRC)

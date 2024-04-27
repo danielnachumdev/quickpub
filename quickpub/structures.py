@@ -1,4 +1,7 @@
 from dataclasses import dataclass
+from typing import Optional
+from .analyzing_framework import StaticAnalyzersConfig
+from .testing_framework import TestingConfiguration
 
 
 @dataclass(order=True)
@@ -22,13 +25,13 @@ class Version:
         return f"{self.major}.{self.minor}.{self.patch}"
 
 
-@dataclass
-class Config:
-    pylint: bool = False
-    mypy: bool = False
+@dataclass(frozen=True)
+class AdditionalConfiguration:
+    analyzers: Optional[list[StaticAnalyzersConfig]] = None
+    testers: Optional[list[TestingConfiguration]] = None
 
 
 __all__ = [
     "Version",
-    "Config",
+    'AdditionalConfiguration'
 ]

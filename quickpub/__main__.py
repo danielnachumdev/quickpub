@@ -3,10 +3,12 @@ from danielutils import warning, file_exists
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit, metrics
-from .structures import Version, Config
+from .testing_framework import test
+from .analyzing_framework import analyze
+from .structures import Version, AdditionalConfiguration
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
-from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if,enforce_remote_correct_version
+from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
 from .custom_types import Path
 
 
@@ -26,7 +28,7 @@ def publish(
 
         keywords: Optional[list[str]] = None,
         dependencies: Optional[list[str]] = None,
-        config: Optional[Config] = None
+        config: Optional[AdditionalConfiguration] = None
 ) -> None:
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.
 
@@ -58,7 +60,12 @@ def publish(
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     dependencies = validate_dependencies(dependencies)
-    enforce_remote_correct_version(name,version)
+    enforce_remote_correct_version(name, version)
+
+    analyze(analyzer_configurations=config.analyzers if config is not None else None, default_src_path=src)
+    test(test_configurations=config.testers if config is not None else None)
+
+    exit(1)
 
     create_setup()
     create_toml(
