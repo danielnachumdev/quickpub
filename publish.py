@@ -13,8 +13,8 @@ def main() -> None:
         min_python="3.9.19",
         config=AdditionalConfiguration(
             analyzers=[
-                StaticAnalyzersConfig("pylint", config_file_path="./.pylintrc"),
-                StaticAnalyzersConfig("mypy", config_file_path="./mypy.ini")
+                StaticAnalyzersConfig("pylint", config_file_path="./.pylintrc", bound=">=0.8"),
+                StaticAnalyzersConfig("mypy", config_file_path="./mypy.ini", bound="<15")
             ],
             testers=[
                 TestingConfiguration("unittest", "./tests")

@@ -2,5 +2,6 @@ twine
 danielutils>=0.9.78
 pylint
 mypy
+types-requests
 requests
 beautifulsoup4
