@@ -4,6 +4,12 @@ from ..common_check import CommonCheck
 
 
 class MypyRunner(CommonCheck):
+    def _pre_command(self):
+        pass
+
+    def _post_command(self):
+        pass
+
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, configuration_path: Optional[str] = None, executable_path: Optional[str] = None) -> None:

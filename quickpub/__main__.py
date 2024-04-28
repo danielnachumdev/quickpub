@@ -64,7 +64,6 @@ def publish(
         if config.runners is not None:
             for runner in config.runners:
                 runner.run(src)
-    exit(1)
 
     create_setup()
     create_toml(

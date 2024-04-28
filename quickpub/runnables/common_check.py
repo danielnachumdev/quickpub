@@ -27,18 +27,25 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
         command += f" {target}"
         return command
 
+    @abstractmethod
+    def _pre_command(self):
+        ...
+
+    @abstractmethod
+    def _post_command(self):
+        ...
+
     def run(self, target: str, *_) -> None:
         command = self._build_command(target)
         info(f"Running {self.name}")
-        cwd = get_current_working_directory()
-        set_current_working_directory(os.path.join(cwd, self.target))
+        self._pre_command()
         try:
             ret, out, err = cm(command)
-            score = self._calculate_score(ret, err.decode("utf-8").splitlines())
+            score = self._calculate_score(ret, b"".join([out, err]).decode("utf-8").splitlines())
             from ..enforcers import exit_if
             exit_if(not self.bound.compare_against(score), f"{self.name} failed to pass it's defined bound")
         finally:
-            set_current_working_directory(cwd)
+            self._post_command()
 
 
 @abstractmethod

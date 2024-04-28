@@ -1,7 +1,7 @@
 import unittest
 from danielutils import frange
 
-from quickpub.analyzing_framework.config import Bound
+from quickpub import Bound
 
 
 class TestBound(unittest.TestCase):

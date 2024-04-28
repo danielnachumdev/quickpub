@@ -4,6 +4,12 @@ from ..common_check import CommonCheck
 
 
 class PylintRunner(CommonCheck):
+    def _pre_command(self):
+        pass
+
+    def _post_command(self):
+        pass
+
     def __init__(self, configuration_path: Optional[str] = None, executable_path: Optional[str] = None) -> None:
         CommonCheck.__init__(self, "pylint",">=0.8", configuration_path, executable_path)
 
