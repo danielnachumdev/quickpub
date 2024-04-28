@@ -4,7 +4,7 @@ from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner,
 def main() -> None:
     publish(
         name="quickpub",
-        version="0.8.2",
+        version="0.8.3",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
@@ -13,8 +13,8 @@ def main() -> None:
         min_python="3.8.0",
         config=AdditionalConfiguration(
             runners=[
-                MypyRunner(bound="<15"),
-                PylintRunner(bound=">=0.8"),
+                MypyRunner(bound="<15", configuration_path="./mypy.ini"),
+                PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
                 UnittestRunner(bound=">=0.8"),
             ]
         )

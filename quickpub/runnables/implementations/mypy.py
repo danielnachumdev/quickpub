@@ -4,6 +4,13 @@ from ..common_check import CommonCheck
 
 
 class MypyRunner(CommonCheck):
+    def _build_command(self, target: str) -> str:
+        command: str = self.get_executable()
+        if self.has_config:
+            command += f" --config-file {self.config_path}"
+        command += f" {target}"
+        return command
+
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,

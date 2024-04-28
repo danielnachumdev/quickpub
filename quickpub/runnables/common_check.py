@@ -19,12 +19,9 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
         self.bound: Bound = bound if isinstance(bound, Bound) else Bound.from_string(bound)
         self.target = target
 
+    @abstractmethod
     def _build_command(self, target: str) -> str:
-        command: str = self.get_executable()
-        if self.has_config:
-            command += f" --rcfile {self.config_path}"
-        command += f" {target}"
-        return command
+        ...
 
     def _pre_command(self):
         pass
@@ -41,6 +38,8 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
             score = self._calculate_score(ret, b"".join([out, err]).decode("utf-8").splitlines())
             from ..enforcers import exit_if
             exit_if(not self.bound.compare_against(score), f"{self.name} failed to pass it's defined bound")
+        except Exception as e:
+            raise RuntimeError(f"Failed to run {self.name}, try running manually:\n{self._build_command('TARGET')}") from e
         finally:
             self._post_command()
 
