@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
-from danielutils.versioned_imports import t_list
+from typing import Optional, List
 from ..runnables import Runnable
 
 
 @dataclass(frozen=True)
 class AdditionalConfiguration:
-    runners: Optional[t_list[Runnable]]
+    runners: Optional[List[Runnable]]
 
 
 __all__ = [

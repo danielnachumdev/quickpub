@@ -1,6 +1,5 @@
-from typing import Optional, Union
+from typing import Optional, Union, List
 from danielutils import warning, file_exists
-from danielutils.versioned_imports import t_list
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit, metrics
@@ -25,8 +24,8 @@ def publish(
 
         min_python: Optional[Union[Version, str]] = None,
 
-        keywords: Optional[t_list[str]] = None,
-        dependencies: Optional[t_list[str]] = None,
+        keywords: Optional[List[str]] = None,
+        dependencies: Optional[List[str]] = None,
         config: Optional[AdditionalConfiguration] = None
 ) -> None:
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.

@@ -1,6 +1,5 @@
 import re
-from typing import Optional
-from danielutils.versioned_imports import t_list
+from typing import Optional, List
 from ..common_check import CommonCheck
 
 
@@ -11,7 +10,7 @@ class MypyRunner(CommonCheck):
                  executable_path: Optional[str] = None) -> None:
         CommonCheck.__init__(self, "mypy", bound, configuration_path, executable_path)
 
-    def _calculate_score(self, ret, lines: t_list[str]) -> float:
+    def _calculate_score(self, ret, lines: List[str]) -> float:
         from ...enforcers import exit_if
         rating_line = lines[-1]
         exit_if(not (m := self.RATING_PATTERN.match(rating_line)),

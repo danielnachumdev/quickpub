@@ -1,8 +1,7 @@
 from abc import abstractmethod
-from typing import Optional, Union
+from typing import Optional, Union, List
 
 from danielutils import cm, info
-from danielutils.versioned_imports import t_list
 
 from .has_optional_executable import HasOptionalExecutable
 from .runnable import Runnable
@@ -47,7 +46,7 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
 
 
 @abstractmethod
-def _calculate_score(self, ret: int, command_output: t_list[str]) -> float: ...
+def _calculate_score(self, ret: int, command_output: List[str]) -> float: ...
 
 
 __all__ = [

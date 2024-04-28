@@ -1,8 +1,9 @@
+from typing import List
+from danielutils import get_files
 from .custom_types import Path
 from .classifiers import Classifier
 from .structures import Version
-from danielutils import get_files
-from danielutils.versioned_imports import t_list
+
 
 def create_toml(
         *,
@@ -15,10 +16,10 @@ def create_toml(
         author_email: str,
         description: str,
         homepage: str,
-        keywords: t_list[str],
+        keywords: List[str],
         min_python: Version,
-        dependencies: t_list[str],
-        classifiers: t_list[Classifier]
+        dependencies: List[str],
+        classifiers: List[Classifier]
 ) -> None:
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
     if len(classifiers_string) > 0:
@@ -63,9 +64,12 @@ packages = ["{name}"]
 def create_setup() -> None:
     with open("./setup.py", "w", encoding="utf8") as f:
         f.write("from setuptools import setup\n\nsetup()\n")
-def create_manifest(*,name:str)->None:
+
+
+def create_manifest(*, name: str) -> None:
     with open("./MANIFEST.in", "w", encoding="utf8") as f:
         f.write(f"recursive-include {name} *.py")
+
 
 __all__ = [
     "create_setup",
