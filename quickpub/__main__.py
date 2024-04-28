@@ -3,8 +3,6 @@ from danielutils import warning, file_exists
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit, metrics
-from .testing_framework import test
-from .analyzing_framework import analyze
 from .structures import Version, AdditionalConfiguration
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
@@ -62,9 +60,10 @@ def publish(
     dependencies = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
-    analyze(analyzer_configurations=config.analyzers if config is not None else None, default_src_path=src)
-    test(test_configurations=config.testers if config is not None else None)
-
+    if config is not None:
+        if config.runners is not None:
+            for runner in config.runners:
+                runner.run(src)
     exit(1)
 
     create_setup()

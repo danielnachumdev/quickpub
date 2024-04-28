@@ -1,4 +1,4 @@
-from quickpub import publish, StaticAnalyzersConfig, AdditionalConfiguration, TestingConfiguration
+from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner, UnittestRunner
 
 
 def main() -> None:
@@ -12,12 +12,10 @@ def main() -> None:
         dependencies=["twine", "danielutils"],
         min_python="3.9.19",
         config=AdditionalConfiguration(
-            analyzers=[
-                StaticAnalyzersConfig("pylint", config_file_path="./.pylintrc", bound=">=0.8"),
-                StaticAnalyzersConfig("mypy", config_file_path="./mypy.ini", bound="<15")
-            ],
-            testers=[
-                TestingConfiguration("unittest", "./tests")
+            runners=[
+                MypyRunner(),
+                PylintRunner(),
+                UnittestRunner(),
             ]
         )
     )
