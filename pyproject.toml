@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quickpub"
-version = "0.8.3"
+version = "0.8.31"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]

@@ -15,7 +15,8 @@ class MypyRunner(CommonCheck):
 
     def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        CommonCheck.__init__(self, "mypy", bound, configuration_path, executable_path)
+        CommonCheck.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
+                             executable_path=executable_path)
 
     def _calculate_score(self, ret, lines: List[str]) -> float:
         from ...enforcers import exit_if

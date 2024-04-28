@@ -5,9 +5,11 @@ from ..common_check import CommonCheck
 
 class PylintRunner(CommonCheck):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
+
     def __init__(self, bound: str = ">=0.8", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        CommonCheck.__init__(self, "pylint", bound, configuration_path, executable_path)
+        CommonCheck.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
+                             executable_path=executable_path)
 
     def _build_command(self, target: str) -> str:
         command: str = self.get_executable()
@@ -15,6 +17,7 @@ class PylintRunner(CommonCheck):
             command += f" --rcfile {self.config_path}"
         command += f" {target}"
         return command
+
     def _calculate_score(self, ret: int, lines: List[str]) -> float:
         from ...enforcers import exit_if
         rating_line = lines[-2]

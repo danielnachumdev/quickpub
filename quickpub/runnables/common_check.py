@@ -11,7 +11,7 @@ from ..structures import Bound
 
 class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
 
-    def __init__(self, name: str, bound: Union[str, Bound], target: Optional[str] = None,
+    def __init__(self, *, name: str, bound: Union[str, Bound], target: Optional[str] = None,
                  configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
         Configurable.__init__(self, configuration_path)
@@ -39,7 +39,8 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
             from ..enforcers import exit_if
             exit_if(not self.bound.compare_against(score), f"{self.name} failed to pass it's defined bound")
         except Exception as e:
-            raise RuntimeError(f"Failed to run {self.name}, try running manually:\n{self._build_command('TARGET')}") from e
+            raise RuntimeError(
+                f"Failed to run {self.name}, try running manually:\n{self._build_command('TARGET')}") from e
         finally:
             self._post_command()
 
