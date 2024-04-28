@@ -2,7 +2,7 @@ from .custom_types import Path
 from .classifiers import Classifier
 from .structures import Version
 from danielutils import get_files
-
+from danielutils.versioned_imports import t_list
 
 def create_toml(
         *,
@@ -15,10 +15,10 @@ def create_toml(
         author_email: str,
         description: str,
         homepage: str,
-        keywords: list[str],
+        keywords: t_list[str],
         min_python: Version,
-        dependencies: list[str],
-        classifiers: list[Classifier]
+        dependencies: t_list[str],
+        classifiers: t_list[Classifier]
 ) -> None:
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
     if len(classifiers_string) > 0:

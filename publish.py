@@ -4,13 +4,13 @@ from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner,
 def main() -> None:
     publish(
         name="quickpub",
-        version="0.8.0",
+        version="0.8.1",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
         homepage="https://github.com/danielnachumdev/quickpub",
         dependencies=["twine", "danielutils"],
-        min_python="3.9.19",
+        min_python="3.8.0",
         config=AdditionalConfiguration(
             runners=[
                 MypyRunner(),

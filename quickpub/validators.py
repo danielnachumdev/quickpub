@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
 from danielutils import get_python_version
-
+from danielutils.versioned_imports import t_list
 from .custom_types import Path
 from .structures import Version
 
@@ -20,13 +20,13 @@ def validate_python_version(min_python: Optional[Version]) -> Version:
     return Version(*get_python_version())
 
 
-def validate_keywords(keywords: Optional[list[str]]) -> list[str]:
+def validate_keywords(keywords: Optional[t_list[str]]) -> t_list[str]:
     if keywords is None:
         return []
     return keywords
 
 
-def validate_dependencies(dependencies: Optional[list[str]]) -> list[str]:
+def validate_dependencies(dependencies: Optional[t_list[str]]) -> t_list[str]:
     if dependencies is None:
         return []
     return dependencies

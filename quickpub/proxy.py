@@ -1,9 +1,9 @@
 import danielutils
 import requests
-
+from danielutils.versioned_imports import t_tuple
 
 # need it like this for the testing
-def cm(*args, **kwargs) -> tuple[int, bytes, bytes]:
+def cm(*args, **kwargs) -> t_tuple[int, bytes, bytes]:
     return danielutils.cm(*args, **kwargs)
 
 
