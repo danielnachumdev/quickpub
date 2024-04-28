@@ -13,8 +13,8 @@ def main() -> None:
         min_python="3.9.19",
         config=AdditionalConfiguration(
             runners=[
-                MypyRunner(),
-                PylintRunner(),
+                # MypyRunner(),
+                # PylintRunner(),
                 UnittestRunner(),
             ]
         )

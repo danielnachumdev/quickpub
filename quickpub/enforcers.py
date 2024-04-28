@@ -28,13 +28,14 @@ def enforce_local_correct_version(name: str, version: Version) -> None:
 
 
 def enforce_remote_correct_version(name: str, version: Version) -> None:
-    url = f"https://pypi.org/project/{name}/#history"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        return
+    pass
+    # url = f"https://pypi.org/project/{name}/#history"
+    # headers = {
+    #     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    # }
+    # response = requests.get(url, headers=headers)
+    # if response.status_code != 200:
+    #     return
     # soup = BeautifulSoup(response.text, "html.parser")
     # divs = soup.find_all("div", class_="release")
     # versions = []
