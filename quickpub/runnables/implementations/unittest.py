@@ -16,8 +16,8 @@ class UnittestRunner(CommonCheck):
 
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
-    def __init__(self, target: Optional[str] = "./tests") -> None:
-        CommonCheck.__init__(self, "unittest", ">=0.7", target)
+    def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8") -> None:
+        CommonCheck.__init__(self, "unittest", bound, target)
         self._cwd = ""
 
     def _build_command(self, src: str, *args) -> str:

@@ -7,8 +7,9 @@ from ..common_check import CommonCheck
 class MypyRunner(CommonCheck):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
-    def __init__(self, configuration_path: Optional[str] = None, executable_path: Optional[str] = None) -> None:
-        CommonCheck.__init__(self, "mypy", "<15", configuration_path, executable_path)
+    def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,
+                 executable_path: Optional[str] = None) -> None:
+        CommonCheck.__init__(self, "mypy", bound, configuration_path, executable_path)
 
     def _calculate_score(self, ret, lines: t_list[str]) -> float:
         from ...enforcers import exit_if
