@@ -2,6 +2,7 @@ import re
 import os
 from typing import Optional
 from danielutils import get_current_working_directory, set_current_working_directory
+from danielutils.versioned_imports import t_list
 from ..common_check import CommonCheck
 
 
@@ -25,7 +26,7 @@ class UnittestRunner(CommonCheck):
         command += f" discover -s {rel}"
         return command  # f"cd {self.target}; {command}"  # f"; cd {self.target}"
 
-    def _calculate_score(self, ret: int, lines: list[str]) -> float:
+    def _calculate_score(self, ret: int, lines: t_list[str]) -> float:
         from ...enforcers import exit_if
         num_tests_line = lines[-3]
         num_failed_line = lines[-1] if lines[-1] != "OK" else "0"

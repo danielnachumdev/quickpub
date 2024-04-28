@@ -1,8 +1,8 @@
-import os
 from abc import abstractmethod
 from typing import Optional, Union
 
-from danielutils import file_exists, cm, info, get_current_working_directory, set_current_working_directory
+from danielutils import cm, info
+from danielutils.versioned_imports import t_list
 
 from .has_optional_executable import HasOptionalExecutable
 from .runnable import Runnable
@@ -27,13 +27,11 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
         command += f" {target}"
         return command
 
-    @abstractmethod
     def _pre_command(self):
-        ...
+        pass
 
-    @abstractmethod
     def _post_command(self):
-        ...
+        pass
 
     def run(self, target: str, *_) -> None:
         command = self._build_command(target)
@@ -49,7 +47,7 @@ class CommonCheck(Runnable, Configurable, HasOptionalExecutable):
 
 
 @abstractmethod
-def _calculate_score(self, ret: int, command_output: list[str]) -> float: ...
+def _calculate_score(self, ret: int, command_output: t_list[str]) -> float: ...
 
 
 __all__ = [
