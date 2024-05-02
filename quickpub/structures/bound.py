@@ -24,6 +24,12 @@ class Bound:
                 return Bound(op, float(splits[-1]))  # type:ignore
         raise ValueError("Invalid 'Bound' format")
 
+    def __str__(self) -> str:
+        return f"{self.operator}{self.value}"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(operator={self.operator}, value={self.value})"
+
 
 __all__ = [
     'Bound'

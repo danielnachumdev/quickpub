@@ -5,7 +5,11 @@ from dataclasses import dataclass
 class Version:
     @staticmethod
     def from_str(version_str: str) -> "Version":
-        return Version(*list(map(int, version_str.split("."))))
+        try:
+            return Version(*list(map(int, version_str.split("."))))
+        except Exception as e:
+            raise ValueError(f"Failed converting '{version_str}' to instance of 'Version' in 'Version.from_str") from e
+
 
     major: int = 0
     minor: int = 0

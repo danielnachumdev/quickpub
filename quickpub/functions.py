@@ -7,8 +7,6 @@ from .structures import Version
 import quickpub.proxy
 
 
-
-
 def prev_main():
     import re
     from danielutils import cmrt, cm, read_file, get_files, directory_exists, create_directory  # type:ignore
@@ -204,13 +202,8 @@ def commit(
     )
 
 
-def metrics(testing_client: Optional[Literal["pytest", "unitest"]] = None):
-    pass
-
-
 __all__ = [
     "build",
     "upload",
     "commit",
-    "metrics"
 ]

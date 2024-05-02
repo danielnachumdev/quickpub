@@ -8,9 +8,10 @@ from .structures import Version
 from .proxy import get
 
 
-def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str) -> None:
+def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str, *, verbose: bool = True) -> None:
     if (isinstance(predicate, bool) and predicate) or (callable(predicate) and predicate()):
-        error(msg)
+        if verbose:
+            error(msg)
         sys.exit(1)
 
 

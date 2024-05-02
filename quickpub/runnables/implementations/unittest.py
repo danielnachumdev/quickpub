@@ -2,10 +2,10 @@ import re
 import os
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory
-from ..common_check import CommonCheck
+from .testing_runner import TestingRunner
 
 
-class UnittestRunner(CommonCheck):
+class UnittestRunner(TestingRunner):
     def _pre_command(self):
         self._cwd = get_current_working_directory()
         set_current_working_directory(os.path.join(self._cwd, self.target))
@@ -16,7 +16,7 @@ class UnittestRunner(CommonCheck):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8") -> None:
-        CommonCheck.__init__(self, name="unittest", bound=bound, target=target)
+        TestingRunner.__init__(self, name="unittest", bound=bound, target=target)
         self._cwd = ""
 
     def _build_command(self, src: str, *args) -> str:

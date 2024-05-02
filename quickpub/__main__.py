@@ -2,12 +2,13 @@ from typing import Optional, Union, List
 from danielutils import warning, file_exists
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
-from .functions import build, upload, commit, metrics
+from .functions import build, upload, commit
 from .structures import Version, AdditionalConfiguration
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
 from .custom_types import Path
+from .qa import qa
 
 
 def publish(
@@ -60,10 +61,7 @@ def publish(
     dependencies = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
-    if config is not None:
-        if config.runners is not None:
-            for runner in config.runners:
-                runner.run(src)
+    qa(config, src, dependencies)
 
     create_setup()
     create_toml(
@@ -88,15 +86,14 @@ def publish(
     )
     create_manifest(name=name)
 
-    build()
-    upload(
-        name=name,
-        version=version
-    )
-    commit(
-        version=version
-    )
-    metrics()
+    # build()
+    # upload(
+    #     name=name,
+    #     version=version
+    # )
+    # commit(
+    #     version=version
+    # )
 
 # if __name__ == '__main__':
 #     publish()

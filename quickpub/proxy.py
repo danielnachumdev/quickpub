@@ -1,11 +1,16 @@
+import os
+from typing import Tuple
 import danielutils
 import requests
-from typing import Tuple
 
 
 # need it like this for the testing
 def cm(*args, **kwargs) -> Tuple[int, bytes, bytes]:
     return danielutils.cm(*args, **kwargs)
+
+
+def os_system(command) -> int:
+    return os.system(command)
 
 
 def get(*args, **kwargs):
@@ -23,5 +28,6 @@ def add_verbose_keyword(func):
 __all__ = [
     "cm",
     "get",
-    'add_verbose_keyword'
+    'add_verbose_keyword',
+    'os_system'
 ]

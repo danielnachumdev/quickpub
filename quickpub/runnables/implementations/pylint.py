@@ -1,15 +1,15 @@
 import re
 from typing import Optional, List
-from ..common_check import CommonCheck
+from .quality_runner import QualityRunner
 
 
-class PylintRunner(CommonCheck):
+class PylintRunner(QualityRunner):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, bound: str = ">=0.8", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        CommonCheck.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
-                             executable_path=executable_path)
+        QualityRunner.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
+                            executable_path=executable_path)
 
     def _build_command(self, target: str) -> str:
         command: str = self.get_executable()
