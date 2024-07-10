@@ -1,11 +1,15 @@
 import re
 import os
 from typing import Optional, List
-from danielutils import get_current_working_directory, set_current_working_directory
-from .testing_runner import TestingRunner
+from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand
+
+from ..base_runner import BaseRunner
 
 
-class UnittestRunner(TestingRunner):
+class UnittestRunner(BaseRunner):
+    def _install_dependencies(self, base: LayeredCommand) -> None:
+        return None
+
     def _pre_command(self):
         self._cwd = get_current_working_directory()
         set_current_working_directory(os.path.join(self._cwd, self.target))
@@ -16,16 +20,16 @@ class UnittestRunner(TestingRunner):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8") -> None:
-        TestingRunner.__init__(self, name="unittest", bound=bound, target=target)
+        BaseRunner.__init__(self, name="unittest", bound=bound, target=target)
         self._cwd = ""
 
-    def _build_command(self, src: str, *args) -> str:
+    def _build_command(self, src: str, *args, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
         rel = os.path.relpath(src, self.target).removesuffix(src.lstrip("./\\"))
         command += f" discover -s {rel}"
         return command  # f"cd {self.target}; {command}"  # f"; cd {self.target}"
 
-    def _calculate_score(self, ret: int, lines: List[str]) -> float:
+    def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
         from ...enforcers import exit_if
         num_tests_line = lines[-3]
         num_failed_line = lines[-1] if lines[-1] != "OK" else "0"

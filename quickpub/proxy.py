@@ -1,6 +1,7 @@
 import os
 from typing import Tuple
 import danielutils
+import requests
 
 
 # need it like this for the testing
@@ -12,7 +13,12 @@ def os_system(command) -> int:
     return os.system(command)
 
 
+def get(*args, **kwargs):
+    return requests.get(*args, **kwargs)
+
+
 __all__ = [
     "cm",
-    'os_system'
+    'os_system',
+    "get"
 ]

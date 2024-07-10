@@ -23,12 +23,14 @@ class TestConfig(unittest.TestCase):
     def setUp(self):
         create_file(PYPIRC)
         create_directory(PACAKGE)
+        create_file(f"{PACAKGE}/__init__.py")
         create_file(README)
         create_file(LICENSE)
         PRINT_QUEUE.clear()
 
     def tearDown(self):
         delete_file(PYPIRC)
+        delete_file(f"{PACAKGE}/__init__.py")
         delete_directory(PACAKGE)
         delete_file(README)
         delete_file(LICENSE)
@@ -104,6 +106,7 @@ class TestConfig(unittest.TestCase):
                 python_manager=CondaPythonManager(["base", "390", "380"]),
             )
         )
+
     @multipatch
     @patch("danielutils.print_.BetterPrinter.__call__", _new_print)
     def test_complete(self, *args):

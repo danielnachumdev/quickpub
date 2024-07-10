@@ -28,7 +28,7 @@ class Bound:
         return f"{self.operator}{self.value}"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(operator={self.operator}, value={self.value})"
+        return f"{self.__class__.__name__}(operator='{self.operator}', value='{self.value}')"
 
 
 __all__ = [

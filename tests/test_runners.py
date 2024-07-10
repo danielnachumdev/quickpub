@@ -44,7 +44,7 @@ class TestRunners(unittest.TestCase):
 
     @multipatch
     @patch("danielutils.context_managers.temporary_file.TemporaryFile.read",
-           return_value=[f"Found {MypyRunner().bound} errors in 7 files (checked 30 source files)\n"])
+           return_value=[f"Found {MypyRunner().bound.value} errors in 7 files (checked 30 source files)\n"])
     def test_mypy_expect_finish_with_fail_default(self, *args):
         with self.assertRaises(SystemExit):
             publish(

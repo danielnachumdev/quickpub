@@ -1,3 +1,4 @@
+import sys
 from typing import Any, Protocol, Optional
 from danielutils import get_os, OSType, file_exists
 
@@ -16,10 +17,14 @@ class HasOptionalExecutable():
             if not file_exists(self.executable_path):
                 raise FileNotFoundError(f"Executable not found {self.executable_path}")
 
-    def get_executable(self) -> str:
+    def get_executable(self, use_system_interpreter: bool = False) -> str:
         if self.use_executable:
             return self.executable_path
-        return f"{self.PYTHON} -m {self.name}"
+
+        p = self.PYTHON
+        if use_system_interpreter:
+            p = sys.executable
+        return f"{p} -m {self.name}"
 
 
 __all__ = [

@@ -2,7 +2,7 @@ import unittest, sys
 from typing import List
 from unittest.mock import Mock, patch, MagicMock
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
-    get_caller_file_name
+    get_caller_file_name, LayeredCommand
 import requests
 
 from quickpub import publish, CondaPythonManager, AdditionalConfiguration
@@ -37,13 +37,16 @@ PRINt_QUEUE: list = []
 
 
 class MockRunner(BaseRunner):
+    def _install_dependencies(self, base: LayeredCommand) -> None:
+        return None
+
     def __init__(self) -> None:
         BaseRunner.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
 
-    def _build_command(self, target: str) -> str:
+    def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         return "echo $(python --version)"
 
-    def _calculate_score(self, ret: int, command_output: List[str]) -> float:
+    def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         return 0
 
 

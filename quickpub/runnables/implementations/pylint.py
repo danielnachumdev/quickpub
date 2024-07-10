@@ -1,17 +1,24 @@
 import re
 from typing import Optional, List
-from .quality_runner import QualityRunner
+
+from danielutils import LayeredCommand
+
+from ..base_runner import BaseRunner
 
 
-class PylintRunner(QualityRunner):
+class PylintRunner(BaseRunner):
+    def _install_dependencies(self, base: LayeredCommand) -> None:
+        with base:
+            base("pip install pylint")
+
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, bound: str = ">=0.8", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        QualityRunner.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
+        BaseRunner.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
                             executable_path=executable_path)
 
-    def _build_command(self, target: str) -> str:
+    def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
         if self.has_config:
             command += f" --rcfile {self.config_path}"

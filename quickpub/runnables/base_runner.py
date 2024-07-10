@@ -14,14 +14,18 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
 
     def __init__(self, *, name: str, bound: Union[str, Bound], target: Optional[str] = None,
                  configuration_path: Optional[str] = None,
-                 executable_path: Optional[str] = None) -> None:
+                 executable_path: Optional[str] = None, auto_install: bool = False) -> None:
         Configurable.__init__(self, configuration_path)
         HasOptionalExecutable.__init__(self, name, executable_path)
         self.bound: Bound = bound if isinstance(bound, Bound) else Bound.from_string(bound)
         self.target = target
 
     @abstractmethod
-    def _build_command(self, target: str) -> str:
+    def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
+        ...
+
+    @abstractmethod
+    def _install_dependencies(self, base: LayeredCommand) -> None:
         ...
 
     def _pre_command(self) -> None:
@@ -30,11 +34,13 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
     def _post_command(self) -> None:
         pass
 
-    def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True) -> None:
-        # need to explicitly override it here
+    def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True,
+            use_system_interpreter: bool = False) -> None:
+        # =====================================
+        # IMPORTANT: need to explicitly override it here
         executor._executor = os_system
-        command = self._build_command(target)
-        # info(f"Running {self.name}")
+        # =====================================
+        command = self._build_command(target, use_system_interpreter)
         self._pre_command()
         try:
             ret, out, err = executor(command)

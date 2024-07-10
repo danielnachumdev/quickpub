@@ -1,12 +1,15 @@
-from typing import Iterator, Tuple, List, Optional, Set
+from typing import Tuple, Optional, Set, Iterator
 from danielutils import LayeredCommand, warning
 
 from ..python_manager import PythonManager
 
 
 class CondaPythonManager(PythonManager):
+    def get_python_executable_name(self) -> str:
+        return "python"
+
     def __init__(self, env_names: list[str]) -> None:
-        PythonManager.__init__(self, known_envs=env_names, explicit_versions=[])
+        PythonManager.__init__(self, requested_envs=env_names, explicit_versions=[])
         self._cached_available_envs: Optional[Set[str]] = None
 
     def get_available_envs(self) -> Set[str]:

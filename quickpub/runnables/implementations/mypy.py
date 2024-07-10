@@ -1,11 +1,18 @@
 import re
 from typing import Optional, List
-from .quality_runner import QualityRunner
+
+from danielutils import LayeredCommand
+
+from ..base_runner import BaseRunner
 
 
-class MypyRunner(QualityRunner):
-    def _build_command(self, target: str) -> str:
-        command: str = self.get_executable()
+class MypyRunner(BaseRunner):
+    def _install_dependencies(self, base: LayeredCommand) -> None:
+        with base:
+            base("pip install pylint")
+
+    def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
+        command: str = self.get_executable(use_system_interpreter)
         if self.has_config:
             command += f" --config-file {self.config_path}"
         command += f" {target}"
@@ -16,8 +23,8 @@ class MypyRunner(QualityRunner):
 
     def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        QualityRunner.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
-                               executable_path=executable_path)
+        BaseRunner.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
+                            executable_path=executable_path)
 
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
         from ...enforcers import exit_if
@@ -25,7 +32,7 @@ class MypyRunner(QualityRunner):
         if rating_line.startswith("Success"):
             return 0.0
         exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
-                f"Failed running MyPy, got exit code {ret}. try running manually using:\n\t{self._build_command('TARGE')}",
+                f"Failed running MyPy, got exit code {ret}. try running manually using:\n\t{self._build_command('TARGET')}",
                 verbose=verbose)
         num_failed = float(m.group(1))
         active_files = float(m.group(2))
