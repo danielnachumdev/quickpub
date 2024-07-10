@@ -64,10 +64,11 @@ class TestRunners(unittest.TestCase):
 
     @multipatch
     @patch("danielutils.context_managers.temporary_file.TemporaryFile.read")
-    def test_mypy_expect_success(self, mock_target,*args):
-        mock_target.side_effect=[
-            ["","","twine", "danielutils"],
+    def test_mypy_expect_success(self, mock_target, *args):
+        mock_target.side_effect = [
+            ["", "", "twine", "danielutils"],
             "",
+            "", "",  # stdout & stderr of sanity_check
             f"Success: no issues found in 1 source file\n",
             "",
 
@@ -105,6 +106,7 @@ class TestRunners(unittest.TestCase):
         mock_target.side_effect = [
             ["", "", "twine", "danielutils"],  # stdout
             "",  # stderr
+            "", "",  # stdout & stderr of sanity_check
             f"Found {51} errors in 7 files (checked 30 source files)\n",  # stdout
             ""  # stderr
         ]

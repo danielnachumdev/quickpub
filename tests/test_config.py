@@ -66,7 +66,7 @@ class TestConfig(unittest.TestCase):
         )
 
     @multipatch
-    def tess_explicit_empty_config(self, *args):
+    def test_explicit_empty_config(self, *args):
         publish(
             name=PACAKGE,
             version="0.0.1",

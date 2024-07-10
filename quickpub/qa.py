@@ -1,3 +1,4 @@
+import sys
 from typing import Optional, ContextManager
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile, \
     ProgressBar
@@ -26,32 +27,12 @@ except ImportError:
             return self.contexts[index]
 
 
-def global_import_sanity_check(package_name: str, python_manager, dependencies) -> None:
-    main_file_name = "./__temp_main.py"
-    all_dependencies = " ".join(dependencies)
-    with TemporaryFile(main_file_name) as main:
-        main.write([f"from {package_name} import *"])
-        bar = AsciiProgressBar(python_manager, position=0, total=len(python_manager))
-        for name, layered_command in python_manager:
-            bar.desc = f"Running '{name}'"
-            bar.update(0)
-            with MultiContext(
-                    AttrContext(layered_command, "_instance_flush_stdout", False),
-                    AttrContext(layered_command, "_instance_flush_stderr", False),
-            ):
-                with layered_command as base:
-                    if python_manager.auto_install_dependencies:
-                        pip_command = f"pip install -U {all_dependencies}"
-                        code, _, _ = base(pip_command)
-                        exit_if(
-                            code != 0,
-                            f"Failed installing dependencies, try manually with '{base._build_command(pip_command)}",
-                            err_func=bar.write
-                        )
-                    code, _, _ = base(f"python {main_file_name}", command_raise_on_fail=False)
-                    exit_if(code != 0,
-                            f"Global import failed. try manually with '{base._build_command()}' and then 'from {package_name} import *'")
-            bar.update(1)
+def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_system_interpreter: bool) -> None:
+    p = sys.executable if is_system_interpreter else "python"
+    file_name = "./__sanity_check_main.py"
+    with TemporaryFile(file_name) as f:
+        f.write([f"from {package_name} import *"])
+        executor(f"{p} {file_name}", command_raise_on_fail=True)
 
 
 def validate_dependencies(python_manager, dependencies, executor, name):
@@ -98,17 +79,17 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
             with executor:
                 executor._prev_instance = base
                 validate_dependencies(python_manager, dependencies, executor, name)
+                global_import_sanity_check(package_name, executor, is_system_interpreter)
                 for runner in pool[1]:
                     try:
-                        runner.run(src, executor, verbose=is_system_interpreter, use_system_interpreter=is_system_interpreter)
+                        runner.run(src, executor, verbose=is_system_interpreter,
+                                   use_system_interpreter=is_system_interpreter)
                     except BaseException as e:
                         manual_command = executor._build_command(runner._build_command(src))
                         msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{name}'. try manually: '{manual_command}'"
                         pool.write(msg)
                         if python_manager.exit_on_fail:
                             raise e
-
-                # global_import_sanity_check(package_name, python_manager, dependencies)
 
 
 __all__ = [
