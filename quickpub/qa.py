@@ -82,11 +82,11 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
     if config is None:
         return
     python_manager = config.python_manager
-    should_use_system_interpreter: bool = False
+    is_system_interpreter: bool = False
     if python_manager is None:
         from .managers import SystemInterpreter
         python_manager = SystemInterpreter()
-        should_use_system_interpreter = True
+        is_system_interpreter = True
     pool = create_progress_bar_pool(config, python_manager)
     with MultiContext(
             AttrContext(LayeredCommand, 'class_flush_stdout', False),
@@ -100,7 +100,7 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                 validate_dependencies(python_manager, dependencies, executor, name)
                 for runner in pool[1]:
                     try:
-                        runner.run(src, executor, verbose=False, use_system_interpreter=should_use_system_interpreter)
+                        runner.run(src, executor, verbose=is_system_interpreter, use_system_interpreter=is_system_interpreter)
                     except BaseException as e:
                         manual_command = executor._build_command(runner._build_command(src))
                         msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{name}'. try manually: '{manual_command}'"

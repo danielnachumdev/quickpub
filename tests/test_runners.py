@@ -63,9 +63,15 @@ class TestRunners(unittest.TestCase):
             )
 
     @multipatch
-    @patch("danielutils.context_managers.temporary_file.TemporaryFile.read",
-           return_value=[f"Success: no issues found in 1 source file\n"])
-    def test_mypy_expect_success(self, *args):
+    @patch("danielutils.context_managers.temporary_file.TemporaryFile.read")
+    def test_mypy_expect_success(self, mock_target,*args):
+        mock_target.side_effect=[
+            ["","","twine", "danielutils"],
+            "",
+            f"Success: no issues found in 1 source file\n",
+            "",
+
+        ]
         publish(
             name=PACAKGE,
             version="0.0.1",
@@ -92,11 +98,17 @@ class TestRunners(unittest.TestCase):
         PRINT_QUEUE.append(args)
 
     @multipatch
-    @patch("danielutils.context_managers.temporary_file.TemporaryFile.read",
-           return_value=[f"Found {51} errors in 7 files (checked 30 source files)\n"])
+    @patch("danielutils.context_managers.temporary_file.TemporaryFile.read")  # ,
+    # return_value=[f"Found {51} errors in 7 files (checked 30 source files)\n"])
     @patch("builtins.print", _new_print)
-    def test_mypy_expect_finished_with_fail_because_failed_bound(self, *args):
-        with self.assertRaises(SystemExit):
+    def test_mypy_expect_finished_with_fail_because_failed_bound(self, mock_target, *args):
+        mock_target.side_effect = [
+            ["", "", "twine", "danielutils"],  # stdout
+            "",  # stderr
+            f"Found {51} errors in 7 files (checked 30 source files)\n",  # stdout
+            ""  # stderr
+        ]
+        try:
             publish(
                 name=PACAKGE,
                 version="0.0.1",
@@ -111,5 +123,12 @@ class TestRunners(unittest.TestCase):
                     ]
                 )
             )
+        except Exception as e:
+            cur = e
+            while cur.__cause__ is not None:
+                cur = cur.__cause__
+            self.assertEqual(type(cur), SystemExit,
+                             "A SystemExit is supposed to be raised as when using the SystemInterpreter we"
+                             " have raise_oin_fail=True and a bound check on the result of mypy has failed.")
         self.assertListEqual([('\x1b[38;2;255;0;0mERROR\x1b[0m: ',), ("mypy failed to pass it's defined bound",)],
                              PRINT_QUEUE)
