@@ -1,17 +1,15 @@
 import sys
 from typing import Union, Callable
 
-import requests
-# from bs4 import BeautifulSoup
 from danielutils import directory_exists, get_files, error, file_exists, get_python_version
 from .structures import Version
-from .proxy import get
 
 
-def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str, *, verbose: bool = True) -> None:
+def exit_if(predicate: Union[bool, Callable[[], bool]], msg: str, *, verbose: bool = True,
+            err_func: Callable[[str], None] = error) -> None:
     if (isinstance(predicate, bool) and predicate) or (callable(predicate) and predicate()):
         if verbose:
-            error(msg)
+            err_func(msg)
         sys.exit(1)
 
 

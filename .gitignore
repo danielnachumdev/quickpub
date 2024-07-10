@@ -1,3 +1,4 @@
+!tests/structures
 tmp/
 .pypirc
 tests/*

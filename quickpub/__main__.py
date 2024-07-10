@@ -52,8 +52,7 @@ def publish(
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
     exit_if(not file_exists(readme), f"Could not find readme file at {readme}")
-    exit_if(not file_exists(license),
-            f"Could not find license file at {license}")
+    exit_if(not file_exists(license), f"Could not find license file at {license}")
     version = validate_version(version)
     enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
@@ -61,7 +60,7 @@ def publish(
     dependencies = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
-    qa(config, src, dependencies)
+    qa(name,config, src, dependencies)
 
     create_setup()
     create_toml(

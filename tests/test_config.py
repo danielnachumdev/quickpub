@@ -6,7 +6,7 @@ from danielutils import create_file, delete_file, create_directory, delete_direc
 import requests
 
 multipatch = chain_decorators(
-    patch("quickpub.proxy.get", return_value=requests.Response()),
+    # patch("quickpub.proxy.get", return_value=requests.Response()),
     patch("quickpub.proxy.cm", return_value=(0, b"", b"")),
     patch('quickpub.proxy.os_system', return_value=0)
 )
@@ -39,7 +39,7 @@ class TestConfig(unittest.TestCase):
         delete_file("pyproject.toml")
 
     @multipatch
-    def test_no_arg(self, *args):
+    def test_no_config(self, *args):
         publish(
             name=PACAKGE,
             version="0.0.1",
@@ -51,7 +51,7 @@ class TestConfig(unittest.TestCase):
         )
 
     @multipatch
-    def test_explicit_none(self, *args):
+    def test_explicit_none_config(self, *args):
         publish(
             name=PACAKGE,
             version="0.0.1",
@@ -64,7 +64,7 @@ class TestConfig(unittest.TestCase):
         )
 
     @multipatch
-    def tess_explicit_empty(self, *args):
+    def tess_explicit_empty_config(self, *args):
         publish(
             name=PACAKGE,
             version="0.0.1",
@@ -89,7 +89,24 @@ class TestConfig(unittest.TestCase):
 
     @multipatch
     @patch("danielutils.print_.BetterPrinter.__call__", _new_print)
-    def test_both(self, *args):
+    def test_config_conda_version_manager(self, *args):
+        name = f"{PACAKGE}/a.py"
+        create_file(name)
+        publish(
+            name=PACAKGE,
+            version="0.0.1",
+            author="danielnachumdev",
+            author_email="danielnachumdev@gmail.com",
+            description="A python package to quickly configure and publish a new package",
+            homepage="https://github.com/danielnachumdev/quickpub",
+            dependencies=["twine", "danielutils"],
+            config=AdditionalConfiguration(
+                python_manager=CondaPythonManager(["base", "390", "380"]),
+            )
+        )
+    @multipatch
+    @patch("danielutils.print_.BetterPrinter.__call__", _new_print)
+    def test_complete(self, *args):
         name = f"{PACAKGE}/a.py"
         create_file(name)
         publish(

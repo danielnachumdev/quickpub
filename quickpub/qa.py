@@ -1,6 +1,6 @@
 from typing import Optional, ContextManager
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, file_exists, bprint, subseteq, ColoredText, \
-    ProgressBarPool
+    ProgressBarPool, TemporaryFile
 from .structures import AdditionalConfiguration
 from .custom_types import Path
 from .enforcers import exit_if
@@ -26,51 +26,83 @@ except ImportError:
             return self.contexts[index]
 
 
-def qa(config: Optional[AdditionalConfiguration], src: Optional[Path], dependencies: list) -> None:
-    if config is not None:
-        if config.runners is not None:
-            with MultiContext(
-                    AttrContext(LayeredCommand, 'class_flush_stdout', False),
-                    AttrContext(LayeredCommand, 'class_flush_stderr', False),
-                    AttrContext(LayeredCommand, 'class_raise_on_fail', False)
-            ):
-                with LayeredCommand() as base:
-                    if config.python_manager is None:
-                        bar = AsciiProgressBar(config.runners, position=0, total=len(config.runners))
-                        for runner in bar:
-                            bar.desc = f"Running {runner.__class__.__name__}"
-                            runner.run(src, base)
-                        return
-                pool = ProgressBarPool(
-                    AsciiProgressBar,
-                    2,
-                    individual_options=[
-                        dict(iterable=config.python_manager,desc="Envs", total=len(config.python_manager.known_envs)),
-                        dict(iterable=config.runners,desc="Runners", total=len(config.runners)),
-                    ]
-                )
-                for name, executor in pool[0]:
-                    with executor:
-                        executor._prev_instance = base
+def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Optional[Path], dependencies: list) -> None:
+    if config is None:
+        return
+    if config.runners is None:
+        if config.python_manager is None:
+            return
+
+        main_file_name = "./__temp_main.py"
+        all_dependencies = " ".join(dependencies)
+        with TemporaryFile(main_file_name) as main:
+            main.write([f"from {package_name} import *"])
+            bar = AsciiProgressBar(config.python_manager, position=0, total=len(config.python_manager))
+            for name, layered_command in config.python_manager:
+                bar.desc = f"Running '{name}'"
+                bar.update(0)
+                with MultiContext(
+                        AttrContext(layered_command, "_instance_flush_stdout", False),
+                        AttrContext(layered_command, "_instance_flush_stderr", False),
+                ):
+                    with layered_command as base:
+                        if config.python_manager.auto_install_dependencies:
+                            pip_command = f"pip install -U {all_dependencies}"
+                            code, _, _ = base(pip_command)
+                            exit_if(
+                                code != 0,
+                                f"Failed installing dependencies, try manually with '{base._build_command(pip_command)}",
+                                err_func=bar.write
+                            )
+                        code, _, _ = base(f"python {main_file_name}", command_raise_on_fail=False)
+                        exit_if(code != 0,
+                                f"Global import failed. try manually with '{base._build_command()}' and then 'from {package_name} import *'")
+                bar.update(1)
+            return
+
+    with MultiContext(
+            AttrContext(LayeredCommand, 'class_flush_stdout', False),
+            AttrContext(LayeredCommand, 'class_flush_stderr', False),
+            AttrContext(LayeredCommand, 'class_raise_on_fail', False)
+    ):
+        with LayeredCommand() as base:
+            if config.python_manager is None:
+                bar = AsciiProgressBar(config.runners, position=0, total=len(config.runners))
+                for runner in bar:
+                    bar.desc = f"Running {runner.__class__.__name__}"
+                    runner.run(src, base)
+                    bar.update()
+                return
+        pool = ProgressBarPool(
+            AsciiProgressBar,
+            2,
+            individual_options=[
+                dict(iterable=config.python_manager, desc="Envs", total=len(config.python_manager.requested_envs)),
+                dict(iterable=config.runners, desc="Runners", total=len(config.runners)),
+            ]
+        )
+        for name, executor in pool[0]:
+            with executor:
+                executor._prev_instance = base
+                if config.python_manager.exit_on_fail:
+                    code, out, err = executor("pip list")
+                    exit_if(code != 0, f"Failed executing 'pip list' at env '{name}'")
+                    installed = [line.split(' ')[0] for line in out[2:]]
+                    not_installed = []
+                    for dep in dependencies:
+                        if dep not in installed:
+                            not_installed.append(dep)
+                    exit_if(not (len(not_installed) == 0),
+                            f"On env '{name}' the following dependencies are not installed: {not_installed}")
+                for runner in pool[1]:
+                    try:
+                        runner.run(src, executor, verbose=False)
+                    except BaseException as e:
+                        manual_command = executor._build_command(runner._build_command(src))
+                        msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{name}'. try manually: {manual_command}"
+                        pool.write(msg)
                         if config.python_manager.exit_on_fail:
-                            code, out, err = executor("pip list")
-                            exit_if(code != 0, f"Failed executing 'pip list' at env '{name}'")
-                            installed = [line.split(' ')[0] for line in out[2:]]
-                            not_installed = []
-                            for dep in dependencies:
-                                if dep not in installed:
-                                    not_installed.append(dep)
-                            exit_if(not (len(not_installed) == 0),
-                                    f"On env '{name}' the following dependencies are not installed: {not_installed}")
-                        for runner in pool[1]:
-                            try:
-                                runner.run(src, executor, verbose=False)
-                            except BaseException as e:
-                                manual_command = executor._build_command(runner._build_command(src))
-                                msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{name}'. try manually: {manual_command}"
-                                pool.write(msg)
-                                if config.python_manager.exit_on_fail:
-                                    raise e
+                            raise e
 
 
 __all__ = ['qa']
