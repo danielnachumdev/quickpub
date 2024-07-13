@@ -78,8 +78,8 @@ def create_progress_bar_pool(config, python_manager) -> ProgressBarPool:
         AsciiProgressBar,
         2,
         individual_options=[
-            dict(iterable=python_manager, desc="Envs", total=len(python_manager.requested_envs)),
-            dict(iterable=config.runners or [], desc="Runners", total=len(config.runners or [])),
+            dict(iterator=python_manager, desc="Envs", total=len(python_manager.requested_envs)),
+            dict(iterator=config.runners or [], desc="Runners", total=len(config.runners or [])),
         ]
     )
 

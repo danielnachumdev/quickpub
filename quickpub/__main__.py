@@ -93,13 +93,13 @@ def publish(
     create_manifest(name=name)
 
     build()
-    upload(
-        name=name,
-        version=version
-    )
-    commit(
-        version=version
-    )
+    # upload(
+    #     name=name,
+    #     version=version
+    # )
+    # commit(
+    #     version=version
+    # )
 
 # if __name__ == '__main__':
 #     publish()

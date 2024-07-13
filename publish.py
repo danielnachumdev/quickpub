@@ -4,12 +4,12 @@ from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner,
 def main() -> None:
     publish(
         name="quickpub",
-        version="1.0.0",
+        version="1.0.1",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
         homepage="https://github.com/danielnachumdev/quickpub",
-        dependencies=["twine", "danielutils"],
+        dependencies=["danielutils>=0.9.90"],
         min_python="3.8.0",
         config=AdditionalConfiguration(
             python_manager=CondaPythonManager(["base", "390", "380"]),

@@ -9,7 +9,7 @@ class CondaPythonManager(PythonManager):
         return "python"
 
     def __init__(self, env_names: list[str]) -> None:
-        PythonManager.__init__(self, requested_envs=env_names, explicit_versions=[])
+        PythonManager.__init__(self, requested_envs=env_names, explicit_versions=[], exit_on_fail=True)
         self._cached_available_envs: Optional[Set[str]] = None
 
     def get_available_envs(self) -> Set[str]:

@@ -29,7 +29,10 @@ class PylintRunner(BaseRunner):
         from ...enforcers import exit_if
         if len(lines) == 1 and lines[0].endswith("No module named pylint"):
             raise RuntimeError("No module named pylint found")
-        rating_line = lines[-2]
+        index = -2
+        if lines[-1] == '\x1b[0m':
+            index = -1
+        rating_line = lines[index]
         m = self.RATING_PATTERN.match(rating_line)
         msg = f"Failed running Pylint, got exit code {ret}. Try running manually using: {self._build_command('TARGET')}"
         exit_if(not m, msg)
