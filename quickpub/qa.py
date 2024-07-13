@@ -35,7 +35,7 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
     with TemporaryFile(file_name) as f:
         f.write([f"from {package_name} import *"])
         code, _, _ = executor(f"{p} {file_name}")
-        exit_if(code != 0, f"Env '{env_name}' failed sanity check. Try manually running using '{env_name}' the following script 'from {package_name} import *'", verbose=True, err_func=print_func)
+        exit_if(code != 0, f"Env '{env_name}' failed sanity check. Try manually running the following script 'from {package_name} import *'", verbose=True, err_func=print_func)
 
 
 def validate_dependencies(python_manager: PythonManager, dependencies: List[str], executor: LayeredCommand,
