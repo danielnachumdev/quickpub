@@ -1,8 +1,8 @@
 import sys
-from typing import Optional, ContextManager
-from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile, \
-    ProgressBar
+from typing import Optional, ContextManager, List, Callable
+from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
+from .managers import PythonManager
 from .structures import AdditionalConfiguration
 from .custom_types import Path
 from .enforcers import exit_if
@@ -35,20 +35,22 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
         executor(f"{p} {file_name}", command_raise_on_fail=True)
 
 
-def validate_dependencies(python_manager, dependencies, executor, name):
+def validate_dependencies(python_manager: PythonManager, dependencies: List[str], executor: LayeredCommand,
+                          env_name: str, print_func: Callable) -> None:
     if python_manager.exit_on_fail:
         code, out, err = executor("pip list")
-        exit_if(code != 0, f"Failed executing 'pip list' at env '{name}'")
+        exit_if(code != 0, f"Failed executing 'pip list' at env '{env_name}'", err_func=print_func)
         installed = [line.split(' ')[0] for line in out[2:]]
         not_installed = []
         for dep in dependencies:
             if dep not in installed:
                 not_installed.append(dep)
         exit_if(not (len(not_installed) == 0),
-                f"On env '{name}' the following dependencies are not installed: {not_installed}")
+                f"On env '{env_name}' the following dependencies are not installed: {not_installed}",
+                err_func=print_func)
 
 
-def create_progress_bar_pool(config, python_manager):
+def create_progress_bar_pool(config, python_manager) -> ProgressBarPool:
     return ProgressBarPool(
         AsciiProgressBar,
         2,
@@ -75,18 +77,25 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
             AttrContext(LayeredCommand, 'class_raise_on_fail', False),
             base := LayeredCommand()
     ):
-        for name, executor in pool[0]:
+        for env_name, executor in pool[0]:
+            pool[0].desc = f"Env {env_name}"
+            pool[0].update(0, refresh=True)
             with executor:
                 executor._prev_instance = base
-                validate_dependencies(python_manager, dependencies, executor, name)
+                validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
                 global_import_sanity_check(package_name, executor, is_system_interpreter)
                 for runner in pool[1]:
                     try:
-                        runner.run(src, executor, verbose=is_system_interpreter,
-                                   use_system_interpreter=is_system_interpreter)
+                        runner.run(
+                            src,
+                            executor,
+                            use_system_interpreter=is_system_interpreter,
+                            raise_on_fail=python_manager.exit_on_fail,
+                            print_func=pool.write
+                        )
                     except BaseException as e:
                         manual_command = executor._build_command(runner._build_command(src))
-                        msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{name}'. try manually: '{manual_command}'"
+                        msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{env_name}'. try manually: '{manual_command}'"
                         pool.write(msg)
                         if python_manager.exit_on_fail:
                             raise e

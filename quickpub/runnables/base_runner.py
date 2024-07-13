@@ -35,7 +35,7 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
         pass
 
     def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True,
-            use_system_interpreter: bool = False) -> None:
+            use_system_interpreter: bool = False, raise_on_fail: bool = False, print_func) -> None:
         # =====================================
         # IMPORTANT: need to explicitly override it here
         executor._executor = os_system
@@ -43,11 +43,11 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
         command = self._build_command(target, use_system_interpreter)
         self._pre_command()
         try:
-            ret, out, err = executor(command)
+            ret, out, err = executor(command, command_raise_on_fail=raise_on_fail)
             score = self._calculate_score(ret, "".join(out + err).splitlines(), verbose=verbose)
             from ..enforcers import exit_if
             exit_if(not self.bound.compare_against(score), f"{self.name} failed to pass it's defined bound",
-                    verbose=verbose)
+                    verbose=verbose, err_func=print_func)
         except BaseException as e:
             raise RuntimeError(
                 f"Failed to run {self.name}, try running manually:\n{executor._build_command(command)}") from e
