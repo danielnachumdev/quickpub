@@ -27,12 +27,14 @@ except ImportError:
             return self.contexts[index]
 
 
-def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_system_interpreter: bool) -> None:
+def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_system_interpreter: bool,
+                               env_name: str, print_func) -> None:
     p = sys.executable if is_system_interpreter else "python"
     file_name = "./__sanity_check_main.py"
     with TemporaryFile(file_name) as f:
         f.write([f"from {package_name} import *"])
-        executor(f"{p} {file_name}", command_raise_on_fail=True)
+        code, _, _ = executor(f"{p} {file_name}")
+        exit_if(code != 0, f"Env '{env_name}' failed sanity check", verbose=True, err_func=print_func)
 
 
 def validate_dependencies(python_manager: PythonManager, dependencies: List[str], executor: LayeredCommand,
@@ -78,14 +80,20 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
             base := LayeredCommand()
     ):
         for env_name, executor in pool[0]:
-            pool[0].desc = f"Env {env_name}"
+            pool[0].desc = f"Env '{env_name}'"
             pool[0].update(0, refresh=True)
             with executor:
                 executor._prev_instance = base
-                validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
-                global_import_sanity_check(package_name, executor, is_system_interpreter)
+                try:
+                    validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
+                except SystemExit:
+                    continue
+                try:
+                    global_import_sanity_check(package_name, executor, is_system_interpreter, env_name, pool.write)
+                except SystemExit:
+                    continue
                 for runner in pool[1]:
-                    pool[1].desc = f"Runner {runner.__class__.__name__}"
+                    pool[1].desc = f"Runner '{runner.__class__.__name__}'"
                     pool[1].update(0, refresh=True)
                     try:
                         runner.run(
