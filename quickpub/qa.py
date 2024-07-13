@@ -1,7 +1,7 @@
 import re
 import sys
 from functools import wraps
-from typing import Optional, ContextManager, List, Callable, Tuple
+from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
 from .managers import PythonManager  # pylint: disable=relative-beyond-top-level
@@ -53,7 +53,8 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
 VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
-def validate_dependencies(python_manager: PythonManager, required_dependencies: List[Dependency], executor: LayeredCommand,
+def validate_dependencies(python_manager: PythonManager, required_dependencies: List[Dependency],
+                          executor: LayeredCommand,
                           env_name: str, err_print_func: Callable) -> None:
     """
     will check if all the dependencies of the package are installed on current env.
@@ -70,7 +71,8 @@ def validate_dependencies(python_manager: PythonManager, required_dependencies: 
         split_lines = (line.split(' ') for line in out[2:])
         version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
         filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
-        currently_installed = {s[0]: Dependency(s[0], "==", Version.from_str(s[-1])) for s in filtered_tuples}
+        currently_installed: Dict[str, Union[str, Dependency]] = {s[0]: Dependency(s[0], "==", Version.from_str(s[-1]))
+                                                                  for s in filtered_tuples}
         currently_installed.update(**{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])})
         not_installed_properly: List[Tuple[Dependency, str]] = []
         for req in required_dependencies:
@@ -85,7 +87,7 @@ def validate_dependencies(python_manager: PythonManager, required_dependencies: 
                     if not req.is_satisfied_by(v.ver):
                         not_installed_properly.append((req, "rInvalid version installed"))
 
-        exit_if(not (len(not_installed_properly) == 0),
+        exit_if(bool(not_installed_properly),
                 f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
                 err_func=err_print_func)
 
