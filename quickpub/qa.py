@@ -115,9 +115,12 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                             executor,
                             use_system_interpreter=is_system_interpreter,
                             raise_on_fail=python_manager.exit_on_fail,
-                            print_func=pool.write
+                            print_func=pool_err
                         )
-                    except BaseException as e:
+                    except SystemExit:
+                        result = False
+                        continue
+                    except Exception as e:
                         result = False
                         manual_command = executor._build_command(runner._build_command(src))
                         pool_err(

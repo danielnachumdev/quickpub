@@ -46,9 +46,10 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
             ret, out, err = executor(command, command_raise_on_fail=raise_on_fail)
             score = self._calculate_score(ret, "".join(out + err).splitlines(), verbose=verbose)
             from ..enforcers import exit_if
-            exit_if(not self.bound.compare_against(score), f"{self.name} failed to pass it's defined bound",
+            exit_if(not self.bound.compare_against(score),
+                    f"{self.name} failed to pass it's defined bound. Got a score of {score} but expected {self.bound}",
                     verbose=verbose, err_func=print_func)
-        except BaseException as e:
+        except Exception as e:
             raise RuntimeError(
                 f"Failed to run {self.name}, try running manually:\n{executor._build_command(command)}") from e
         finally:

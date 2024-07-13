@@ -62,8 +62,11 @@ def publish(
 
     try:
         if not qa(name, config, src, dependencies):
-            error(f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
-            return
+            error(
+                f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
+            raise SystemExit(1)
+    except SystemExit as e:
+        raise e
     except Exception as e:
         raise RuntimeError("Quality assurance stage has failed") from e
 
