@@ -1,4 +1,5 @@
 import sys
+from functools import wraps
 from typing import Optional, ContextManager, List, Callable
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
@@ -63,6 +64,15 @@ def create_progress_bar_pool(config, python_manager) -> ProgressBarPool:
     )
 
 
+def create_pool_print_error(pool: ProgressBarPool):
+    @wraps(pool.write)
+    def func(*args, **kwargs):
+        msg = "".join([ColoredText.red("ERROR"), ": ", *args])
+        pool.write(msg, **kwargs)
+
+    return func
+
+
 def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Optional[Path], dependencies: list) -> bool:
     if config is None:
         return
@@ -74,6 +84,7 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
         python_manager = SystemInterpreter()
         is_system_interpreter = True
     pool = create_progress_bar_pool(config, python_manager)
+    pool_err = create_pool_print_error(pool)
     with MultiContext(
             AttrContext(LayeredCommand, 'class_flush_stdout', False),
             AttrContext(LayeredCommand, 'class_flush_stderr', False),
@@ -86,12 +97,12 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
             with executor:
                 executor._prev_instance = base
                 try:
-                    validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
+                    validate_dependencies(python_manager, dependencies, executor, env_name, pool_err)
                 except SystemExit:
                     result = False
                     continue
                 try:
-                    global_import_sanity_check(package_name, executor, is_system_interpreter, env_name, pool.write)
+                    global_import_sanity_check(package_name, executor, is_system_interpreter, env_name, pool_err)
                 except SystemExit:
                     result = False
                     continue
@@ -109,8 +120,8 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                     except BaseException as e:
                         result = False
                         manual_command = executor._build_command(runner._build_command(src))
-                        msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{env_name}'. try manually: '{manual_command}'"
-                        pool.write(msg)
+                        pool_err(
+                            f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. try manually: '{manual_command}'")
                         if python_manager.exit_on_fail:
                             raise e
     return result
