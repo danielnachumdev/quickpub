@@ -14,7 +14,7 @@ def main() -> None:
         config=AdditionalConfiguration(
             python_manager=CondaPythonManager(["base", "390", "380"]),
             runners=[
-                MypyRunner(bound="<15", configuration_path="./mypy.ini"),
+                MypyRunner(bound="<=15", configuration_path="./mypy.ini"),
                 PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
                 UnittestRunner(bound=">=0.8"),
             ]

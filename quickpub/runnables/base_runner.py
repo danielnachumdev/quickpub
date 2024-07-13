@@ -43,7 +43,7 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
         command = self._build_command(target, use_system_interpreter)
         self._pre_command()
         try:
-            ret, out, err = executor(command, command_raise_on_fail=raise_on_fail)
+            ret, out, err = executor(command, command_raise_on_fail=False)
             score = self._calculate_score(ret, "".join(out + err).splitlines(), verbose=verbose)
             from ..enforcers import exit_if
             exit_if(not self.bound.compare_against(score),

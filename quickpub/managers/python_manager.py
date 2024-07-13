@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, Set, Iterator
+from typing import Tuple, Set, Iterator, List
 from danielutils import LayeredCommand
 
 
 class PythonManager(ABC):
-    def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: list[str],
-                 explicit_versions: list[str],
+    def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: List[str],
+                 explicit_versions: List[str],
                  exit_on_fail: bool = False) -> None:
         self.auto_install_dependencies = auto_install_dependencies
         self.requested_envs = requested_envs

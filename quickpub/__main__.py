@@ -1,3 +1,4 @@
+import argparse
 from typing import Optional, Union, List
 from danielutils import warning, file_exists, error
 
@@ -94,13 +95,54 @@ def publish(
     create_manifest(name=name)
 
     build()
-    # upload(
-    #     name=name,
-    #     version=version
-    # )
-    # commit(
-    #     version=version
-    # )
+    upload(
+        name=name,
+        version=version
+    )
+    commit(
+        version=version
+    )
 
-# if __name__ == '__main__':
-#     publish()
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Publish a package")
+
+    parser.add_argument('--name', required=True, type=str, help='Name of the package')
+    parser.add_argument('--author', required=True, type=str, help='Author of the package')
+    parser.add_argument('--author_email', required=True, type=str, help='Email of the author')
+    parser.add_argument('--description', required=True, type=str, help='Description of the package')
+    parser.add_argument('--homepage', required=True, type=str, help='Homepage of the package')
+    parser.add_argument('--explicit_src_folder_path', type=str, help='Explicit source folder path')
+    parser.add_argument('--version', type=str, help='Version of the package')
+    parser.add_argument('--readme_file_path', type=str, default='./README.md', help='Path to the README file')
+    parser.add_argument('--license_file_path', type=str, default='./LICENSE', help='Path to the LICENSE file')
+    parser.add_argument('--min_python', type=str, help='Minimum Python version required')
+    parser.add_argument('--keywords', nargs='*', help='Keywords for the package')
+    parser.add_argument('--dependencies', nargs='*', help='Dependencies of the package')
+    parser.add_argument('--config', help='Additional configuration for the package')
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    publish(
+        name=args.name,
+        author=args.author,
+        author_email=args.author_email,
+        description=args.description,
+        homepage=args.homepage,
+        explicit_src_folder_path=args.explicit_src_folder_path,
+        version=args.version,
+        readme_file_path=args.readme_file_path,
+        license_file_path=args.license_file_path,
+        min_python=args.min_python,
+        keywords=args.keywords,
+        dependencies=args.dependencies,
+        config=args.config
+    )
+
+
+if __name__ == '__main__':
+    main()

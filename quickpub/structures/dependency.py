@@ -6,9 +6,9 @@ from .bound import Bound
 
 class Dependency:
     def __init__(self, name: str, operator: Literal["<", "<=", "==", ">", ">="], ver: Optional[Version] = None) -> None:
-        self.name = name
-        self.operator = operator
-        self.ver = ver
+        self.name: str = name
+        self.operator: Literal["<", "<=", "==", ">", ">="] = operator
+        self.ver: Version = ver
         if operator and not ver or not operator and ver:
             raise RuntimeError("Cannot create a 'Dependency' object with only one of parameters 'operator' and 'ver'")
         if not operator and not ver:
