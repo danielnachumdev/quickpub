@@ -1,4 +1,5 @@
-from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner, UnittestRunner, CondaPythonManager
+from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner, UnittestRunner, CondaPythonManager, \
+    PypircUploadStrategy, SetuptoolsBuildStrategy, GitUploadStrategy
 
 
 def main() -> None:
@@ -9,6 +10,8 @@ def main() -> None:
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
         homepage="https://github.com/danielnachumdev/quickpub",
+        build_strategies=[SetuptoolsBuildStrategy()],
+        upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
         dependencies=["danielutils>=0.9.90"],
         min_python="3.8.0",
         config=AdditionalConfiguration(

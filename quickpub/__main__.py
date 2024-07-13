@@ -2,6 +2,8 @@ import argparse
 from typing import Optional, Union, List
 from danielutils import warning, file_exists, error
 
+from quickpub import UploadStrategy
+from strategies.build_strategy import BuildStrategy
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit
@@ -19,6 +21,8 @@ def publish(
         author_email: str,
         description: str,
         homepage: str,
+        build_strategies: List[BuildStrategy],
+        upload_strategies: List[UploadStrategy],
         explicit_src_folder_path: Optional[str] = None,
         version: Optional[Union[Version, str]] = None,
         readme_file_path: str = "./README.md",
@@ -98,14 +102,10 @@ def publish(
     )
     create_manifest(name=name)
     if not demo:
-        build()
-        upload(
-            name=name,
-            version=version
-        )
-        commit(
-            version=version
-        )
+        for build_strategy in build_strategies:
+            build_strategy.execute_strategy()
+        for upload_strategy in upload_strategies:
+            upload_strategy.execute_strategy(name=name, version=version)
 
 
 def parse_args():
