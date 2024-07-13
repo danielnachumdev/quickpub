@@ -35,7 +35,7 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
     with TemporaryFile(file_name) as f:
         f.write([f"from {package_name} import *"])
         code, _, _ = executor(f"{p} {file_name}")
-        exit_if(code != 0, f"Env '{env_name}' failed sanity check", verbose=True, err_func=print_func)
+        exit_if(code != 0, f"Env '{env_name}' failed sanity check. Try manually running using '{env_name}' the following script 'from {package_name} import *'", verbose=True, err_func=print_func)
 
 
 def validate_dependencies(python_manager: PythonManager, dependencies: List[str], executor: LayeredCommand,
@@ -124,7 +124,8 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                         result = False
                         manual_command = executor._build_command(runner._build_command(src))
                         pool_err(
-                            f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. try manually: '{manual_command}'")
+                            f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. Try manually: '{manual_command}'.")
+                        pool.write(f"\tCaused by '{e.__cause__ or e}'")
                         if python_manager.exit_on_fail:
                             raise e
     return result

@@ -25,11 +25,14 @@ class PylintRunner(BaseRunner):
         command += f" {target}"
         return command
 
-    def _calculate_score(self, ret: int, lines: List[str]) -> float:
+    def _calculate_score(self, ret: int, lines: List[str], verbose: bool = False) -> float:
         from ...enforcers import exit_if
+        if len(lines) == 1 and lines[0].endswith("No module named pylint"):
+            raise RuntimeError(f"No module named pylint found")
         rating_line = lines[-2]
-        exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
-                f"Failed running Pylint, got exit code {ret}. try running manually using:\n\t{self._build_command('TARGET')}")
+        m = self.RATING_PATTERN.match(rating_line)
+        msg = f"Failed running Pylint, got exit code {ret}. Try running manually using:\n\t{self._build_command('TARGET')}"
+        exit_if(not m, msg)
         rating_string = m.group(1)  # type:ignore
         numerator, denominator = rating_string.split("/")
         return float(numerator) / float(denominator)
