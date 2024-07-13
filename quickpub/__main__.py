@@ -1,5 +1,5 @@
 from typing import Optional, Union, List
-from danielutils import warning, file_exists
+from danielutils import warning, file_exists, error
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit
@@ -60,7 +60,12 @@ def publish(
     dependencies = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
-    qa(name,config, src, dependencies)
+    try:
+        if not qa(name, config, src, dependencies):
+            error(f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
+            return
+    except Exception as e:
+        raise RuntimeError("Quality assurance stage has failed") from e
 
     create_setup()
     create_toml(

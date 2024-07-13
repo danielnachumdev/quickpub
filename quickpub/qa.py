@@ -63,9 +63,10 @@ def create_progress_bar_pool(config, python_manager) -> ProgressBarPool:
     )
 
 
-def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Optional[Path], dependencies: list) -> None:
+def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Optional[Path], dependencies: list) -> bool:
     if config is None:
         return
+    result = True
     python_manager = config.python_manager
     is_system_interpreter: bool = False
     if python_manager is None:
@@ -87,10 +88,12 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                 try:
                     validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
                 except SystemExit:
+                    result = False
                     continue
                 try:
                     global_import_sanity_check(package_name, executor, is_system_interpreter, env_name, pool.write)
                 except SystemExit:
+                    result = False
                     continue
                 for runner in pool[1]:
                     pool[1].desc = f"Runner '{runner.__class__.__name__}'"
@@ -104,11 +107,13 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                             print_func=pool.write
                         )
                     except BaseException as e:
+                        result = False
                         manual_command = executor._build_command(runner._build_command(src))
                         msg = f"{ColoredText.red('ERROR')}: Failed running '{runner.__class__.__name__}' on env '{env_name}'. try manually: '{manual_command}'"
                         pool.write(msg)
                         if python_manager.exit_on_fail:
                             raise e
+    return result
 
 
 __all__ = [
