@@ -1,16 +1,17 @@
+import re
 import sys
 from functools import wraps
-from typing import Optional, ContextManager, List, Callable
+from typing import Optional, ContextManager, List, Callable, Tuple
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
 from .managers import PythonManager  # pylint: disable=relative-beyond-top-level
-from .structures import AdditionalConfiguration  # pylint: disable=relative-beyond-top-level
+from .structures import AdditionalConfiguration, Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
 try:
     from danielutils import MultiContext  # type:ignore
 except ImportError:
-    class MultiContext(ContextManager):  # pylint: disable=missing-class-docstring #type:ignore
+    class MultiContext(ContextManager):  # type: ignore # pylint: disable=missing-class-docstring
         def __init__(self, *contexts: ContextManager):
             self.contexts = contexts
 
@@ -49,12 +50,15 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
                 verbose=True, err_func=err_print_func)
 
 
-def validate_dependencies(python_manager: PythonManager, dependencies: List[str], executor: LayeredCommand,
+VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def validate_dependencies(python_manager: PythonManager, required_dependencies: List[Dependency], executor: LayeredCommand,
                           env_name: str, err_print_func: Callable) -> None:
     """
     will check if all the dependencies of the package are installed on current env.
     :param python_manager: the manager to use
-    :param dependencies: the dependencies to check
+    :param required_dependencies: the dependencies to check
     :param executor: the current LayeredCommand executor
     :param env_name: name of the currently checked environment
     :param err_print_func: function to print errors
@@ -63,13 +67,26 @@ def validate_dependencies(python_manager: PythonManager, dependencies: List[str]
     if python_manager.exit_on_fail:
         code, out, err = executor("pip list")
         exit_if(code != 0, f"Failed executing 'pip list' at env '{env_name}'", err_func=err_print_func)
-        installed = [line.split(' ')[0] for line in out[2:]]
-        not_installed = []
-        for dep in dependencies:
-            if dep not in installed:
-                not_installed.append(dep)
-        exit_if(not (len(not_installed) == 0),
-                f"On env '{env_name}' the following dependencies are not installed: {not_installed}",
+        split_lines = (line.split(' ') for line in out[2:])
+        version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
+        filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
+        currently_installed = {s[0]: Dependency(s[0], "==", Version.from_str(s[-1])) for s in filtered_tuples}
+        currently_installed.update(**{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])})
+        not_installed_properly: List[Tuple[Dependency, str]] = []
+        for req in required_dependencies:
+            if req.name not in currently_installed:
+                not_installed_properly.append((req, "dependency not found"))
+            else:
+                v = currently_installed[req.name]
+                if isinstance(v, str):
+                    not_installed_properly.append(
+                        (req, "Verion format of dependecy is not currently supported by quickpub"))
+                elif isinstance(v, Dependency):
+                    if not req.is_satisfied_by(v.ver):
+                        not_installed_properly.append((req, "rInvalid version installed"))
+
+        exit_if(not (len(not_installed_properly) == 0),
+                f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
                 err_func=err_print_func)
 
 

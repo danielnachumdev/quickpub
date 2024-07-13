@@ -1,7 +1,8 @@
 from typing import List
 from danielutils import get_files
+
 from .classifiers import Classifier
-from .structures import Version
+from .structures import Version, Dependency
 
 
 def create_toml(
@@ -17,7 +18,7 @@ def create_toml(
         homepage: str,
         keywords: List[str],
         min_python: Version,
-        dependencies: List[str],
+        dependencies: List[Dependency],
         classifiers: List[Classifier]
 ) -> None:
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
@@ -40,7 +41,7 @@ version = "{version}"
 authors = [
     {{ name = "{author}", email = "{author_email}" }},
 ]
-dependencies = {dependencies}
+dependencies = {[str(dep) for dep in dependencies]}
 keywords = {keywords}
 license = {{ "file" = "{license_file_path}" }}
 description = "{description}"

@@ -10,7 +10,6 @@ class Version:
         except Exception as e:
             raise ValueError(f"Failed converting '{version_str}' to instance of 'Version' in 'Version.from_str") from e
 
-
     major: int = 0
     minor: int = 0
     patch: int = 0

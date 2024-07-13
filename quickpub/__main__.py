@@ -1,9 +1,10 @@
 from typing import Optional, Union, List
 from danielutils import warning, file_exists, error
+
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .functions import build, upload, commit
-from .structures import Version, AdditionalConfiguration
+from .structures import Version, AdditionalConfiguration, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
@@ -25,7 +26,7 @@ def publish(
         min_python: Optional[Union[Version, str]] = None,
 
         keywords: Optional[List[str]] = None,
-        dependencies: Optional[List[str]] = None,
+        dependencies: Optional[List[Union[str, Dependency]]] = None,
         config: Optional[AdditionalConfiguration] = None
 ) -> None:
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.
@@ -56,11 +57,11 @@ def publish(
     enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
-    dependencies = validate_dependencies(dependencies)
+    validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
     try:
-        if not qa(name, config, explicit_src_folder_path, dependencies):
+        if not qa(name, config, explicit_src_folder_path, validated_dependencies):
             error(
                 f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
             raise SystemExit(1)
@@ -81,7 +82,7 @@ def publish(
         description=description,
         homepage=homepage,
         keywords=keywords,
-        dependencies=dependencies,
+        dependencies=validated_dependencies,
         classifiers=[
             DevelopmentStatusClassifier.Alpha,
             IntendedAudienceClassifier.Developers,

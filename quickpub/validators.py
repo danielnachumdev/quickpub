@@ -1,7 +1,8 @@
 from typing import Optional, Union, List
 
 from danielutils import get_python_version
-from .structures import Version
+
+from .structures import Version, Dependency
 
 
 def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
@@ -22,10 +23,16 @@ def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
     return keywords
 
 
-def validate_dependencies(dependencies: Optional[List[str]]) -> List[str]:
+def validate_dependencies(dependencies: Optional[List[Union[str, Dependency]]]) -> List[Dependency]:
     if dependencies is None:
         return []
-    return dependencies
+    res = []
+    for dep in dependencies:
+        if isinstance(dep, str):
+            res.append(Dependency.from_string(dep))
+        else:
+            res.append(dep)
+    return res
 
 
 def validate_source(name: str, src: Optional[str] = None) -> str:
