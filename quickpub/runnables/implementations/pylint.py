@@ -31,7 +31,7 @@ class PylintRunner(BaseRunner):
             raise RuntimeError(f"No module named pylint found")
         rating_line = lines[-2]
         m = self.RATING_PATTERN.match(rating_line)
-        msg = f"Failed running Pylint, got exit code {ret}. Try running manually using:\n\t{self._build_command('TARGET')}"
+        msg = f"Failed running Pylint, got exit code {ret}. Try running manually using: {self._build_command('TARGET')}"
         exit_if(not m, msg)
         rating_string = m.group(1)  # type:ignore
         numerator, denominator = rating_string.split("/")

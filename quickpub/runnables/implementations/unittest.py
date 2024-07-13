@@ -49,7 +49,7 @@ class UnittestRunner(BaseRunner):
             return 1.0 - (float(num_failed) / float(num_tests))
         except:
             exit_if(True,
-                    f"Failed running Unittest, got exit code {ret}. try running manually using:\n\t{self._build_command('TARGET')}")
+                    f"Failed running Unittest, got exit code {ret}. try running manually using: {self._build_command('TARGET')}")
 
 
 __all__ = [

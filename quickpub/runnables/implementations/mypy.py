@@ -32,7 +32,7 @@ class MypyRunner(BaseRunner):
         if rating_line.startswith("Success"):
             return 0.0
         exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
-                f"Failed running MyPy, got exit code {ret}. try running manually using:\n\t{self._build_command('TARGET')}",
+                f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
                 verbose=verbose)
         num_failed = float(m.group(1))
         active_files = float(m.group(2))
