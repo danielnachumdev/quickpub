@@ -34,19 +34,19 @@ def publish(
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.
 
     Args:
-        name (str): The name of the package
-        author (str): The name of the author
-        author_email (str): The email of the author
-        description (str): A short description for the package
-        homepage (str): The homepage for the package. URL to the github repo is a good option.
-        explicit_src_folder_path (Optional[Path], optional): The path to the source code of the package. if None defaults to CWD/<name>
-        version (Optional[Union[Version, str]], optional): The version to create the new distribution. if None defaults to 0.0.1
-        readme_file_path (Path, optional): The path to the readme file. Defaults to "./README.md".
-        license_file_path (Path, optional): The path to the license file . Defaults to "./LICENSE".
-        min_python (Optional[Union[Version, str]], optional): The minimum version of python required for this package to run. Defaults to the version of python running this script.
-        keywords (Optional[list[str]], optional): A list of keywords to describe areas of interests of this package. Defaults to None.
-        dependencies (Optional[list[str]], optional): A list of the dependencies for this package. Defaults to None.
-        config (Optional[Config], optional): reserved for future use. Defaults to None.
+        :param name: The name of the package.
+        :param author: The name of the author.
+        :param author_email: The email of the author.
+        :param description: A short description for the package.
+        :param homepage: The homepage for the package. URL to the GitHub repo is a good option.
+        :param explicit_src_folder_path: The path to the source code of the package. Defaults to CWD/<name>.
+        :param version: The version to create the new distribution. Defaults to 0.0.1.
+        :param readme_file_path: The path to the readme file. Defaults to "./README.md".
+        :param license_file_path: The path to the license file. Defaults to "./LICENSE".
+        :param min_python: The minimum version of Python required for this package to run. Defaults to the version of Python running this script.
+        :param keywords: A list of keywords to describe areas of interest for this package. Defaults to None.
+        :param dependencies: A list of the dependencies for this package. Defaults to None.
+        :param config: Reserved for future use. Defaults to None.
         :param demo: Whether to only perform checks without making any hard changes. Defaults to False.
     """
     enforce_pypirc_exists()
