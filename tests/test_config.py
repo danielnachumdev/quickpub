@@ -1,9 +1,11 @@
 import unittest, sys
 from unittest.mock import Mock, patch, MagicMock
-from quickpub import publish, AdditionalConfiguration, MypyRunner, PylintRunner, UnittestRunner, CondaPythonManager
+from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonVersionManagerStrategy, \
+    PypircUploadStrategy, GitUploadStrategy, SetuptoolsBuildStrategy
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller, get_caller_file_name
-import requests
+
+from test_python_manager import MockRunner
 
 multipatch = chain_decorators(
     # patch("quickpub.proxy.get", return_value=requests.Response()),
@@ -62,20 +64,8 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            config=None
-        )
-
-    @multipatch
-    def test_explicit_empty_config(self, *args):
-        publish(
-            name=PACAKGE,
-            version="0.0.1",
-            author="danielnachumdev",
-            author_email="danielnachumdev@gmail.com",
-            description="A python package to quickly configure and publish a new package",
-            homepage="https://github.com/danielnachumdev/quickpub",
-            dependencies=["twine", "danielutils"],
-            config=AdditionalConfiguration()
+            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+            build_strategies=[SetuptoolsBuildStrategy()],
         )
 
     @staticmethod
@@ -102,9 +92,9 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            config=AdditionalConfiguration(
-                python_manager=CondaPythonManager(["base", "390", "380"]),
-            )
+            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+            build_strategies=[SetuptoolsBuildStrategy()],
+            python_version_manager_strategy=CondaPythonVersionManagerStrategy(["base", "390", "380"]),
         )
 
     @multipatch
@@ -120,14 +110,11 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            config=AdditionalConfiguration(
-                python_manager=CondaPythonManager(["base", "390", "380"]),
-                runners=[
-                    MypyRunner(bound="<15"),
-                    PylintRunner(bound=">=0.8"),
-                    UnittestRunner(bound=">=0.8"),
-                ]
-            )
+            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+            build_strategies=[SetuptoolsBuildStrategy()],
+            python_version_manager_strategy=CondaPythonVersionManagerStrategy(["base", "390", "380"]),
+            quality_assurance_strategies=[MypyRunner(bound="<15"), PylintRunner(bound=">=0.8"),
+                                          UnittestRunner(bound=">=0.8")]
         )
         delete_file(name)
         if len(PRINT_QUEUE) > 0:

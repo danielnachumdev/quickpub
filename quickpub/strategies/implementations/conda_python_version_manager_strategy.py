@@ -4,7 +4,7 @@ from danielutils import LayeredCommand, warning
 from ..python_version_manager_strategy import PythonVersionManagerStrategy
 
 
-class CondaPythonManager(PythonVersionManagerStrategy):
+class CondaPythonVersionManagerStrategy(PythonVersionManagerStrategy):
     def get_python_executable_name(self) -> str:
         return "python"
 
@@ -33,5 +33,5 @@ class CondaPythonManager(PythonVersionManagerStrategy):
 
 
 __all__ = [
-    'CondaPythonManager',
+    'CondaPythonVersionManagerStrategy',
 ]

@@ -20,10 +20,12 @@ def publish(
         author_email: str,
         description: str,
         homepage: str,
-        quality_assurance_strategies: List[QualityAssuranceStrategy],
+
         build_strategies: List[BuildStrategy],
         upload_strategies: List[UploadStrategy],
+        quality_assurance_strategies: Optional[List[QualityAssuranceStrategy]] = None,
         python_version_manager_strategy: PythonVersionManagerStrategy = SystemInterpreter(),
+
         explicit_src_folder_path: Optional[str] = None,
         version: Optional[Union[Version, str]] = None,
         readme_file_path: str = "./README.md",
@@ -37,25 +39,31 @@ def publish(
 
         config: Optional[Any] = None,
 ) -> None:
-    """The main function of this package. will do all the heavy lifting in order for you to publish your package.
+    """The main function for publishing a package. It performs all necessary steps to prepare and publish the package.
 
-    Args:
-        :param name: The name of the package.
-        :param author: The name of the author.
-        :param author_email: The email of the author.
-        :param description: A short description for the package.
-        :param homepage: The homepage for the package. URL to the GitHub repo is a good option.
-        :param explicit_src_folder_path: The path to the source code of the package. Defaults to CWD/<name>.
-        :param version: The version to create the new distribution. Defaults to 0.0.1.
-        :param readme_file_path: The path to the readme file. Defaults to "./README.md".
-        :param license_file_path: The path to the license file. Defaults to "./LICENSE".
-        :param min_python: The minimum version of Python required for this package to run. Defaults to the version of
-        Python running this script.
-        :param keywords: A list of keywords to describe areas of interest for this package. Defaults to None.
-        :param dependencies: A list of the dependencies for this package. Defaults to None.
-        :param config: Reserved for future use. Defaults to None.
-        :param demo: Whether to only perform checks without making any hard changes. Defaults to False.
-    """
+     :param name: The name of the package.
+     :param author: The name of the author.
+     :param author_email: The email of the author.
+     :param description: A short description of the package.
+     :param homepage: The homepage URL for the package (e.g., GitHub repository).
+     :param quality_assurance_strategies: Strategies for quality assurance.
+     :param build_strategies: Strategies for building the package.
+     :param upload_strategies: Strategies for uploading the package.
+     :param python_version_manager_strategy: Strategy for managing Python versions. Defaults to SystemInterpreter().
+     :param explicit_src_folder_path: The path to the source code of the package. Defaults to the current working directory/<name>.
+     :param version: The version for the new distribution. Defaults to "0.0.1".
+     :param readme_file_path: The path to the README file. Defaults to "./README.md".
+     :param license_file_path: The path to the license file. Defaults to "./LICENSE".
+     :param min_python: The minimum Python version required for the package. Defaults to the Python version running this script.
+     :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
+     :param dependencies: A list of dependencies for the package. Defaults to None.
+     :param demo: Whether to perform checks without making any changes. Defaults to False.
+     :param config: Reserved for future use. Defaults to None.
+
+     Returns:
+         None
+     """
+
     enforce_pypirc_exists()
     explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
     if explicit_src_folder_path != f"./{name}":
@@ -71,6 +79,8 @@ def publish(
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
+    if quality_assurance_strategies is None:
+        quality_assurance_strategies = []
     try:
         res = qa(
             python_version_manager_strategy,
@@ -138,25 +148,22 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-
-    publish(
-        name=args.name,
-        author=args.author,
-        author_email=args.author_email,
-        description=args.description,
-        homepage=args.homepage,
-        explicit_src_folder_path=args.explicit_src_folder_path,
-        version=args.version,
-        readme_file_path=args.readme_file_path,
-        license_file_path=args.license_file_path,
-        min_python=args.min_python,
-        keywords=args.keywords,
-        dependencies=args.dependencies,
-        config=args.config
-    )
-
-
 if __name__ == '__main__':
-    main()
+    print("CLI is not currently supported")
+    # args = parse_args()
+    #
+    # publish(
+    #     name=args.name,
+    #     author=args.author,
+    #     author_email=args.author_email,
+    #     description=args.description,
+    #     homepage=args.homepage,
+    #     explicit_src_folder_path=args.explicit_src_folder_path,
+    #     version=args.version,
+    #     readme_file_path=args.readme_file_path,
+    #     license_file_path=args.license_file_path,
+    #     min_python=args.min_python,
+    #     keywords=args.keywords,
+    #     dependencies=args.dependencies,
+    #     config=args.config
+    # )

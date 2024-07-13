@@ -1,12 +1,10 @@
-import builtins
+import requests
 import sys
 import unittest
-from unittest.mock import Mock, patch, MagicMock
-from quickpub import publish, AdditionalConfiguration, MypyRunner
+from unittest.mock import patch
+from quickpub import publish, MypyRunner, SetuptoolsBuildStrategy, GitUploadStrategy, PypircUploadStrategy
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller_file_name
-
-import requests
 
 multipatch = chain_decorators(
     patch("quickpub.proxy.get", return_value=requests.Response()),
@@ -55,11 +53,9 @@ class TestRunners(unittest.TestCase):
                 description="A python package to quickly configure and publish a new package",
                 homepage="https://github.com/danielnachumdev/quickpub",
                 dependencies=["twine", "danielutils"],
-                config=AdditionalConfiguration(
-                    runners=[
-                        MypyRunner()
-                    ]
-                )
+                upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+                build_strategies=[SetuptoolsBuildStrategy()],
+                quality_assurance_strategies=[MypyRunner()]
             )
 
     @multipatch
@@ -81,11 +77,9 @@ class TestRunners(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            config=AdditionalConfiguration(
-                runners=[
-                    MypyRunner(bound="<=50")
-                ]
-            )
+            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+            build_strategies=[SetuptoolsBuildStrategy()],
+            quality_assurance_strategies=[MypyRunner(bound="<=50")]
         )
 
     @staticmethod
@@ -119,11 +113,9 @@ class TestRunners(unittest.TestCase):
                 description="A python package to quickly configure and publish a new package",
                 homepage="https://github.com/danielnachumdev/quickpub",
                 dependencies=["twine", "danielutils"],
-                config=AdditionalConfiguration(
-                    runners=[
-                        MypyRunner(bound="<=50")
-                    ]
-                )
+                upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
+                build_strategies=[SetuptoolsBuildStrategy()],
+                quality_assurance_strategies=[MypyRunner(bound="<=50")]
             )
         except Exception as e:
             cur = e

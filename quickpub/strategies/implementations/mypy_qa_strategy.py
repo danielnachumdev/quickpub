@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from strategies.quality_assurance_strategy import QualityAssuranceStrategy
+from ..quality_assurance_strategy import QualityAssuranceStrategy
 
 
 class MypyRunner(QualityAssuranceStrategy):

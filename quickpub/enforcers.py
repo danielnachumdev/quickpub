@@ -21,7 +21,7 @@ def _remove_suffix(s: str, suffix: str) -> str:
     :return: modified string
     """
     if get_python_version() >= (3, 9):
-        return s.removesuffix(suffix)
+        return s.removesuffix(suffix)  # type:ignore
     return _remove_prefix(s[::-1], suffix[::-1])[::-1]
 
 
@@ -33,7 +33,7 @@ def _remove_prefix(s: str, prefix: str) -> str:
     :return:
     """
     if get_python_version() >= (3, 9):
-        return s.removeprefix(prefix)
+        return s.removeprefix(prefix)  # type:ignore
 
     if s.startswith(prefix):
         return s[len(prefix):]
