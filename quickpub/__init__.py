@@ -1,4 +1,4 @@
 from .structures import *
-from .runnables import *
-from .managers import *
+from .qa_runners import *
+from .python_managers import *
 from .__main__ import publish

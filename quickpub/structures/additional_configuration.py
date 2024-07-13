@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional, List
-from ..runnables import Runnable
-from ..managers import PythonManager
+from ..qa_runners import Runnable
+from ..python_managers import PythonManager
 
 
 @dataclass(frozen=True)

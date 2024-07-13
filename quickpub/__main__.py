@@ -28,7 +28,8 @@ def publish(
 
         keywords: Optional[List[str]] = None,
         dependencies: Optional[List[Union[str, Dependency]]] = None,
-        config: Optional[AdditionalConfiguration] = None
+        config: Optional[AdditionalConfiguration] = None,
+        demo: bool = False
 ) -> None:
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.
 
@@ -46,6 +47,7 @@ def publish(
         keywords (Optional[list[str]], optional): A list of keywords to describe areas of interests of this package. Defaults to None.
         dependencies (Optional[list[str]], optional): A list of the dependencies for this package. Defaults to None.
         config (Optional[Config], optional): reserved for future use. Defaults to None.
+        :param demo: Whether to only perform checks without making any hard changes. Defaults to False.
     """
     enforce_pypirc_exists()
     explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
@@ -55,7 +57,8 @@ def publish(
     exit_if(not file_exists(readme_file_path), f"Could not find readme file at {readme_file_path}")
     exit_if(not file_exists(license_file_path), f"Could not find license file at {license_file_path}")
     version = validate_version(version)
-    enforce_local_correct_version(name, version)
+    if not demo:
+        enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
@@ -93,15 +96,15 @@ def publish(
         min_python=min_python
     )
     create_manifest(name=name)
-
-    build()
-    upload(
-        name=name,
-        version=version
-    )
-    commit(
-        version=version
-    )
+    if not demo:
+        build()
+        upload(
+            name=name,
+            version=version
+        )
+        commit(
+            version=version
+        )
 
 
 def parse_args():

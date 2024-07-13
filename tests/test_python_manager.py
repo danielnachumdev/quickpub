@@ -6,7 +6,7 @@ from danielutils import create_file, delete_file, create_directory, delete_direc
 import requests
 
 from quickpub import publish, CondaPythonManager, AdditionalConfiguration
-from quickpub.runnables.base_runner import BaseRunner
+from quickpub.qa_runners.base_runner import BaseRunner
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"

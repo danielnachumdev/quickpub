@@ -4,7 +4,7 @@ from functools import wraps
 from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
-from .managers import PythonManager  # pylint: disable=relative-beyond-top-level
+from .python_managers import PythonManager  # pylint: disable=relative-beyond-top-level
 from .structures import AdditionalConfiguration, Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
@@ -120,7 +120,7 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src_folder_
     python_manager = config.python_manager
     is_system_interpreter: bool = False
     if python_manager is None:
-        from .managers import SystemInterpreter
+        from .python_managers import SystemInterpreter
         python_manager = SystemInterpreter()
         is_system_interpreter = True
     pool = create_progress_bar_pool(config, python_manager)
