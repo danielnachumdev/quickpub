@@ -2,8 +2,6 @@ import re
 
 from danielutils import file_exists, info
 
-from ...proxy import cm
-from ...enforcers import exit_if
 from ..upload_strategy import UploadStrategy
 
 
@@ -11,7 +9,9 @@ class PypircUploadStrategy(UploadStrategy):
     REGEX_PATTERN: re.Pattern = re.compile(
         r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\nusername = __token__\npassword = .+\n\n\[testpypi\]\nusername = __token__\npassword = .+\n")
 
-    def execute_strategy(self, *, name: str, version: str,**kwargs) -> None:
+    def execute_strategy(self, *, name: str, version: str, **kwargs) -> None:
+        from quickpub.proxy import cm
+        from quickpub.enforcers import exit_if
         self._validate_file_exists()
         self._validate_file_contents()
         if self.verbose:

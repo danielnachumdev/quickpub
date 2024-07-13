@@ -1,13 +1,11 @@
 from danielutils import info
-from danielutils.university.oop.strategy import Strategy
 
 from ..upload_strategy import UploadStrategy
-from ...enforcers import exit_if
-from ...proxy import cm
-
 
 class GitUploadStrategy(UploadStrategy):
     def execute_strategy(self, version: str, **kwargs) -> None:
+        from quickpub.proxy import cm
+        from quickpub.enforcers import exit_if
         if self.verbose:
             info("Git")
             info("\tStaging")

@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+from .quickpub_strategy import QuickpubStrategy
+from abc import abstractmethod
 from typing import Tuple, Set, Iterator, List
 from danielutils import LayeredCommand
 
 
-class PythonManager(ABC):
+class PythonVersionManagerStrategy(QuickpubStrategy):
     def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: List[str],
                  explicit_versions: List[str],
                  exit_on_fail: bool = False) -> None:
@@ -26,5 +27,5 @@ class PythonManager(ABC):
 
 
 __all__ = [
-    'PythonManager'
+    'PythonVersionManagerStrategy'
 ]

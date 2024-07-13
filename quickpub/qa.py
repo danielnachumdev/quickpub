@@ -4,8 +4,9 @@ from functools import wraps
 from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
-from .python_managers import PythonManager  # pylint: disable=relative-beyond-top-level
-from .structures import AdditionalConfiguration, Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
+from quickpub import QualityAssuranceStrategy
+from .strategies import PythonVersionManagerStrategy  # pylint: disable=relative-beyond-top-level
+from .structures import Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
 try:
@@ -53,7 +54,7 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
 VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
-def validate_dependencies(python_manager: PythonManager, required_dependencies: List[Dependency],
+def validate_dependencies(python_manager: PythonVersionManagerStrategy, required_dependencies: List[Dependency],
                           executor: LayeredCommand,
                           env_name: str, err_print_func: Callable) -> None:
     """
@@ -92,13 +93,22 @@ def validate_dependencies(python_manager: PythonManager, required_dependencies: 
                 err_func=err_print_func)
 
 
-def create_progress_bar_pool(config, python_manager) -> ProgressBarPool:
+def create_progress_bar_pool(python_version_manager: PythonVersionManagerStrategy,
+                             quality_assurance_strategies: List[QualityAssuranceStrategy]) -> ProgressBarPool:
     return ProgressBarPool(
         AsciiProgressBar,
         2,
         individual_options=[
-            dict(iterator=python_manager, desc="Envs", total=len(python_manager.requested_envs)),
-            dict(iterator=config.runners or [], desc="Runners", total=len(config.runners or [])),
+            dict(
+                iterator=python_version_manager,
+                desc="Envs",
+                total=len(python_version_manager.requested_envs)
+            ),
+            dict(
+                iterator=quality_assurance_strategies or [],
+                desc="Runners",
+                total=len(quality_assurance_strategies or [])
+            ),
         ]
     )
 
@@ -112,18 +122,19 @@ def create_pool_print_error(pool: ProgressBarPool):
     return func
 
 
-def qa(package_name: str, config: Optional[AdditionalConfiguration], src_folder_path: Optional[str],
-       dependencies: list) -> bool:
-    if config is None:
-        return True
+def qa(
+        python_version_manager: PythonVersionManagerStrategy,
+        quality_assurance_strategies: List[QualityAssuranceStrategy],
+        package_name: str,
+        src_folder_path: Optional[str],
+        dependencies: list
+) -> bool:
+    from .strategies import SystemInterpreter
     result = True
-    python_manager = config.python_manager
-    is_system_interpreter: bool = False
-    if python_manager is None:
-        from .python_managers import SystemInterpreter
-        python_manager = SystemInterpreter()
-        is_system_interpreter = True
-    pool = create_progress_bar_pool(config, python_manager)
+    if python_version_manager is None:
+        python_version_manager = SystemInterpreter()
+    is_system_interpreter = isinstance(python_version_manager, SystemInterpreter)
+    pool = create_progress_bar_pool(python_version_manager, quality_assurance_strategies)
     pool_err = create_pool_print_error(pool)
     with MultiContext(
             AttrContext(LayeredCommand, 'class_flush_stdout', False),
@@ -137,7 +148,7 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src_folder_
             with executor:
                 executor._prev_instance = base
                 try:
-                    validate_dependencies(python_manager, dependencies, executor, env_name, pool_err)
+                    validate_dependencies(python_version_manager, dependencies, executor, env_name, pool_err)
                 except SystemExit:
                     result = False
                     continue
@@ -154,7 +165,7 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src_folder_
                             src_folder_path,
                             executor,
                             use_system_interpreter=is_system_interpreter,
-                            raise_on_fail=python_manager.exit_on_fail,
+                            raise_on_fail=python_version_manager.exit_on_fail,
                             print_func=pool_err,
                             env_name=env_name
                         )
@@ -168,8 +179,8 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src_folder_
                             f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. "
                             f"Try manually: '{manual_command}'.")
                         pool.write(f"\tCaused by '{e.__cause__ or e}'")
-                        if python_manager.exit_on_fail:
-                            raise e
+                        if python_version_manager.exit_on_fail:
+                            raise RuntimeError() from e
     return result
 
 

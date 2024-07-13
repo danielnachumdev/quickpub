@@ -1,12 +1,12 @@
 import unittest, sys
 from typing import List
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller_file_name, LayeredCommand
 import requests
 
 from quickpub import publish, CondaPythonManager, AdditionalConfiguration
-from quickpub.qa_runners.base_runner import BaseRunner
+from strategies.quality_assurance_strategy import QualityAssuranceStrategy
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"
@@ -36,12 +36,12 @@ multipatch = chain_decorators(
 PRINt_QUEUE: list = []
 
 
-class MockRunner(BaseRunner):
+class MockRunner(QualityAssuranceStrategy):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
 
     def __init__(self) -> None:
-        BaseRunner.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
+        QualityAssuranceStrategy.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         return "echo $(python --version)"

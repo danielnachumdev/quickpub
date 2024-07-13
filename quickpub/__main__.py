@@ -1,13 +1,12 @@
 import argparse
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Any
 from danielutils import warning, file_exists, error
 
-from quickpub import UploadStrategy
-from strategies.build_strategy import BuildStrategy
+from quickpub import SystemInterpreter
+from strategies import BuildStrategy, UploadStrategy, QualityAssuranceStrategy, PythonVersionManagerStrategy
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
-from .functions import build, upload, commit
-from .structures import Version, AdditionalConfiguration, Dependency
+from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
@@ -21,8 +20,10 @@ def publish(
         author_email: str,
         description: str,
         homepage: str,
+        quality_assurance_strategies: List[QualityAssuranceStrategy],
         build_strategies: List[BuildStrategy],
         upload_strategies: List[UploadStrategy],
+        python_version_manager_strategy: PythonVersionManagerStrategy = SystemInterpreter(),
         explicit_src_folder_path: Optional[str] = None,
         version: Optional[Union[Version, str]] = None,
         readme_file_path: str = "./README.md",
@@ -32,8 +33,9 @@ def publish(
 
         keywords: Optional[List[str]] = None,
         dependencies: Optional[List[Union[str, Dependency]]] = None,
-        config: Optional[AdditionalConfiguration] = None,
-        demo: bool = False
+        demo: bool = False,
+
+        config: Optional[Any] = None,
 ) -> None:
     """The main function of this package. will do all the heavy lifting in order for you to publish your package.
 
@@ -70,9 +72,17 @@ def publish(
     enforce_remote_correct_version(name, version)
 
     try:
-        if not qa(name, config, explicit_src_folder_path, validated_dependencies):
-            error(
-                f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
+        res = qa(
+            python_version_manager_strategy,
+            quality_assurance_strategies,
+            name,
+            explicit_src_folder_path,
+            validated_dependencies
+        )
+        if not res:
+            error(f"quickpub.publish exited early as '{name}' "
+                  "did not pass quality assurance step, see above "
+                  "logs to pass this step.")
             raise SystemExit(1)
     except SystemExit as e:
         raise e
