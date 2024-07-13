@@ -85,6 +85,8 @@ def qa(package_name: str, config: Optional[AdditionalConfiguration], src: Option
                 validate_dependencies(python_manager, dependencies, executor, env_name, pool.write)
                 global_import_sanity_check(package_name, executor, is_system_interpreter)
                 for runner in pool[1]:
+                    pool[1].desc = f"Runner {runner.__class__.__name__}"
+                    pool[1].update(0, refresh=True)
                     try:
                         runner.run(
                             src,
