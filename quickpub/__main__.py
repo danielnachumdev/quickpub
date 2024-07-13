@@ -43,7 +43,8 @@ def publish(
         :param version: The version to create the new distribution. Defaults to 0.0.1.
         :param readme_file_path: The path to the readme file. Defaults to "./README.md".
         :param license_file_path: The path to the license file. Defaults to "./LICENSE".
-        :param min_python: The minimum version of Python required for this package to run. Defaults to the version of Python running this script.
+        :param min_python: The minimum version of Python required for this package to run. Defaults to the version of
+        Python running this script.
         :param keywords: A list of keywords to describe areas of interest for this package. Defaults to None.
         :param dependencies: A list of the dependencies for this package. Defaults to None.
         :param config: Reserved for future use. Defaults to None.
