@@ -1,6 +1,5 @@
 from typing import List
 from danielutils import get_files
-from .custom_types import Path
 from .classifiers import Classifier
 from .structures import Version
 
@@ -8,9 +7,9 @@ from .structures import Version
 def create_toml(
         *,
         name: str,
-        src: Path,
-        readme: Path,
-        license: Path,
+        src_folder_path: str,
+        readme_file_path: str,
+        license_file_path: str,
         version: Version,
         author: str,
         author_email: str,
@@ -25,7 +24,7 @@ def create_toml(
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
     py_typed = ""
-    for file in get_files(src):
+    for file in get_files(src_folder_path):
         if file == "py.typed":
             py_typed = f"""[tool.setuptools.package-data]
 "{name}" = ["py.typed"]"""
@@ -43,9 +42,9 @@ authors = [
 ]
 dependencies = {dependencies}
 keywords = {keywords}
-license = {{ "file" = "{license}" }}
+license = {{ "file" = "{license_file_path}" }}
 description = "{description}"
-readme = {{file = "{readme}", content-type = "text/markdown"}}
+readme = {{file = "{readme_file_path}", content-type = "text/markdown"}}
 requires-python = ">={min_python}"
 classifiers = [{classifiers_string}]
 

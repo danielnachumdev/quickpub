@@ -10,7 +10,7 @@ class SystemInterpreter(PythonManager):
     def get_python_executable_name(self) -> str:
         return sys.executable
 
-    def __init__(self):
+    def __init__(self) -> None:
         PythonManager.__init__(self, requested_envs=["system"], explicit_versions=[], exit_on_fail=True)
 
     def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]:

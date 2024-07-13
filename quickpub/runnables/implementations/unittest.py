@@ -1,7 +1,7 @@
 import re
 import os
 from typing import Optional, List
-from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand
+from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
 from ..base_runner import BaseRunner
 
@@ -12,6 +12,9 @@ class UnittestRunner(BaseRunner):
 
     def _pre_command(self):
         self._cwd = get_current_working_directory()
+        if self.target is None:
+            self.target = ""
+            warning("This is not supposed to happen. See quickpub's UnitestRunner._pre_command")
         set_current_working_directory(os.path.join(self._cwd, self.target))
 
     def _post_command(self):

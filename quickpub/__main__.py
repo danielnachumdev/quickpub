@@ -7,7 +7,6 @@ from .structures import Version, AdditionalConfiguration
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
-from .custom_types import Path
 from .qa import qa
 
 
@@ -18,10 +17,10 @@ def publish(
         author_email: str,
         description: str,
         homepage: str,
-        src: Optional[Path] = None,
+        explicit_src_folder_path: Optional[str] = None,
         version: Optional[Union[Version, str]] = None,
-        readme: Path = "./README.md",
-        license: Path = "./LICENSE",
+        readme_file_path: str = "./README.md",
+        license_file_path: str = "./LICENSE",
 
         min_python: Optional[Union[Version, str]] = None,
 
@@ -37,22 +36,22 @@ def publish(
         author_email (str): The email of the author
         description (str): A short description for the package
         homepage (str): The homepage for the package. URL to the github repo is a good option.
-        src (Optional[Path], optional): The path to the source code of the package. if None defaults to CWD/<name>
+        explicit_src_folder_path (Optional[Path], optional): The path to the source code of the package. if None defaults to CWD/<name>
         version (Optional[Union[Version, str]], optional): The version to create the new distribution. if None defaults to 0.0.1
-        readme (Path, optional): The path to the readme file. Defaults to "./README.md".
-        license (Path, optional): The path to the license file . Defaults to "./LICENSE".
+        readme_file_path (Path, optional): The path to the readme file. Defaults to "./README.md".
+        license_file_path (Path, optional): The path to the license file . Defaults to "./LICENSE".
         min_python (Optional[Union[Version, str]], optional): The minimum version of python required for this package to run. Defaults to the version of python running this script.
         keywords (Optional[list[str]], optional): A list of keywords to describe areas of interests of this package. Defaults to None.
         dependencies (Optional[list[str]], optional): A list of the dependencies for this package. Defaults to None.
         config (Optional[Config], optional): reserved for future use. Defaults to None.
     """
     enforce_pypirc_exists()
-    src = validate_source(name, src)
-    if src != f"./{name}":
+    explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
+    if explicit_src_folder_path != f"./{name}":
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
-    exit_if(not file_exists(readme), f"Could not find readme file at {readme}")
-    exit_if(not file_exists(license), f"Could not find license file at {license}")
+    exit_if(not file_exists(readme_file_path), f"Could not find readme file at {readme_file_path}")
+    exit_if(not file_exists(license_file_path), f"Could not find license file at {license_file_path}")
     version = validate_version(version)
     enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
@@ -61,7 +60,7 @@ def publish(
     enforce_remote_correct_version(name, version)
 
     try:
-        if not qa(name, config, src, dependencies):
+        if not qa(name, config, explicit_src_folder_path, dependencies):
             error(
                 f"quickpub.publish exited early as '{name}' did not pass quality assurance step, see above logs to pass this step.")
             raise SystemExit(1)
@@ -73,9 +72,9 @@ def publish(
     create_setup()
     create_toml(
         name=name,
-        src=src,
-        readme=readme,
-        license=license,
+        src_folder_path=explicit_src_folder_path,
+        readme_file_path=readme_file_path,
+        license_file_path=license_file_path,
         version=version,
         author=author,
         author_email=author_email,

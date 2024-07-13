@@ -1,16 +1,13 @@
 from typing import Optional, Union, List
 
 from danielutils import get_python_version
-from .custom_types import Path
 from .structures import Version
 
 
-def validate_version(version: Optional[Union[str, Version]]) -> Version:
+def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
     if version is None:
-        version = Version(0, 0, 1)
-    else:
-        version: Version = version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
-    return version
+        return Version(0, 0, 1)
+    return version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
 
 
 def validate_python_version(min_python: Optional[Version]) -> Version:
@@ -31,7 +28,7 @@ def validate_dependencies(dependencies: Optional[List[str]]) -> List[str]:
     return dependencies
 
 
-def validate_source(name: str, src: Optional[Path] = None) -> Path:
+def validate_source(name: str, src: Optional[str] = None) -> str:
     if src is not None:
         return src
     return f"./{name}"

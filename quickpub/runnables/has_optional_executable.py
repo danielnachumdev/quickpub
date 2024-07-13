@@ -1,5 +1,5 @@
 import sys
-from typing import Any, Protocol, Optional
+from typing import Any, Protocol, Optional, cast
 from danielutils import get_os, OSType, file_exists
 
 
@@ -19,7 +19,7 @@ class HasOptionalExecutable():
 
     def get_executable(self, use_system_interpreter: bool = False) -> str:
         if self.use_executable:
-            return self.executable_path
+            return cast(str, self.executable_path)
 
         p = self.PYTHON
         if use_system_interpreter:

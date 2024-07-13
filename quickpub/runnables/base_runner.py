@@ -34,8 +34,8 @@ class BaseRunner(Runnable, Configurable, HasOptionalExecutable):
     def _post_command(self) -> None:
         pass
 
-    def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True,
-            use_system_interpreter: bool = False, raise_on_fail: bool = False, print_func, env_name:str) -> None:
+    def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True,  # type: ignore
+            use_system_interpreter: bool = False, raise_on_fail: bool = False, print_func, env_name: str) -> None:
         # =====================================
         # IMPORTANT: need to explicitly override it here
         executor._executor = os_system
