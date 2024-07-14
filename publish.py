@@ -4,7 +4,7 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
 def main() -> None:
     publish(
         name="quickpub",
-        version="1.0.2",
+        version="1.0.3",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",

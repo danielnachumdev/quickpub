@@ -1,4 +1,4 @@
-# quickpub V0.8.3
+# quickpub V1.0.3
 **Tested python versions**: `3.8.0`, `3.9.0`, `3.10.13`,
 
 Example usage of how this package was published
@@ -10,7 +10,7 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
 def main() -> None:
     publish(
         name="quickpub",
-        version="1.0.2",
+        version="1.0.3",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
