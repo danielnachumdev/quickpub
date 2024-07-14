@@ -42,7 +42,7 @@ class HasOptionalExecutable:
         return f"{p} -m {self.name}"
 
 
-class QualityAssuranceStrategy(Configurable, HasOptionalExecutable):
+class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
 
     def __init__(self, *, name: str, bound: Union[str, Bound], target: Optional[str] = None,
                  configuration_path: Optional[str] = None,
@@ -94,5 +94,5 @@ class QualityAssuranceStrategy(Configurable, HasOptionalExecutable):
 
 
 __all__ = [
-    "QualityAssuranceStrategy"
+    "QualityAssuranceRunner"
 ]

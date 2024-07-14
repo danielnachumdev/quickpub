@@ -3,10 +3,10 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from ..quality_assurance_strategy import QualityAssuranceStrategy
+from ..quality_assurance_runner import QualityAssuranceRunner
 
 
-class MypyRunner(QualityAssuranceStrategy):
+class MypyRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         with base:
             base("pip install pylint")
@@ -23,8 +23,8 @@ class MypyRunner(QualityAssuranceStrategy):
 
     def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        QualityAssuranceStrategy.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
-                                          executable_path=executable_path)
+        QualityAssuranceRunner.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
+                                        executable_path=executable_path)
 
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
         from ...enforcers import exit_if

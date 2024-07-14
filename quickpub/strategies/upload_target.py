@@ -3,7 +3,7 @@ from abc import abstractmethod
 from .quickpub_strategy import QuickpubStrategy
 
 
-class UploadStrategy(QuickpubStrategy):
+class UploadTarget(QuickpubStrategy):
     def __init__(self, verbose: bool = True) -> None:
         self.verbose = verbose
 
@@ -12,5 +12,5 @@ class UploadStrategy(QuickpubStrategy):
 
 
 __all__ = [
-    'UploadStrategy',
+    'UploadTarget',
 ]

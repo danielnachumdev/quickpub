@@ -3,7 +3,7 @@ from abc import abstractmethod
 from .quickpub_strategy import QuickpubStrategy
 
 
-class BuildStrategy(QuickpubStrategy):
+class BuildSchema(QuickpubStrategy):
     def __init__(self, verbose: bool = True) -> None:
         self.verbose = verbose
 
@@ -12,5 +12,5 @@ class BuildStrategy(QuickpubStrategy):
 
 
 __all__ = [
-    "BuildStrategy"
+    "BuildSchema"
 ]

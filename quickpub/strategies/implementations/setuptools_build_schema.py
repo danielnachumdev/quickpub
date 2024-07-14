@@ -1,9 +1,9 @@
 from danielutils import info
 
-from ..build_strategy import BuildStrategy
+from ..build_schema import BuildSchema
 
 
-class SetuptoolsBuildStrategy(BuildStrategy):
+class SetuptoolsBuildSchema(BuildSchema):
     def execute_strategy(self, *args, **kwargs) -> None:
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
@@ -17,5 +17,5 @@ class SetuptoolsBuildStrategy(BuildStrategy):
 
 
 __all__ = [
-    "SetuptoolsBuildStrategy",
+    "SetuptoolsBuildSchema",
 ]

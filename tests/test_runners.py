@@ -2,7 +2,7 @@ import requests
 import sys
 import unittest
 from unittest.mock import patch
-from quickpub import publish, MypyRunner, SetuptoolsBuildStrategy, GitUploadStrategy, PypircUploadStrategy
+from quickpub import publish, MypyRunner, SetuptoolsBuildSchema, GithubUploadTarget, PypircUploadTarget
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller_file_name
 
@@ -53,9 +53,9 @@ class TestRunners(unittest.TestCase):
                 description="A python package to quickly configure and publish a new package",
                 homepage="https://github.com/danielnachumdev/quickpub",
                 dependencies=["twine", "danielutils"],
-                upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-                build_strategies=[SetuptoolsBuildStrategy()],
-                quality_assurance_strategies=[MypyRunner()]
+                upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+                build_schemas=[SetuptoolsBuildSchema()],
+                quality_assurance_runners=[MypyRunner()]
             )
 
     @multipatch
@@ -77,9 +77,9 @@ class TestRunners(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-            build_strategies=[SetuptoolsBuildStrategy()],
-            quality_assurance_strategies=[MypyRunner(bound="<=50")]
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
+            quality_assurance_runners=[MypyRunner(bound="<=50")]
         )
 
     @staticmethod
@@ -113,9 +113,9 @@ class TestRunners(unittest.TestCase):
                 description="A python package to quickly configure and publish a new package",
                 homepage="https://github.com/danielnachumdev/quickpub",
                 dependencies=["twine", "danielutils"],
-                upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-                build_strategies=[SetuptoolsBuildStrategy()],
-                quality_assurance_strategies=[MypyRunner(bound="<=50")]
+                upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+                build_schemas=[SetuptoolsBuildSchema()],
+                quality_assurance_runners=[MypyRunner(bound="<=50")]
             )
         except Exception as e:
             cur = e

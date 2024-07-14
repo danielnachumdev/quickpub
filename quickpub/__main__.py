@@ -2,8 +2,8 @@ import argparse
 from typing import Optional, Union, List, Any
 from danielutils import warning, file_exists, error
 
-from quickpub import SystemInterpreter
-from strategies import BuildStrategy, UploadStrategy, QualityAssuranceStrategy, PythonVersionManagerStrategy
+from quickpub import DefaultInterpreterProvider
+from strategies import BuildSchema, UploadTarget, QualityAssuranceRunner, PythonProvider
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .structures import Version, Dependency
@@ -21,22 +21,20 @@ def publish(
         description: str,
         homepage: str,
 
-        build_strategies: List[BuildStrategy],
-        upload_strategies: List[UploadStrategy],
-        quality_assurance_strategies: Optional[List[QualityAssuranceStrategy]] = None,
-        python_version_manager_strategy: PythonVersionManagerStrategy = SystemInterpreter(),
+        build_schemas: List[BuildSchema],
+        upload_targets: List[UploadTarget],
+        quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
+        python_interpreter_provider: PythonProvider = DefaultInterpreterProvider(),
 
-        explicit_src_folder_path: Optional[str] = None,
-        version: Optional[Union[Version, str]] = None,
         readme_file_path: str = "./README.md",
         license_file_path: str = "./LICENSE",
-
+        version: Optional[Union[Version, str]] = None,
         min_python: Optional[Union[Version, str]] = None,
-
-        keywords: Optional[List[str]] = None,
         dependencies: Optional[List[Union[str, Dependency]]] = None,
-        demo: bool = False,
+        keywords: Optional[List[str]] = None,
+        explicit_src_folder_path: Optional[str] = None,
 
+        demo: bool = False,
         config: Optional[Any] = None,
 ) -> None:
     """The main function for publishing a package. It performs all necessary steps to prepare and publish the package.
@@ -46,10 +44,10 @@ def publish(
      :param author_email: The email of the author.
      :param description: A short description of the package.
      :param homepage: The homepage URL for the package (e.g., GitHub repository).
-     :param quality_assurance_strategies: Strategies for quality assurance.
-     :param build_strategies: Strategies for building the package.
-     :param upload_strategies: Strategies for uploading the package.
-     :param python_version_manager_strategy: Strategy for managing Python versions. Defaults to SystemInterpreter().
+     :param quality_assurance_runners: Strategies for quality assurance.
+     :param build_schemas: Strategies for building the package.
+     :param upload_targets: Strategies for uploading the package.
+     :param python_interpreter_provider: Strategy for managing Python versions. Defaults to SystemInterpreter().
      :param explicit_src_folder_path: The path to the source code of the package. Defaults to the current working directory/<name>.
      :param version: The version for the new distribution. Defaults to "0.0.1".
      :param readme_file_path: The path to the README file. Defaults to "./README.md".
@@ -79,12 +77,12 @@ def publish(
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
     enforce_remote_correct_version(name, version)
 
-    if quality_assurance_strategies is None:
-        quality_assurance_strategies = []
+    if quality_assurance_runners is None:
+        quality_assurance_runners = []
     try:
         res = qa(
-            python_version_manager_strategy,
-            quality_assurance_strategies,
+            python_interpreter_provider,
+            quality_assurance_runners,
             name,
             explicit_src_folder_path,
             validated_dependencies
@@ -122,9 +120,9 @@ def publish(
     )
     create_manifest(name=name)
     if not demo:
-        for build_strategy in build_strategies:
+        for build_strategy in build_schemas:
             build_strategy.execute_strategy()
-        for upload_strategy in upload_strategies:
+        for upload_strategy in upload_targets:
             upload_strategy.execute_strategy(name=name, version=version)
 
 

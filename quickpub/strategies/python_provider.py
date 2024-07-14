@@ -4,7 +4,7 @@ from typing import Tuple, Set, Iterator, List
 from danielutils import LayeredCommand
 
 
-class PythonVersionManagerStrategy(QuickpubStrategy):
+class PythonProvider(QuickpubStrategy):
     def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: List[str],
                  explicit_versions: List[str],
                  exit_on_fail: bool = False) -> None:
@@ -27,5 +27,5 @@ class PythonVersionManagerStrategy(QuickpubStrategy):
 
 
 __all__ = [
-    'PythonVersionManagerStrategy'
+    'PythonProvider'
 ]

@@ -5,8 +5,8 @@ from danielutils import create_file, delete_file, create_directory, delete_direc
     get_caller_file_name, LayeredCommand
 import requests
 
-from quickpub import publish, CondaPythonVersionManagerStrategy, GitUploadStrategy, PypircUploadStrategy, \
-    SetuptoolsBuildStrategy, QualityAssuranceStrategy
+from quickpub import publish, CondaPythonProvider, GithubUploadTarget, PypircUploadTarget, \
+    SetuptoolsBuildSchema, QualityAssuranceRunner
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"
@@ -36,12 +36,12 @@ multipatch = chain_decorators(
 PRINt_QUEUE: list = []
 
 
-class MockRunner(QualityAssuranceStrategy):
+class MockRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
 
     def __init__(self) -> None:
-        QualityAssuranceStrategy.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
+        QualityAssuranceRunner.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         return "echo $(python --version)"
@@ -93,8 +93,8 @@ class TestPythonManager(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-            build_strategies=[SetuptoolsBuildStrategy()],
-            python_version_manager_strategy=CondaPythonVersionManagerStrategy(["base", "390", "380"]),
-            quality_assurance_strategies=[MockRunner()]
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
+            python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
+            quality_assurance_runners=[MockRunner()]
         )

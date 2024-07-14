@@ -2,10 +2,10 @@ import re
 
 from danielutils import file_exists, info
 
-from ..upload_strategy import UploadStrategy
+from ..upload_target import UploadTarget
 
 
-class PypircUploadStrategy(UploadStrategy):
+class PypircUploadTarget(UploadTarget):
     REGEX_PATTERN: re.Pattern = re.compile(
         r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\nusername = __token__\npassword = .+\n\n\[testpypi\]\nusername = __token__\npassword = .+\n")
 
@@ -40,5 +40,5 @@ class PypircUploadStrategy(UploadStrategy):
 
 
 __all__ = [
-    "PypircUploadStrategy"
+    "PypircUploadTarget"
 ]

@@ -1,8 +1,8 @@
 from danielutils import info
 
-from ..upload_strategy import UploadStrategy
+from ..upload_target import UploadTarget
 
-class GitUploadStrategy(UploadStrategy):
+class GithubUploadTarget(UploadTarget):
     def execute_strategy(self, version: str, **kwargs) -> None:
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
@@ -22,5 +22,5 @@ class GitUploadStrategy(UploadStrategy):
 
 
 __all__ = [
-    "GitUploadStrategy",
+    "GithubUploadTarget",
 ]

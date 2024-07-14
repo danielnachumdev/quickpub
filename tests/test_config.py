@@ -1,7 +1,7 @@
 import unittest, sys
 from unittest.mock import Mock, patch, MagicMock
-from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonVersionManagerStrategy, \
-    PypircUploadStrategy, GitUploadStrategy, SetuptoolsBuildStrategy
+from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
+    PypircUploadTarget, GithubUploadTarget, SetuptoolsBuildSchema
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller, get_caller_file_name
 
@@ -64,8 +64,8 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-            build_strategies=[SetuptoolsBuildStrategy()],
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
         )
 
     @staticmethod
@@ -92,9 +92,9 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-            build_strategies=[SetuptoolsBuildStrategy()],
-            python_version_manager_strategy=CondaPythonVersionManagerStrategy(["base", "390", "380"]),
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
+            python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
         )
 
     @multipatch
@@ -110,11 +110,11 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
-            upload_strategies=[PypircUploadStrategy(), GitUploadStrategy()],
-            build_strategies=[SetuptoolsBuildStrategy()],
-            python_version_manager_strategy=CondaPythonVersionManagerStrategy(["base", "390", "380"]),
-            quality_assurance_strategies=[MypyRunner(bound="<15"), PylintRunner(bound=">=0.8"),
-                                          UnittestRunner(bound=">=0.8")]
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
+            python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
+            quality_assurance_runners=[MypyRunner(bound="<15"), PylintRunner(bound=">=0.8"),
+                                       UnittestRunner(bound=">=0.8")]
         )
         delete_file(name)
         if len(PRINT_QUEUE) > 0:

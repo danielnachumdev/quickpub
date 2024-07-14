@@ -3,10 +3,10 @@ import os
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
-from strategies.quality_assurance_strategy import QualityAssuranceStrategy
+from strategies.quality_assurance_runner import QualityAssuranceRunner
 
 
-class UnittestRunner(QualityAssuranceStrategy):
+class UnittestRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
 
@@ -23,7 +23,7 @@ class UnittestRunner(QualityAssuranceStrategy):
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
     def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8") -> None:
-        QualityAssuranceStrategy.__init__(self, name="unittest", bound=bound, target=target)
+        QualityAssuranceRunner.__init__(self, name="unittest", bound=bound, target=target)
         self._cwd = ""
 
     def _build_command(self, src: str, *args, use_system_interpreter: bool = False) -> str:

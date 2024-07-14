@@ -4,8 +4,8 @@ from functools import wraps
 from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
-from quickpub import QualityAssuranceStrategy
-from .strategies import PythonVersionManagerStrategy  # pylint: disable=relative-beyond-top-level
+from quickpub import QualityAssuranceRunner
+from .strategies import PythonProvider  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
@@ -54,7 +54,7 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
 VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
-def validate_dependencies(python_manager: PythonVersionManagerStrategy, required_dependencies: List[Dependency],
+def validate_dependencies(python_manager: PythonProvider, required_dependencies: List[Dependency],
                           executor: LayeredCommand,
                           env_name: str, err_print_func: Callable) -> None:
     """
@@ -93,8 +93,8 @@ def validate_dependencies(python_manager: PythonVersionManagerStrategy, required
                 err_func=err_print_func)
 
 
-def create_progress_bar_pool(python_version_manager: PythonVersionManagerStrategy,
-                             quality_assurance_strategies: List[QualityAssuranceStrategy]) -> ProgressBarPool:
+def create_progress_bar_pool(python_version_manager: PythonProvider,
+                             quality_assurance_strategies: List[QualityAssuranceRunner]) -> ProgressBarPool:
     return ProgressBarPool(
         AsciiProgressBar,
         2,
@@ -123,17 +123,17 @@ def create_pool_print_error(pool: ProgressBarPool):
 
 
 def qa(
-        python_version_manager: PythonVersionManagerStrategy,
-        quality_assurance_strategies: List[QualityAssuranceStrategy],
+        python_version_manager: PythonProvider,
+        quality_assurance_strategies: List[QualityAssuranceRunner],
         package_name: str,
         src_folder_path: Optional[str],
         dependencies: list
 ) -> bool:
-    from .strategies import SystemInterpreter
+    from .strategies import DefaultInterpreterProvider
     result = True
     if python_version_manager is None:
-        python_version_manager = SystemInterpreter()
-    is_system_interpreter = isinstance(python_version_manager, SystemInterpreter)
+        python_version_manager = DefaultInterpreterProvider()
+    is_system_interpreter = isinstance(python_version_manager, DefaultInterpreterProvider)
     pool = create_progress_bar_pool(python_version_manager, quality_assurance_strategies)
     pool_err = create_pool_print_error(pool)
     with MultiContext(

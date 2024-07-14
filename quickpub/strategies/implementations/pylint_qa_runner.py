@@ -3,10 +3,10 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from strategies.quality_assurance_strategy import QualityAssuranceStrategy
+from strategies.quality_assurance_runner import QualityAssuranceRunner
 
 
-class PylintRunner(QualityAssuranceStrategy):
+class PylintRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         with base:
             base("pip install pylint")
@@ -15,8 +15,8 @@ class PylintRunner(QualityAssuranceStrategy):
 
     def __init__(self, bound: str = ">=0.8", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
-        QualityAssuranceStrategy.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
-                                          executable_path=executable_path)
+        QualityAssuranceRunner.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
+                                        executable_path=executable_path)
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
