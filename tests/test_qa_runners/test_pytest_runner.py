@@ -4,7 +4,7 @@ from danielutils import create_directory, delete_directory, create_file
 
 from quickpub import DefaultInterpreterProvider, PytestRunner
 
-TESTS_FOLDER_NAME: str = "./tmp_pytest_tests"
+TESTS_FOLDER_NAME: str = "./tmp_pytest_tests_folder"
 
 
 class TestPytestRunner(unittest.TestCase):
@@ -54,16 +54,21 @@ import pytest
                 )
 
     def test_only_one_test_that_passes(self):
+        # TODO
         pass
 
     def test_only_one_test_that_fails(self):
+        # TODO
         pass
 
     def test_combined(self):
+        # TODO
         pass
 
     def test_combined_with_bound_should_fail(self):
+        # TODO
         pass
 
     def test_combined_with_bound_should_pass(self):
+        # TODO
         pass
