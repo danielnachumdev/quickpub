@@ -9,7 +9,7 @@ class PypircUploadTarget(UploadTarget):
     REGEX_PATTERN: re.Pattern = re.compile(
         r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\n    username = __token__\n    password = .+\n\n\[testpypi\]\n    username = __token__\n    password = .+\n?")
 
-    def execute_strategy(self, *, name: str, version: str, **kwargs) -> None:
+    def upload(self, name: str, version: str, **kwargs) -> None:
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
         self._validate_file_exists()

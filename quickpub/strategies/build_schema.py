@@ -8,7 +8,7 @@ class BuildSchema(QuickpubStrategy):
         self.verbose = verbose
 
     @abstractmethod
-    def execute_strategy(self, *args, **kwargs) -> None: ...
+    def build(self, *args, **kwargs) -> None: ...
 
 
 __all__ = [

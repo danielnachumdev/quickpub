@@ -3,7 +3,7 @@ from danielutils import info
 from ..upload_target import UploadTarget
 
 class GithubUploadTarget(UploadTarget):
-    def execute_strategy(self, version: str, **kwargs) -> None:
+    def upload(self, version: str, **kwargs) -> None:
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
         if self.verbose:

@@ -1,8 +1,7 @@
 from danielutils.university.oop.strategy import Strategy
 
 
-class QuickpubStrategy(Strategy):
-    pass
+class QuickpubStrategy(Strategy): ...
 
 
 __all__ = [

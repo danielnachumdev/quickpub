@@ -4,7 +4,7 @@ from ..build_schema import BuildSchema
 
 
 class SetuptoolsBuildSchema(BuildSchema):
-    def execute_strategy(self, *args, **kwargs) -> None:
+    def build(self, *args, **kwargs) -> None:
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
         if self.verbose:

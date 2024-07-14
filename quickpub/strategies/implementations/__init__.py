@@ -7,3 +7,8 @@ from .pytest_qa_runner import *
 from .unittest_qa_runner import *
 from .conda_python_version_manager_strategy import *
 from .system_interpreter import *
+from .license_enforcer import *
+from .pypirc_enforcer import *
+from .readme_enforcer import *
+from .remote_version_enforcer import *
+from .local_version_enforcer import *

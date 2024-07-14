@@ -8,7 +8,7 @@ class UploadTarget(QuickpubStrategy):
         self.verbose = verbose
 
     @abstractmethod
-    def execute_strategy(self, *args, **kwargs) -> None: ...
+    def upload(self, **kwargs) -> None: ...
 
 
 __all__ = [

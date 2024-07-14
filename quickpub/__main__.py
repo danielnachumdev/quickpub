@@ -2,13 +2,14 @@ import argparse
 from typing import Optional, Union, List, Any
 from danielutils import warning, file_exists, error
 
-from .strategies import BuildSchema, UploadTarget, QualityAssuranceRunner, PythonProvider, DefaultInterpreterProvider
+from .strategies import BuildSchema, ConstraintEnforcer, UploadTarget, QualityAssuranceRunner, PythonProvider, \
+    DefaultInterpreterProvider
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
-from .enforcers import enforce_local_correct_version, enforce_pypirc_exists, exit_if, enforce_remote_correct_version
+from .enforcers import exit_if
 from .qa import qa
 
 
@@ -22,6 +23,7 @@ def publish(
 
         build_schemas: List[BuildSchema],
         upload_targets: List[UploadTarget],
+        enforcers: Optional[List[ConstraintEnforcer]] = None,
         quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
         python_interpreter_provider: PythonProvider = DefaultInterpreterProvider(),
 
@@ -60,21 +62,17 @@ def publish(
      Returns:
          None
      """
+    for enforcer in enforcers or []:
+        enforcer.enforce(name=name, version=version, demo=demo)
 
-    enforce_pypirc_exists()
     explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
     if explicit_src_folder_path != f"./{name}":
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
-    exit_if(not file_exists(readme_file_path), f"Could not find readme file at {readme_file_path}")
-    exit_if(not file_exists(license_file_path), f"Could not find license file at {license_file_path}")
     version = validate_version(version)
-    if not demo:
-        enforce_local_correct_version(name, version)
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
-    enforce_remote_correct_version(name, version)
 
     if quality_assurance_runners is None:
         quality_assurance_runners = []
@@ -119,10 +117,10 @@ def publish(
     )
     create_manifest(name=name)
     if not demo:
-        for build_strategy in build_schemas:
-            build_strategy.execute_strategy()
-        for upload_strategy in upload_targets:
-            upload_strategy.execute_strategy(name=name, version=version)
+        for schema in build_schemas:
+            schema.build()
+        for target in upload_targets:
+            target.upload(name=name, version=version)
 
 
 def parse_args():
