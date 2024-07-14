@@ -43,7 +43,7 @@ class LocalVersionEnforcer(ConstraintEnforcer):
                 v: Version = Version.from_str(d)
                 max_version = max(max_version, v)
             if not version <= max_version:
-                raise SystemExit(
+                raise self.EXCEPTION_TYPE(
                     f"Specified version is '{version}' but (locally available) latest existing is '{max_version}'")
 
 

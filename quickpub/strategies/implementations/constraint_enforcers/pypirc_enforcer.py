@@ -7,7 +7,7 @@ from ...constraint_enforcer import ConstraintEnforcer
 
 class PypircEnforcer(ConstraintEnforcer):
     PYPIRC_REGEX: re.Pattern = re.compile(
-        r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\n    username = __token__\n    password = .+\n\n\[testpypi\]\n    username = __token__\n    password = .+\n?")
+        r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\n    username = __token__\n    password = .+\n\n\[testpypi\]\n    username = __token__\n    password = .+\n?")  # pylint: disable=line-too-long
 
     def __init__(self, path: str = "./.pypirc", should_enforce_expected_format: bool = True) -> None:
         self.path = path
@@ -21,7 +21,7 @@ class PypircEnforcer(ConstraintEnforcer):
                 text = f.read()
 
             if not self.PYPIRC_REGEX.match(text):
-                raise SystemExit(f"Couldn't enforce '{self.path}'")
+                raise self.EXCEPTION_TYPE(f"Couldn't enforce '{self.path}'")
 
 
 __all__ = [

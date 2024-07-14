@@ -9,7 +9,7 @@ class LicenseEnforcer(ConstraintEnforcer):
 
     def enforce(self, **kwargs) -> None:
         if not file_exists(self.path):
-            raise SystemExit(f"Could not find license file at '{self.path}'")
+            raise self.EXCEPTION_TYPE(f"Could not find license file at '{self.path}'")
 
 
 __all__ = [
