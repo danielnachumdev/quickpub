@@ -3,7 +3,7 @@ import os
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
-from strategies.quality_assurance_runner import QualityAssuranceRunner
+from ..quality_assurance_runner import QualityAssuranceRunner
 
 
 class UnittestRunner(QualityAssuranceRunner):
@@ -33,7 +33,6 @@ class UnittestRunner(QualityAssuranceRunner):
         return command  # f"cd {self.target}; {command}"  # f"; cd {self.target}"
 
     def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
-        from ...enforcers import exit_if
         num_tests_line = lines[-3]
         num_failed_line = lines[-1] if lines[-1] != "OK" else "0"
         try:
@@ -48,8 +47,8 @@ class UnittestRunner(QualityAssuranceRunner):
 
             return 1.0 - (float(num_failed) / float(num_tests))
         except:
-            exit_if(True,
-                    f"Failed running Unittest, got exit code {ret}. try running manually using: {self._build_command('TARGET')}")
+            raise SystemExit(f"Failed running Unittest, got exit code {ret}. "
+                             f"try running manually using: {self._build_command('TARGET')}")
 
 
 __all__ = [

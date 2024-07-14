@@ -1,5 +1,5 @@
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
-    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PytestRunner
+    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget
 
 def main() -> None:
     publish(

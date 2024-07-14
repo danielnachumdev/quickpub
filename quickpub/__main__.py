@@ -2,8 +2,7 @@ import argparse
 from typing import Optional, Union, List, Any
 from danielutils import warning, file_exists, error
 
-from quickpub import DefaultInterpreterProvider
-from strategies import BuildSchema, UploadTarget, QualityAssuranceRunner, PythonProvider
+from .strategies import BuildSchema, UploadTarget, QualityAssuranceRunner, PythonProvider, DefaultInterpreterProvider
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .structures import Version, Dependency

@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from strategies.quality_assurance_runner import QualityAssuranceRunner
+from ..quality_assurance_runner import QualityAssuranceRunner
 
 
 class PylintRunner(QualityAssuranceRunner):

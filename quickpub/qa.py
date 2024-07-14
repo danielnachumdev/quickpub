@@ -4,8 +4,7 @@ from functools import wraps
 from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
 from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
 
-from quickpub import QualityAssuranceRunner
-from .strategies import PythonProvider  # pylint: disable=relative-beyond-top-level
+from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
