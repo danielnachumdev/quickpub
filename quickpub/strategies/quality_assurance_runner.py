@@ -43,10 +43,18 @@ class HasOptionalExecutable:
 
 
 class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
+    """
 
-    def __init__(self, *, name: str, bound: Union[str, Bound], target: Optional[str] = None,
-                 configuration_path: Optional[str] = None,
-                 executable_path: Optional[str] = None) -> None:
+    """
+
+    def __init__(
+            self, *,
+            name: str,
+            bound: Union[str, Bound],
+            target: Optional[str] = None,
+            configuration_path: Optional[str] = None,
+            executable_path: Optional[str] = None
+    ) -> None:
         Configurable.__init__(self, configuration_path)
         HasOptionalExecutable.__init__(self, name, executable_path)
         self.bound: Bound = bound if isinstance(bound, Bound) else Bound.from_string(bound)
@@ -54,7 +62,12 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
 
     @abstractmethod
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
-        ...
+        """
+
+        :param target:
+        :param use_system_interpreter:
+        :return:
+        """
 
     @abstractmethod
     def _install_dependencies(self, base: LayeredCommand) -> None:
@@ -66,13 +79,13 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
     def _post_command(self) -> None:
         pass
 
-    def run(self, target: str, executor: LayeredCommand, *_, verbose: bool = True,  # type: ignore
-            use_system_interpreter: bool = False, raise_on_fail: bool = False, print_func, env_name: str) -> None:
+    def run(self, target: str, executor: LayeredCommand, *, verbose: bool = True,  # type: ignore
+            use_system_interpreter: bool = False, print_func, env_name: str) -> None:
         # =====================================
         # IMPORTANT: need to explicitly override it here
-        from quickpub.proxy import os_system
-        from quickpub.enforcers import exit_if
-        executor._executor = os_system
+        from quickpub.proxy import os_system  # pylint: disable=import-error
+        from quickpub.enforcers import exit_if  # pylint: disable=import-error
+        executor._executor = os_system  # pylint: disable=protected-access
         # =====================================
         command = self._build_command(target, use_system_interpreter)
         self._pre_command()
