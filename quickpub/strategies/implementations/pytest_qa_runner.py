@@ -6,6 +6,7 @@ from danielutils import LayeredCommand
 from quickpub import Bound
 from ..quality_assurance_runner import QualityAssuranceRunner
 
+
 class PytestRunner(QualityAssuranceRunner):
     """
     PytestRunner is a concrete implementation of QualityAssuranceRunner specifically for running
@@ -19,7 +20,13 @@ class PytestRunner(QualityAssuranceRunner):
     PYTEST_REGEX: re.Pattern = re.compile(
         r"=+ (?:(?P<failed>\d+) failed,? )?(?:(?P<passed>\d+) passed )?in [\d\.]+s =+")
 
-    def __init__(self, *, bound: Union[str, Bound] = ">=0.8", target: str = "./tests"):
+    def __init__(
+            self, *,
+            bound: Union[str, Bound] = ">=0.8",
+            target: str = "./tests",
+            no_output_score: float = 0.0,
+            no_tests_score: float = 1.0
+    ):
         """
         Initializes the PytestRunner with a bound and target directory for tests.
 
@@ -32,6 +39,13 @@ class PytestRunner(QualityAssuranceRunner):
             bound=bound,
             target=target
         )
+        if not (0.0 <= no_tests_score <= 1.0):
+            raise RuntimeError("no_tests_score should be between 0.0 and 1.0 (including both).")
+        self.no_tests_score = no_tests_score
+
+        if not (0.0 <= no_output_score <= 1.0):
+            raise RuntimeError("no_output_score should be between 0.0 and 1.0 (including both).")
+        self.no_output_score = no_output_score
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         """
@@ -64,10 +78,10 @@ class PytestRunner(QualityAssuranceRunner):
         :return: The calculated test score as a float.
         """
         if len(command_output) == 0:
-            return 0
+            return self.no_output_score
         rating_line = command_output[-1]
         if "no tests ran" in rating_line:
-            return 1.0
+            return self.no_tests_score
         if not (m := self.PYTEST_REGEX.match(rating_line)):
             raise SystemExit(1)
 
@@ -77,5 +91,5 @@ class PytestRunner(QualityAssuranceRunner):
         assert failed >= 0
         assert passed >= 0
         if failed + passed == 0:
-            return 1.0
+            return self.no_tests_score
         return passed / (passed + failed)

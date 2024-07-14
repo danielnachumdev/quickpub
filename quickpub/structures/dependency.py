@@ -22,7 +22,7 @@ class Dependency:
             splits = s.split(op)
             if len(splits) == 2:
                 return Dependency(splits[0], op, Version.from_str(splits[-1]))  # type:ignore
-        raise ValueError("Invalid 'Dependency' format")
+        return Dependency(s, ">=", Version(0, 0, 0))
 
     def __str__(self) -> str:
         if self.ver == Version(0, 0, 0):

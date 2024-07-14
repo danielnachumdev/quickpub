@@ -1,11 +1,9 @@
 import unittest, sys
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
     PypircUploadTarget, GithubUploadTarget, SetuptoolsBuildSchema
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller, get_caller_file_name
-
-from test_python_manager import MockRunner
 
 multipatch = chain_decorators(
     # patch("quickpub.proxy.get", return_value=requests.Response()),
@@ -23,7 +21,19 @@ PRINT_QUEUE: list = []
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
-        create_file(PYPIRC)
+        with open(PYPIRC, "w") as f:
+            f.write("""[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaa
+
+[testpypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaaa""")
         create_directory(PACAKGE)
         create_file(f"{PACAKGE}/__init__.py")
         create_file(README)
@@ -52,6 +62,8 @@ class TestConfig(unittest.TestCase):
             description="A python package to quickly configure and publish a new package",
             homepage="https://github.com/danielnachumdev/quickpub",
             dependencies=["twine", "danielutils"],
+            upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+            build_schemas=[SetuptoolsBuildSchema()],
         )
 
     @multipatch
@@ -70,7 +82,7 @@ class TestConfig(unittest.TestCase):
 
     @staticmethod
     def _new_print(*args, sep: str = " ", end: str = "\n", file=sys.stdout, flush: bool = False) -> None:
-        special_case = get_caller().__name__ == "_write" and get_caller_file_name().split("\\")[
+        special_case = get_caller().__name__ == "_write" and get_caller_file_name().split("\\")[  # type: ignore
             -1] == "ascii_progress_bar.py"
         if not special_case:
             file.write(sep.join(args) + end)

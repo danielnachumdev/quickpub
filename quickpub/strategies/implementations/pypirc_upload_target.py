@@ -7,7 +7,7 @@ from ..upload_target import UploadTarget
 
 class PypircUploadTarget(UploadTarget):
     REGEX_PATTERN: re.Pattern = re.compile(
-        r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\nusername = __token__\npassword = .+\n\n\[testpypi\]\nusername = __token__\npassword = .+\n")
+        r"\[distutils\]\nindex-servers =\n    pypi\n    testpypi\n\n\[pypi\]\n    username = __token__\n    password = .+\n\n\[testpypi\]\n    username = __token__\n    password = .+\n?")
 
     def execute_strategy(self, *, name: str, version: str, **kwargs) -> None:
         from quickpub.proxy import cm
@@ -32,7 +32,7 @@ class PypircUploadTarget(UploadTarget):
             text = f.read()
         if not self.REGEX_PATTERN.match(text):
             raise RuntimeError(
-                f"{self.__class__.__name__} checked the contents of '{self.pypirc_file_path}' and it failed to match the following regex: {self.REGEX_PATTERN.pattern}")
+                f"{self.__class__.__name__} checked the contents of '{self.pypirc_file_path}' and it failed to match the following regex: r\"{self.REGEX_PATTERN.pattern}\"")
 
     def __init__(self, pypirc_file_path: str = "./.pypirc", verbose: bool = False) -> None:
         super().__init__(verbose)

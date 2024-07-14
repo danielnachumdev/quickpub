@@ -22,7 +22,19 @@ PRINT_QUEUE: list = []
 
 class TestRunners(unittest.TestCase):
     def setUp(self):
-        create_file(PYPIRC)
+        with open(PYPIRC, "w") as f:
+            f.write("""[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaa
+
+[testpypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaaa""")
         create_directory(PACAKGE)
         create_file(README)
         create_file(LICENSE)

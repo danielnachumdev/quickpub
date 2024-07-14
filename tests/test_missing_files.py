@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch, MagicMock
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators
 import requests
 
-from quickpub import publish
+from quickpub import publish, GithubUploadTarget, PypircUploadTarget, SetuptoolsBuildSchema
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"
@@ -20,7 +20,9 @@ def f() -> None:
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
         homepage="https://github.com/danielnachumdev/quickpub",
-        dependencies=["twine", "danielutils"]
+        dependencies=["danielutils"],
+        upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+        build_schemas=[SetuptoolsBuildSchema()],
     )
 
 
@@ -34,7 +36,19 @@ multipatch = chain_decorators(
 class TestMissingFiles(unittest.TestCase):
 
     def setUp(self):
-        create_file(PYPIRC)
+        with open(PYPIRC, "w") as f:
+            f.write("""[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaa
+
+[testpypi]
+    username = __token__
+    password = aaaaaaaaaaaaaaaaaaaaaa""")
         create_directory(PACAKGE)
         create_file(README)
         create_file(LICENSE)

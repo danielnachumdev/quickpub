@@ -86,7 +86,7 @@ def validate_dependencies(python_manager: PythonProvider, required_dependencies:
                         (req, "Verion format of dependecy is not currently supported by quickpub"))
                 elif isinstance(v, Dependency):
                     if not req.is_satisfied_by(v.ver):
-                        not_installed_properly.append((req, "rInvalid version installed"))
+                        not_installed_properly.append((req, "Invalid version installed"))
 
         exit_if(bool(not_installed_properly),
                 f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
