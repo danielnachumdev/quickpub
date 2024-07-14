@@ -165,7 +165,6 @@ def qa(
                             src_folder_path,
                             executor,
                             use_system_interpreter=is_system_interpreter,
-                            raise_on_fail=python_version_manager.exit_on_fail,
                             print_func=pool_err,
                             env_name=env_name
                         )
