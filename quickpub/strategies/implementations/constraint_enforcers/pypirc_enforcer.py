@@ -2,7 +2,7 @@ import re
 
 from danielutils import file_exists
 
-from ..constraint_enforcer import ConstraintEnforcer
+from ...constraint_enforcer import ConstraintEnforcer
 
 
 class PypircEnforcer(ConstraintEnforcer):

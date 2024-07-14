@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from ..quality_assurance_runner import QualityAssuranceRunner
+from ...quality_assurance_runner import QualityAssuranceRunner
 
 
 class MypyRunner(QualityAssuranceRunner):
@@ -27,16 +27,16 @@ class MypyRunner(QualityAssuranceRunner):
                                         executable_path=executable_path)
 
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
-        from ...enforcers import exit_if
+        from quickpub.enforcers import exit_if
         rating_line = lines[-1]
         if rating_line.startswith("Success"):
             return 0.0
         exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
                 f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
                 verbose=verbose)
-        num_failed = float(m.group(1))
-        active_files = float(m.group(2))
-        total_files = float(m.group(3))
+        num_failed = float(m.group(1))  # type :ignore
+        # active_files = float(m.group(2))  # type :ignore
+        # total_files = float(m.group(3))  # type :ignore
         return num_failed
 
 

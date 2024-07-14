@@ -25,7 +25,6 @@ def main() -> None:
         ],
         dependencies=["danielutils>=0.9.90"],
         min_python="3.8.0",
-        demo=True
     )
 
 

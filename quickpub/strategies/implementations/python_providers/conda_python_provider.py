@@ -1,7 +1,7 @@
 from typing import Tuple, Optional, Set, Iterator, List
 from danielutils import LayeredCommand, warning
 
-from ..python_provider import PythonProvider
+from ...python_provider import PythonProvider
 
 
 class CondaPythonProvider(PythonProvider):

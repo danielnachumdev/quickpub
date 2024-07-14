@@ -1,7 +1,7 @@
 from danielutils import directory_exists, get_files, get_python_version
 
 from quickpub import Version
-from ..constraint_enforcer import ConstraintEnforcer
+from ...constraint_enforcer import ConstraintEnforcer
 
 
 def _remove_suffix(s: str, suffix: str) -> str:
@@ -32,7 +32,7 @@ def _remove_prefix(s: str, prefix: str) -> str:
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
-    def enforce(self, name: str, version: Version, demo: bool, **kwargs) -> None:
+    def enforce(self, name: str, version: Version, demo: bool, **kwargs) -> None:  # type: ignore
         if demo:
             return
 

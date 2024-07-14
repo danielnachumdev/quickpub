@@ -1,10 +1,10 @@
 import re
-from typing import List, Union, Optional
+from typing import List, Union
 
 from danielutils import LayeredCommand
 
 from quickpub import Bound
-from ..quality_assurance_runner import QualityAssuranceRunner
+from ...quality_assurance_runner import QualityAssuranceRunner
 
 
 class PytestRunner(QualityAssuranceRunner):

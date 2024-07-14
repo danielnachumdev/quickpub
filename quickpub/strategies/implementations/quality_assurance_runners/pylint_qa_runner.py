@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from ..quality_assurance_runner import QualityAssuranceRunner
+from ...quality_assurance_runner import QualityAssuranceRunner
 
 
 class PylintRunner(QualityAssuranceRunner):
@@ -26,7 +26,7 @@ class PylintRunner(QualityAssuranceRunner):
         return command
 
     def _calculate_score(self, ret: int, lines: List[str], verbose: bool = False) -> float:
-        from ...enforcers import exit_if
+        from quickpub.enforcers import exit_if
         if len(lines) == 1 and lines[0].endswith("No module named pylint"):
             raise RuntimeError("No module named pylint found")
         index = -2

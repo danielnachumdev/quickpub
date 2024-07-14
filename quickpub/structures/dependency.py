@@ -5,15 +5,11 @@ from .bound import Bound
 
 
 class Dependency:
-    def __init__(self, name: str, operator: Literal["<", "<=", "==", ">", ">="], ver: Optional[Version] = None) -> None:
+    def __init__(self, name: str, operator: Literal["<", "<=", "==", ">", ">="] = ">=",
+                 ver: Version = Version(0, 0, 0)) -> None:
         self.name: str = name
         self.operator: Literal["<", "<=", "==", ">", ">="] = operator
-        self.ver: Version = ver
-        if operator and not ver or not operator and ver:
-            raise RuntimeError("Cannot create a 'Dependency' object with only one of parameters 'operator' and 'ver'")
-        if not operator and not ver:
-            self.operator = ">="
-            self.ver = Version(0, 0, 0)
+        self.ver: Version = ver or Version(0, 0, 0)
 
     @staticmethod
     def from_string(s: str) -> 'Dependency':
@@ -33,7 +29,7 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', operator='{self.operator}', version='{self.ver}')"
 
     def is_satisfied_by(self, ver: Version) -> bool:
-        return {
+        return {  # type :ignore
             "==": lambda v: v == self.ver,
             ">=": lambda v: v >= self.ver,
             "<=": lambda v: v <= self.ver,

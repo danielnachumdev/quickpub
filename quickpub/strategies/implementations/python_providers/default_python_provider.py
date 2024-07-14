@@ -3,7 +3,7 @@ from typing import Set, Tuple, Iterator
 
 from danielutils import LayeredCommand
 
-from ..python_provider import PythonProvider
+from ...python_provider import PythonProvider
 
 
 class DefaultInterpreterProvider(PythonProvider):

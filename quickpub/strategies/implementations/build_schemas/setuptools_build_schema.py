@@ -1,6 +1,6 @@
 from danielutils import info
 
-from ..build_schema import BuildSchema
+from ...build_schema import BuildSchema
 
 
 class SetuptoolsBuildSchema(BuildSchema):

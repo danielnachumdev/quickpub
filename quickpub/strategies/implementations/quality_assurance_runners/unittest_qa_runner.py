@@ -3,7 +3,7 @@ import os
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
-from ..quality_assurance_runner import QualityAssuranceRunner
+from ...quality_assurance_runner import QualityAssuranceRunner
 
 
 class UnittestRunner(QualityAssuranceRunner):

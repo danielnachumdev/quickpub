@@ -1,9 +1,9 @@
 from danielutils import info
 
-from ..upload_target import UploadTarget
+from ...upload_target import UploadTarget
 
 class GithubUploadTarget(UploadTarget):
-    def upload(self, version: str, **kwargs) -> None:
+    def upload(self, version: str, **kwargs) -> None: # type: ignore
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
         if self.verbose:
