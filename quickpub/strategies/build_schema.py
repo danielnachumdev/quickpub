@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Type
 
 from .quickpub_strategy import QuickpubStrategy
 

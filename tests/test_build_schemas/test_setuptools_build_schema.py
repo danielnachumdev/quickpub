@@ -1,0 +1,44 @@
+import os
+import unittest
+from danielutils import directory_exists, delete_directory, get_current_working_directory, get_files, delete_file, \
+    create_file, set_current_working_directory, create_directory, get_directories
+
+from quickpub import SetuptoolsBuildSchema
+
+TMP_SETUP_FILE_PATH: str = "./tmp_setup.py"
+TMP_TOML_FILE_PATH: str = "./tmp_pyproject.toml"
+EXPECTED_CONTENTS = """from setuptools import setup
+
+setup()
+"""
+
+
+class TestSetupToolsBuildSchema(unittest.TestCase):
+    def setUp(self):
+        self.test_folder = f"./{self.__class__.__name__}_test_folder"
+        create_directory(self.test_folder)
+        self.prev_cwd = get_current_working_directory()
+        set_current_working_directory(os.path.join(self.prev_cwd, self.test_folder))
+
+    def tearDown(self):
+        set_current_working_directory(self.prev_cwd)
+        delete_directory(self.test_folder)
+
+    def test_no_setup_file(self) -> None:
+        with self.assertRaises(SetuptoolsBuildSchema.EXCEPTION_TYPE):
+            SetuptoolsBuildSchema(TMP_SETUP_FILE_PATH).build()
+
+    def test_no_toml(self) -> None:
+        with open(TMP_SETUP_FILE_PATH, "w") as f:
+            f.write(EXPECTED_CONTENTS)
+        SetuptoolsBuildSchema(TMP_SETUP_FILE_PATH, "toml").build()
+        subdirs = get_directories(get_current_working_directory())
+        self.assertEqual(2, len(subdirs), "Expected only 2 subdirectories")
+        self.assertTrue(subdirs[0] == "dist", "dist folder does not exist")
+        self.assertTrue(subdirs[1].endswith(".egg-info"), f"folder that ends with '.egg-info' does not exist ")
+
+    def test_toml_backend(self) -> None:
+        with open(TMP_SETUP_FILE_PATH, "w") as f:
+            f.write(EXPECTED_CONTENTS)
+        create_file(TMP_TOML_FILE_PATH)
+        SetuptoolsBuildSchema(TMP_SETUP_FILE_PATH, "toml").build()
