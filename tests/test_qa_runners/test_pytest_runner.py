@@ -5,7 +5,6 @@ from danielutils import create_directory, delete_directory, create_file
 from quickpub import DefaultInterpreterProvider, PytestRunner
 from utils import AutoCWDTestCase
 
-TESTS_FOLDER_NAME: str = "./tmp_pytest_tests_folder"
 
 
 class TestPytestRunner(AutoCWDTestCase):
@@ -14,22 +13,18 @@ class TestPytestRunner(AutoCWDTestCase):
         cls.env_name, cls.base = next(iter(DefaultInterpreterProvider()))  # type: ignore
 
     def setUp(self):
-        create_directory(TESTS_FOLDER_NAME)
-        create_file(os.path.join(TESTS_FOLDER_NAME, "__init__.py"))
-
-    def tearDown(self):
-        delete_directory(TESTS_FOLDER_NAME)
+        create_file("./__init__.py")
 
     def test_default_no_tests(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
-            target=TESTS_FOLDER_NAME
+            target="./"
         )
         with self.assertRaises(SystemExit):
             with self.base:  # type: ignore
                 runner.run(
-                    target=TESTS_FOLDER_NAME,
+                    target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
@@ -39,16 +34,16 @@ class TestPytestRunner(AutoCWDTestCase):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
-            target=TESTS_FOLDER_NAME
+            target="./"
         )
-        with open(os.path.join(TESTS_FOLDER_NAME, "test_foo.py"), "w") as f:
+        with open(os.path.join("./", "test_foo.py"), "w") as f:
             f.write("""
 import pytest
             """)
         with self.assertRaises(SystemExit):
             with self.base:  # type: ignore
                 runner.run(
-                    target=TESTS_FOLDER_NAME,
+                    target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore

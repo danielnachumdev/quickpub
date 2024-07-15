@@ -20,22 +20,13 @@ class TestPypircEnforcer(AutoCWDTestCase):
         exp = None
         with open(TMP_PYPIRC_PATH, "w") as f:
             f.write("asjbdalkjgn;asljkgn agn a;ljsgn weg na;kjb")
-        try:
-            PypircEnforcer(TMP_PYPIRC_PATH, False).enforce()
-        except Exception as e:
-            exp = e
-        delete_file(TMP_PYPIRC_PATH)
-        if exp:
-            raise exp
+        PypircEnforcer(TMP_PYPIRC_PATH, False).enforce()
 
     def test_file_exists_and_check_format_should_fail(self) -> None:
         with open(TMP_PYPIRC_PATH, "w") as f:
             f.write("asjbdalkjgn;asljkgn agn a;ljsgn weg na;kjb")
-        try:
-            with self.assertRaises(PypircEnforcer.EXCEPTION_TYPE):
-                PypircEnforcer(TMP_PYPIRC_PATH).enforce()
-        finally:
-            delete_file(TMP_PYPIRC_PATH)
+        with self.assertRaises(PypircEnforcer.EXCEPTION_TYPE):
+            PypircEnforcer(TMP_PYPIRC_PATH).enforce()
 
     def test_file_exists_and_check_format_should_pass(self) -> None:
         with open(TMP_PYPIRC_PATH, "w") as f:
@@ -52,7 +43,4 @@ index-servers =
     username = __token__
     password = aaaaaaaaaaaaaaaaa
 """)
-        try:
-            PypircEnforcer(TMP_PYPIRC_PATH).enforce()
-        finally:
-            delete_file(TMP_PYPIRC_PATH)
+        PypircEnforcer(TMP_PYPIRC_PATH).enforce()
