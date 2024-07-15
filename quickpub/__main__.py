@@ -61,17 +61,17 @@ def publish(
      Returns:
          None
      """
-    for enforcer in enforcers or []:
-        enforcer.enforce(name=name, version=version, demo=demo)
-
+    version = validate_version(version)
     explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
     if explicit_src_folder_path != f"./{name}":
         warning(
             "The source folder's name is different from the package's name. this may not be currently supported correctly")
-    version = validate_version(version)
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
+
+    for enforcer in enforcers or []:
+        enforcer.enforce(name=name, version=version, demo=demo)
 
     try:
         res = qa(

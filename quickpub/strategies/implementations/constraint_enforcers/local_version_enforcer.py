@@ -32,19 +32,25 @@ def _remove_prefix(s: str, prefix: str) -> str:
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
-    def enforce(self, name: str, version: Version, demo: bool, **kwargs) -> None:  # type: ignore
+    def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
         if demo:
             return
 
-        if directory_exists("./dist"):
-            max_version = Version(0, 0, 0)
-            for d in get_files("./dist"):
-                d = _remove_suffix(_remove_prefix(d, f"{name}-"), ".tar.gz")
-                v: Version = Version.from_str(d)
-                max_version = max(max_version, v)
-            if not version <= max_version:
-                raise self.EXCEPTION_TYPE(
-                    f"Specified version is '{version}' but (locally available) latest existing is '{max_version}'")
+        if not directory_exists("./dist"):
+            return
+
+        prev_builds = get_files("./dist")
+        if len(prev_builds) == 0:
+            return
+
+        max_local_version = Version(0, 0, 0)
+        for d in prev_builds:
+            d = _remove_suffix(_remove_prefix(d, f"{name}-"), ".tar.gz")
+            v: Version = Version.from_str(d)
+            max_local_version = max(max_local_version, v)
+        if version <= max_local_version:
+            raise self.EXCEPTION_TYPE(
+                f"Specified version is '{version}' but (locally available) latest existing is '{max_local_version}'")
 
 
 __all__ = [
