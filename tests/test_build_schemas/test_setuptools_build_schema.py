@@ -1,10 +1,5 @@
-import os
-import unittest
-from danielutils import directory_exists, delete_directory, get_current_working_directory, get_files, delete_file, \
-    create_file, set_current_working_directory, create_directory, get_directories
-
+from danielutils import get_current_working_directory, create_file, get_directories, AutoCWDTestCase
 from quickpub import SetuptoolsBuildSchema
-from danielutils import AutoCWDTestCase
 
 TMP_SETUP_FILE_PATH: str = "./tmp_setup.py"
 TMP_TOML_FILE_PATH: str = "./tmp_pyproject.toml"
@@ -26,7 +21,7 @@ class TestSetupToolsBuildSchema(AutoCWDTestCase):
         subdirs = get_directories(get_current_working_directory())
         self.assertEqual(2, len(subdirs), "Expected only 2 subdirectories")
         self.assertTrue(subdirs[0] == "dist", "dist folder does not exist")
-        self.assertTrue(subdirs[1].endswith(".egg-info"), f"folder that ends with '.egg-info' does not exist ")
+        self.assertTrue(subdirs[1].endswith(".egg-info"), "folder that ends with '.egg-info' does not exist ")
 
     def test_toml_backend(self) -> None:
         with open(TMP_SETUP_FILE_PATH, "w") as f:
