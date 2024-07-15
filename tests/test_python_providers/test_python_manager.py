@@ -7,6 +7,7 @@ import requests
 
 from quickpub import publish, CondaPythonProvider, GithubUploadTarget, PypircUploadTarget, \
     SetuptoolsBuildSchema, QualityAssuranceRunner
+from utils import AutoCWDTestCase
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"
@@ -50,7 +51,7 @@ class MockRunner(QualityAssuranceRunner):
         return 0
 
 
-class TestPythonManager(unittest.TestCase):
+class TestPythonManager(AutoCWDTestCase):
     def setUp(self):
         with open(PYPIRC, "w") as f:
             f.write("""[distutils]

@@ -4,6 +4,7 @@ from danielutils import directory_exists, delete_directory, get_current_working_
     create_file, set_current_working_directory, create_directory, get_directories
 
 from quickpub import SetuptoolsBuildSchema
+from utils import AutoCWDTestCase
 
 TMP_SETUP_FILE_PATH: str = "./tmp_setup.py"
 TMP_TOML_FILE_PATH: str = "./tmp_pyproject.toml"
@@ -13,17 +14,7 @@ setup()
 """
 
 
-class TestSetupToolsBuildSchema(unittest.TestCase):
-    def setUp(self):
-        self.test_folder = f"./{self.__class__.__name__}_test_folder"
-        create_directory(self.test_folder)
-        self.prev_cwd = get_current_working_directory()
-        set_current_working_directory(os.path.join(self.prev_cwd, self.test_folder))
-
-    def tearDown(self):
-        set_current_working_directory(self.prev_cwd)
-        delete_directory(self.test_folder)
-
+class TestSetupToolsBuildSchema(AutoCWDTestCase):
     def test_no_setup_file(self) -> None:
         with self.assertRaises(SetuptoolsBuildSchema.EXCEPTION_TYPE):
             SetuptoolsBuildSchema(TMP_SETUP_FILE_PATH).build()

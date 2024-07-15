@@ -3,11 +3,12 @@ import unittest
 from danielutils import create_file, delete_file
 
 from quickpub import LicenseEnforcer
+from utils import AutoCWDTestCase
 
 TMP_LICENSE_PATH: str = "./TMP_LICENSE"
 
 
-class TestLicenseEnforcer(unittest.TestCase):
+class TestLicenseEnforcer(AutoCWDTestCase):
     def test_license_exists_should_not_fail(self) -> None:
         exp = None
         create_file(TMP_LICENSE_PATH)

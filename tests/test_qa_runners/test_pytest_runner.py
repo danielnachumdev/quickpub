@@ -3,11 +3,12 @@ import unittest
 from danielutils import create_directory, delete_directory, create_file
 
 from quickpub import DefaultInterpreterProvider, PytestRunner
+from utils import AutoCWDTestCase
 
 TESTS_FOLDER_NAME: str = "./tmp_pytest_tests_folder"
 
 
-class TestPytestRunner(unittest.TestCase):
+class TestPytestRunner(AutoCWDTestCase):
     @classmethod
     def setUpClass(cls):
         cls.env_name, cls.base = next(iter(DefaultInterpreterProvider()))  # type: ignore

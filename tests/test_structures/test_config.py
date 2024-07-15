@@ -5,6 +5,8 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
     get_caller, get_caller_file_name
 
+from utils import AutoCWDTestCase
+
 multipatch = chain_decorators(
     # patch("quickpub.proxy.get", return_value=requests.Response()),
     patch("quickpub.proxy.cm", return_value=(0, b"", b"")),
@@ -19,7 +21,7 @@ MANIFEST = "./MANIFEST.in"
 PRINT_QUEUE: list = []
 
 
-class TestConfig(unittest.TestCase):
+class TestConfig(AutoCWDTestCase):
     def setUp(self):
         with open(PYPIRC, "w") as f:
             f.write("""[distutils]

@@ -3,11 +3,12 @@ import unittest
 from danielutils import create_file, delete_file
 
 from quickpub import ReadmeEnforcer
+from utils import AutoCWDTestCase
 
 TMP_README_PATH: str = "./TMP_README.md"
 
 
-class TestReadmeEnforcer(unittest.TestCase):
+class TestReadmeEnforcer(AutoCWDTestCase):
     def test_readme_exists_should_not_fail(self) -> None:
         exp = None
         create_file(TMP_README_PATH)

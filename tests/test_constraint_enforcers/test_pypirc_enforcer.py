@@ -3,11 +3,12 @@ import unittest
 from danielutils import create_file, delete_file
 
 from quickpub import PypircEnforcer
+from utils import AutoCWDTestCase
 
 TMP_PYPIRC_PATH: str = "./.TMP_PYPIRC"
 
 
-class TestPypircEnforcer(unittest.TestCase):
+class TestPypircEnforcer(AutoCWDTestCase):
     def test_no_file_should_fail(self) -> None:
         with self.assertRaises(PypircEnforcer.EXCEPTION_TYPE):
             PypircEnforcer(TMP_PYPIRC_PATH).enforce()
