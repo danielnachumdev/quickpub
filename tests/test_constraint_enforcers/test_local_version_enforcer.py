@@ -1,6 +1,4 @@
-import unittest
-
-from utils import improved_setup, improved_teardown, AutoCWDTestCase
+from utils import AutoCWDTestCase
 
 
 class TestLocalVersionEnforcer(AutoCWDTestCase):

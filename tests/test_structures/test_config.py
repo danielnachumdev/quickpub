@@ -1,4 +1,4 @@
-import unittest, sys
+import sys
 from unittest.mock import patch
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
     PypircUploadTarget, GithubUploadTarget, SetuptoolsBuildSchema

@@ -1,6 +1,5 @@
 import os
-import unittest
-from danielutils import create_directory, delete_directory, create_file
+from danielutils import create_file
 
 from quickpub import DefaultInterpreterProvider, PytestRunner
 from utils import AutoCWDTestCase

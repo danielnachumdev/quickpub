@@ -1,6 +1,5 @@
 import requests
 import sys
-import unittest
 from unittest.mock import patch
 from quickpub import publish, MypyRunner, SetuptoolsBuildSchema, GithubUploadTarget, PypircUploadTarget
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \

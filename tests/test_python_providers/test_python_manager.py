@@ -1,4 +1,4 @@
-import unittest, sys
+import sys
 from typing import List
 from unittest.mock import patch
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \

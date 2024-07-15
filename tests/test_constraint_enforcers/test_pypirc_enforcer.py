@@ -1,7 +1,3 @@
-import unittest
-
-from danielutils import create_file, delete_file
-
 from quickpub import PypircEnforcer
 from utils import AutoCWDTestCase
 

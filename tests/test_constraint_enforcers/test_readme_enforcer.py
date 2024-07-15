@@ -1,6 +1,4 @@
-import unittest
-
-from danielutils import create_file, delete_file
+from danielutils import create_file
 
 from quickpub import ReadmeEnforcer
 from utils import AutoCWDTestCase
