@@ -9,7 +9,6 @@ from .validators import validate_version, validate_python_version, validate_keyw
 from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
-from .enforcers import exit_if
 from .qa import qa
 
 
@@ -74,12 +73,10 @@ def publish(
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
 
-    if quality_assurance_runners is None:
-        quality_assurance_runners = []
     try:
         res = qa(
             python_interpreter_provider,
-            quality_assurance_runners,
+            quality_assurance_runners or [],
             name,
             explicit_src_folder_path,
             validated_dependencies
