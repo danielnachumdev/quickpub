@@ -1,9 +1,7 @@
 import os
-from danielutils import create_file
+from danielutils import create_file, AutoCWDTestCase
 
 from quickpub import DefaultInterpreterProvider, PytestRunner
-from utils import AutoCWDTestCase
-
 
 
 class TestPytestRunner(AutoCWDTestCase):

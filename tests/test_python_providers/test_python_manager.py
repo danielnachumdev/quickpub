@@ -2,12 +2,11 @@ import sys
 from typing import List
 from unittest.mock import patch
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
-    get_caller_file_name, LayeredCommand
+    get_caller_file_name, LayeredCommand,AutoCWDTestCase
 import requests
 
 from quickpub import publish, CondaPythonProvider, GithubUploadTarget, PypircUploadTarget, \
     SetuptoolsBuildSchema, QualityAssuranceRunner
-from utils import AutoCWDTestCase
 
 PYPIRC = "./.pypirc"
 PACAKGE = "pacakge"

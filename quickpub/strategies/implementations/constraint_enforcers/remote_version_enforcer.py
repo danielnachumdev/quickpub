@@ -3,7 +3,6 @@ import requests
 from quickpub import Version
 from ...constraint_enforcer import ConstraintEnforcer
 
-
 class RemoteVersionEnforcer(ConstraintEnforcer):
     def enforce(self, name: str, version: str, demo: bool, **kwargs) -> None:  # type: ignore
         if demo:

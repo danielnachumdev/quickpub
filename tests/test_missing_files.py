@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch, MagicMock
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators
 import requests
 

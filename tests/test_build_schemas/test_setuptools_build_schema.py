@@ -4,7 +4,7 @@ from danielutils import directory_exists, delete_directory, get_current_working_
     create_file, set_current_working_directory, create_directory, get_directories
 
 from quickpub import SetuptoolsBuildSchema
-from utils import AutoCWDTestCase
+from danielutils import AutoCWDTestCase
 
 TMP_SETUP_FILE_PATH: str = "./tmp_setup.py"
 TMP_TOML_FILE_PATH: str = "./tmp_pyproject.toml"

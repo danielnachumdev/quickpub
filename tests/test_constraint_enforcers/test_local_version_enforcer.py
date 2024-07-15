@@ -1,7 +1,5 @@
-from danielutils import create_directory, create_file
-
+from danielutils import create_directory, create_file, AutoCWDTestCase
 from quickpub import LocalVersionEnforcer, Version
-from utils import AutoCWDTestCase
 
 PACKAGE_NAME: str = "foo"
 LOWEST_VERSION: Version = Version.from_str("0.0.0")

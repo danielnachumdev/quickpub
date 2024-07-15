@@ -3,9 +3,7 @@ from unittest.mock import patch
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
     PypircUploadTarget, GithubUploadTarget, SetuptoolsBuildSchema
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
-    get_caller, get_caller_file_name
-
-from utils import AutoCWDTestCase
+    get_caller, get_caller_file_name, AutoCWDTestCase
 
 multipatch = chain_decorators(
     # patch("quickpub.proxy.get", return_value=requests.Response()),

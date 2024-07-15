@@ -1,8 +1,5 @@
-
-from danielutils import create_file
-
+from danielutils import create_file, AutoCWDTestCase
 from quickpub import LicenseEnforcer
-from utils import AutoCWDTestCase
 
 TMP_LICENSE_PATH: str = "./TMP_LICENSE"
 

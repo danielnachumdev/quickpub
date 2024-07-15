@@ -1,7 +1,5 @@
-from danielutils import create_file
-
+from danielutils import create_file, AutoCWDTestCase
 from quickpub import ReadmeEnforcer
-from utils import AutoCWDTestCase
 
 TMP_README_PATH: str = "./TMP_README.md"
 
