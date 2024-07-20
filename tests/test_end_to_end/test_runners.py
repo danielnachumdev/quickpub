@@ -3,7 +3,7 @@ import sys
 from unittest.mock import patch
 from quickpub import publish, MypyRunner, SetuptoolsBuildSchema, GithubUploadTarget, PypircUploadTarget
 from danielutils import create_file, delete_file, create_directory, delete_directory, chain_decorators, \
-    get_caller_file_name,AutoCWDTestCase
+    get_caller_file_name, AutoCWDTestCase
 
 multipatch = chain_decorators(
     patch("quickpub.proxy.get", return_value=requests.Response()),
@@ -95,7 +95,10 @@ index-servers =
 
     @staticmethod
     def _new_print(*args, sep: str = " ", end: str = "\n", file=sys.stdout, flush: bool = False) -> None:
-        caller_file = get_caller_file_name().split("\\")[-1]
+        path = get_caller_file_name()
+        if path is None:
+            return
+        caller_file = path.split("\\")[-1]
         if caller_file != "colors.py":
             file.write(sep.join(args) + end)
             if flush:
@@ -133,7 +136,7 @@ index-servers =
             while cur.__cause__ is not None:
                 cur = cur.__cause__
             self.assertEqual(type(cur), SystemExit,
-                             "A SystemExit is supposed to be raised as when using the SystemInterpreter we"
-                             " have raise_oin_fail=True and a bound check on the result of mypy has failed.")
+                             "A SystemExit is supposed to be raised, as when using the SystemInterpreter we"
+                             " have raise_on_fail=True and a bound check on the result of mypy has failed.")
         self.assertListEqual([('\x1b[38;2;255;0;0mERROR\x1b[0m: ',), ("mypy failed to pass it's defined bound",)],
                              PRINT_QUEUE)

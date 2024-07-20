@@ -13,7 +13,7 @@ def os_system(command) -> int:
     return os.system(command)
 
 
-def get(*args, **kwargs):
+def get(*args, **kwargs) -> requests.models.Response:
     return requests.get(*args, **kwargs)
 
 
