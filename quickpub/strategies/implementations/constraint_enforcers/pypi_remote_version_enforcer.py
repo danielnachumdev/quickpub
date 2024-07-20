@@ -6,7 +6,7 @@ from quickpub import Version
 from ...constraint_enforcer import ConstraintEnforcer
 
 
-class RemoteVersionEnforcer(ConstraintEnforcer):
+class PypiRemoteVersionEnforcer(ConstraintEnforcer):
     _HTTP_FAILED_MESSAGE: str = "Failed to send http request"
 
     def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
@@ -35,5 +35,5 @@ class RemoteVersionEnforcer(ConstraintEnforcer):
 
 
 __all__ = [
-    'RemoteVersionEnforcer'
+    'PypiRemoteVersionEnforcer'
 ]

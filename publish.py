@@ -1,6 +1,6 @@
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
     PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer, \
-    RemoteVersionEnforcer, LocalVersionEnforcer
+    PypiRemoteVersionEnforcer, LocalVersionEnforcer
 
 
 def main() -> None:
@@ -13,7 +13,7 @@ def main() -> None:
         homepage="https://github.com/danielnachumdev/quickpub",
         enforcers=[
             PypircEnforcer(), ReadmeEnforcer(), LicenseEnforcer(),
-            LocalVersionEnforcer(), RemoteVersionEnforcer()
+            LocalVersionEnforcer(), PypiRemoteVersionEnforcer()
         ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
