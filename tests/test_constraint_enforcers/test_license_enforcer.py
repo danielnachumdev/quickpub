@@ -6,7 +6,6 @@ TMP_LICENSE_PATH: str = "./TMP_LICENSE"
 
 class TestLicenseEnforcer(AutoCWDTestCase):
     def test_license_exists_should_not_fail(self) -> None:
-        exp = None
         create_file(TMP_LICENSE_PATH)
         LicenseEnforcer(TMP_LICENSE_PATH).enforce()
 
