@@ -1,7 +1,8 @@
 twine
-danielutils>=0.9.90
+danielutils>=0.9.92
 pylint
 mypy
 types-requests
 requests
 beautifulsoup4
+setuptools
