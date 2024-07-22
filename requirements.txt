@@ -5,3 +5,4 @@ mypy
 types-requests
 requests
 beautifulsoup4
+setuptools
