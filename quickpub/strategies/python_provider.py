@@ -16,8 +16,18 @@ class PythonProvider(QuickpubStrategy):
     @abstractmethod
     def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]: ...
 
+    @classmethod
+    def get_available_envs(cls) -> Set[str]:
+        KEY = "__available_envs__"
+        if (res := getattr(cls, KEY, None)) is not None:
+            return res
+
+        setattr(cls, KEY, res := cls._get_available_envs_impl())
+        return res
+
+    @classmethod
     @abstractmethod
-    def get_available_envs(self) -> Set[str]: ...
+    def _get_available_envs_impl(cls) -> Set[str]: ...
 
     def __len__(self) -> int:
         return len(self.requested_envs)

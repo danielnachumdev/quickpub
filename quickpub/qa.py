@@ -122,18 +122,16 @@ def create_pool_print_error(pool: ProgressBarPool):
 
 
 def qa(
-        python_version_manager: PythonProvider,
+        python_provider: PythonProvider,
         quality_assurance_strategies: List[QualityAssuranceRunner],
         package_name: str,
-        src_folder_path: Optional[str],
+        src_folder_path: str,
         dependencies: list
 ) -> bool:
     from .strategies import DefaultInterpreterProvider
     result = True
-    if python_version_manager is None:
-        python_version_manager = DefaultInterpreterProvider()
-    is_system_interpreter = isinstance(python_version_manager, DefaultInterpreterProvider)
-    pool = create_progress_bar_pool(python_version_manager, quality_assurance_strategies)
+    is_system_interpreter = isinstance(python_provider, DefaultInterpreterProvider)
+    pool = create_progress_bar_pool(python_provider, quality_assurance_strategies)
     pool_err = create_pool_print_error(pool)
     with MultiContext(
             AttrContext(LayeredCommand, 'class_flush_stdout', False),
@@ -147,7 +145,7 @@ def qa(
             with executor:
                 executor._prev_instance = base
                 try:
-                    validate_dependencies(python_version_manager, dependencies, executor, env_name, pool_err)
+                    validate_dependencies(python_provider, dependencies, executor, env_name, pool_err)
                 except SystemExit:
                     result = False
                     continue
@@ -177,7 +175,7 @@ def qa(
                             f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. "
                             f"Try manually: '{manual_command}'.")
                         pool.write(f"\tCaused by '{e.__cause__ or e}'")
-                        if python_version_manager.exit_on_fail:
+                        if python_provider.exit_on_fail:
                             raise RuntimeError() from e
     return result
 

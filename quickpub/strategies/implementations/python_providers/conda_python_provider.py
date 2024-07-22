@@ -12,16 +12,11 @@ class CondaPythonProvider(PythonProvider):
         PythonProvider.__init__(self, requested_envs=env_names, explicit_versions=[], exit_on_fail=True)
         self._cached_available_envs: Optional[Set[str]] = None
 
-    def get_available_envs(self) -> Set[str]:
-        if self._cached_available_envs is not None:
-            return self._cached_available_envs
-
+    @classmethod
+    def _get_available_envs_impl(cls) -> Set[str]:
         with LayeredCommand(instance_flush_stdout=False, instance_flush_stderr=False) as base:
             code, out, err = base("conda env list")
-        res = set([line.split(' ')[0] for line in out[2:] if len(line.split(' ')) > 1])
-
-        self._cached_available_envs = res
-        return res
+        return set([line.split(' ')[0] for line in out[2:] if len(line.split(' ')) > 1])
 
     def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]:
         available_envs = self.get_available_envs()

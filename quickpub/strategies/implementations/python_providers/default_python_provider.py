@@ -16,7 +16,8 @@ class DefaultInterpreterProvider(PythonProvider):
     def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]:
         return iter([("system", LayeredCommand(""))])
 
-    def get_available_envs(self) -> Set[str]:
+    @classmethod
+    def _get_available_envs_impl(cls) -> Set[str]:
         return set("system")
 
 
