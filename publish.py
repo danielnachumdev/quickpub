@@ -23,7 +23,7 @@ def main() -> None:
             PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
             UnittestRunner(bound=">=0.8"),
         ],
-        dependencies=["danielutils>=0.9.91", "requests"],
+        dependencies=["danielutils>=0.9.92", "requests"],
         min_python="3.8.0",
         demo=True
     )
