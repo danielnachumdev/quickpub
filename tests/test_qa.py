@@ -10,24 +10,23 @@ from quickpub import publish, CondaPythonProvider, GithubUploadTarget, PypircUpl
     SetuptoolsBuildSchema, QualityAssuranceRunner
 from quickpub.qa import qa
 
+PACKAGE_NAME: str = "foo"
+
+PRINT_QUEUE: List[str] = []
+
 
 class MockRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
 
     def __init__(self) -> None:
-        QualityAssuranceRunner.__init__(self, name="MockRunner", bound="<10", target=PACAKGE)
+        QualityAssuranceRunner.__init__(self, name="MockRunner", bound="<10", target=PACKAGE_NAME)
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         return "echo $(python --version)"
 
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         return 0
-
-
-PACKAGE_NAME: str = "foo"
-
-PRINT_QUEUE: List[str] = []
 
 
 class TestCondaPythonProvider(AutoCWDTestCase):
