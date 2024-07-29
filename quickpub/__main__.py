@@ -3,7 +3,7 @@ from typing import Optional, Union, List, Any
 from danielutils import warning, file_exists, error
 
 from .strategies import BuildSchema, ConstraintEnforcer, UploadTarget, QualityAssuranceRunner, PythonProvider, \
-    DefaultInterpreterProvider
+    DefaultPythonProvider
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
     validate_source
 from .structures import Version, Dependency
@@ -24,7 +24,7 @@ def publish(
         upload_targets: List[UploadTarget],
         enforcers: Optional[List[ConstraintEnforcer]] = None,
         quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
-        python_interpreter_provider: PythonProvider = DefaultInterpreterProvider(),
+        python_interpreter_provider: PythonProvider = DefaultPythonProvider(),
 
         readme_file_path: str = "./README.md",
         license_file_path: str = "./LICENSE",

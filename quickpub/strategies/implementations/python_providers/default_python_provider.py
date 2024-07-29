@@ -6,7 +6,7 @@ from danielutils import LayeredCommand
 from ...python_provider import PythonProvider
 
 
-class DefaultInterpreterProvider(PythonProvider):
+class DefaultPythonProvider(PythonProvider):
     def get_python_executable_name(self) -> str:
         return sys.executable
 
@@ -22,5 +22,5 @@ class DefaultInterpreterProvider(PythonProvider):
 
 
 __all__ = [
-    "DefaultInterpreterProvider",
+    "DefaultPythonProvider",
 ]

@@ -1,13 +1,13 @@
 import os
 from danielutils import create_file, AutoCWDTestCase
 
-from quickpub import DefaultInterpreterProvider, PytestRunner
+from quickpub import DefaultPythonProvider, PytestRunner
 
 
 class TestPytestRunner(AutoCWDTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.env_name, cls.base = next(iter(DefaultInterpreterProvider()))  # type: ignore
+        cls.env_name, cls.base = next(iter(DefaultPythonProvider()))  # type: ignore
 
     def setUp(self):
         create_file("./__init__.py")

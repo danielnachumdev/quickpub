@@ -128,9 +128,9 @@ def qa(
         src_folder_path: str,
         dependencies: list
 ) -> bool:
-    from .strategies import DefaultInterpreterProvider
+    from .strategies import DefaultPythonProvider
     result = True
-    is_system_interpreter = isinstance(python_provider, DefaultInterpreterProvider)
+    is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
     pool = create_progress_bar_pool(python_provider, quality_assurance_strategies)
     pool_err = create_pool_print_error(pool)
     with MultiContext(
