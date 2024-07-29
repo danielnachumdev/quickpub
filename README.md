@@ -4,7 +4,8 @@
 Example usage of how this package was published
 ```python
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
-    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget
+    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer, \
+    PypiRemoteVersionEnforcer, LocalVersionEnforcer
 
 
 def main() -> None:
@@ -15,6 +16,10 @@ def main() -> None:
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
         homepage="https://github.com/danielnachumdev/quickpub",
+        enforcers=[
+            PypircEnforcer(), ReadmeEnforcer(), LicenseEnforcer(),
+            LocalVersionEnforcer(), PypiRemoteVersionEnforcer()
+        ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
         python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
@@ -23,13 +28,12 @@ def main() -> None:
             PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
             UnittestRunner(bound=">=0.8"),
         ],
-        dependencies=["danielutils>=0.9.90"],
+        dependencies=["danielutils>=0.9.92", "requests"],
         min_python="3.8.0",
+        demo=True
     )
 
 
 if __name__ == '__main__':
     main()
-
-
 ```
