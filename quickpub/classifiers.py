@@ -3,6 +3,10 @@ from enum import Enum
 
 
 class Classifier(Enum):
+    """
+    A base enum class for all classifiers.
+    """
+
     def _str(self) -> str:
         return str(self.value)
 
@@ -36,6 +40,9 @@ class Classifier(Enum):
 
 
 class DevelopmentStatusClassifier(Classifier):
+    """
+    An enum class for specifying the development state of the package
+    """
     # https://pypi.org/classifiers/
     Planning = 1
     PreAlpha = 2
@@ -51,15 +58,24 @@ class DevelopmentStatusClassifier(Classifier):
 
 
 class IntendedAudienceClassifier(Classifier):
+    """
+    An enum class for specifying the intended audience
+    """
     CustomerService = "CustomerService"
     Developers = "Developers"
 
 
 class ProgrammingLanguageClassifier(Classifier):
+    """
+    An enum class for specifying the target language level
+    """
     Python3 = "Python :: 3"
 
 
 class OperatingSystemClassifier(Classifier):
+    """
+    An enum class for specifying the target operating system
+    """
     MicrosoftWindows = "Microsoft :: Windows"
 
 
