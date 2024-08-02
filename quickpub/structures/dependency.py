@@ -1,10 +1,10 @@
-from typing import Literal, Callable
+from typing import Literal, Callable, Dict
 
 from .version import Version
 
 
 class Dependency:
-    def _build_func_map(self) -> dict[str, Callable[[Version], bool]]:
+    def _build_func_map(self) -> Dict[str, Callable[[Version], bool]]:
         return {
             "==": lambda v: v == self.ver,
             ">=": lambda v: v >= self.ver,
