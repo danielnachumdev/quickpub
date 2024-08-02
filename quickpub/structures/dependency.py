@@ -1,10 +1,18 @@
-from typing import Literal, Optional
+from typing import Literal, Callable
 
 from .version import Version
-from .bound import Bound
 
 
 class Dependency:
+    def _build_func_map(self) -> dict[str, Callable[[Version], bool]]:
+        return {
+            "==": lambda v: v == self.ver,
+            ">=": lambda v: v >= self.ver,
+            "<=": lambda v: v <= self.ver,
+            ">": lambda v: v > self.ver,
+            "<": lambda v: v < self.ver,
+        }
+
     def __init__(self, name: str, operator: Literal["<", "<=", "==", ">", ">="] = ">=",
                  ver: Version = Version(0, 0, 0)) -> None:
         self.name: str = name
@@ -29,13 +37,7 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', operator='{self.operator}', version='{self.ver}')"
 
     def is_satisfied_by(self, ver: Version) -> bool:
-        return {  # type :ignore
-            "==": lambda v: v == self.ver,
-            ">=": lambda v: v >= self.ver,
-            "<=": lambda v: v <= self.ver,
-            ">": lambda v: v > self.ver,
-            "<": lambda v: v < self.ver,
-        }[self.operator](ver)
+        return self._build_func_map()[self.operator](ver)
 
 
 __all__ = [

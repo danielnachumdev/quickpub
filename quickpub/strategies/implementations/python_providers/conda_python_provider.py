@@ -24,7 +24,8 @@ class CondaPythonProvider(PythonProvider):
             if name not in available_envs:
                 warning(f"Couldn't find env '{name}'")
                 continue
-            yield name, LayeredCommand(f"conda activate {name}")
+            yield name, LayeredCommand(f"conda activate {name}", instance_flush_stdout=False,
+                                       instance_flush_stderr=False)
 
 
 __all__ = [

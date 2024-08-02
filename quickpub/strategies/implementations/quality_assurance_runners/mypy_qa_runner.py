@@ -7,9 +7,13 @@ from ...quality_assurance_runner import QualityAssuranceRunner
 
 
 class MypyRunner(QualityAssuranceRunner):
+    NO_TESTS_PATTERN: re.Pattern = re.compile(r"There are no \.py\[i\] files in directory '[\w\.\\\/]+'")
+    RATING_PATTERN: re.Pattern = re.compile(
+        r"Found (\d+(?:\.\d+)?) errors? in (\d+(?:\.\d+)?) files? \(checked (\d+(?:\.\d+)?) source files?\)")
+
     def _install_dependencies(self, base: LayeredCommand) -> None:
         with base:
-            base("pip install pylint")
+            base("pip install mypy")
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable(use_system_interpreter)
@@ -17,9 +21,6 @@ class MypyRunner(QualityAssuranceRunner):
             command += f" --config-file {self.config_path}"
         command += f" {target}"
         return command
-
-    RATING_PATTERN: re.Pattern = re.compile(
-        "Found (\d+(?:\.\d+)?) errors in (\d+(?:\.\d+)?) files \(checked (\d+(?:\.\d+)?) source files\)")
 
     def __init__(self, bound: str = "<15", configuration_path: Optional[str] = None,
                  executable_path: Optional[str] = None) -> None:
@@ -29,8 +30,15 @@ class MypyRunner(QualityAssuranceRunner):
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
         rating_line = lines[-1]
+        if self.NO_TESTS_PATTERN.match(rating_line):
+            return 0.0
+
+        if rating_line.endswith("No module named mypy"):
+            raise SystemExit("Mypy is not installed.")
+
         if rating_line.startswith("Success"):
             return 0.0
+
         exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
                 f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
                 verbose=verbose)
