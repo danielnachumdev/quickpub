@@ -66,7 +66,7 @@ index-servers =
                 dependencies=["twine", "danielutils"],
                 upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
                 build_schemas=[SetuptoolsBuildSchema()],
-                quality_assurance_runners=[MypyRunner()]
+                global_quality_assurance_runners=[MypyRunner()]
             )
 
     @multipatch
@@ -90,7 +90,7 @@ index-servers =
             dependencies=["twine", "danielutils"],
             upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
             build_schemas=[SetuptoolsBuildSchema()],
-            quality_assurance_runners=[MypyRunner(bound="<=50")]
+            global_quality_assurance_runners=[MypyRunner(bound="<=50")]
         )
 
     @staticmethod
@@ -129,7 +129,7 @@ index-servers =
                 dependencies=["twine", "danielutils"],
                 upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
                 build_schemas=[SetuptoolsBuildSchema()],
-                quality_assurance_runners=[MypyRunner(bound="<=50")]
+                global_quality_assurance_runners=[MypyRunner(bound="<=50")]
             )
         except Exception as e:
             cur = e

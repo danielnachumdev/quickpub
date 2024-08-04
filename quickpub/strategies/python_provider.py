@@ -1,3 +1,4 @@
+from quickpub import QualityAssuranceRunner
 from .quickpub_strategy import QuickpubStrategy
 from abc import abstractmethod
 from typing import Tuple, Set, Iterator, List

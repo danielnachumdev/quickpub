@@ -23,7 +23,7 @@ def publish(
         build_schemas: List[BuildSchema],
         upload_targets: List[UploadTarget],
         enforcers: Optional[List[ConstraintEnforcer]] = None,
-        quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
+        global_quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
         python_interpreter_provider: PythonProvider = DefaultPythonProvider(),
 
         readme_file_path: str = "./README.md",
@@ -44,11 +44,11 @@ def publish(
      :param author_email: The email of the author.
      :param description: A short description of the package.
      :param homepage: The homepage URL for the package (e.g., GitHub repository).
-     :param quality_assurance_runners: Strategies for quality assurance.
+     :param global_quality_assurance_runners: Strategies for quality assurance. These will run on all Envs supplies by the supplier.
      :param build_schemas: Strategies for building the package.
      :param upload_targets: Strategies for uploading the package.
      :param python_interpreter_provider: Strategy for managing Python versions. Defaults to SystemInterpreter().
-     :param explicit_src_folder_path: The path to the source code of the package. Defaults to the current working directory/<name>.
+     :param explicit_src_folder_path: The path to the source code of the package. Defaults to <current working directory>/<name>.
      :param version: The version for the new distribution. Defaults to "0.0.1".
      :param readme_file_path: The path to the README file. Defaults to "./README.md".
      :param license_file_path: The path to the license file. Defaults to "./LICENSE".
@@ -76,7 +76,7 @@ def publish(
     try:
         res = qa(
             python_interpreter_provider,
-            quality_assurance_runners or [],
+            global_quality_assurance_runners or [],
             name,
             explicit_src_folder_path,
             validated_dependencies

@@ -125,8 +125,8 @@ index-servers =
             upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
             build_schemas=[SetuptoolsBuildSchema()],
             python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
-            quality_assurance_runners=[MypyRunner(bound="<15"), PylintRunner(bound=">=0.8"),
-                                       UnittestRunner(bound=">=0.8")]
+            global_quality_assurance_runners=[MypyRunner(bound="<15"), PylintRunner(bound=">=0.8"),
+                                              UnittestRunner(bound=">=0.8")]
         )
         delete_file(name)
         if len(PRINT_QUEUE) > 0:
