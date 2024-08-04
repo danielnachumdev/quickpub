@@ -1,5 +1,5 @@
-from quickpub import QualityAssuranceRunner
 from .quickpub_strategy import QuickpubStrategy
+from .quality_assurance_runner import QualityAssuranceRunner
 from abc import abstractmethod
 from typing import Tuple, Set, Iterator, List
 from danielutils import LayeredCommand
