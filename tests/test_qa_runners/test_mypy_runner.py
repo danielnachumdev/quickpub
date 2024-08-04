@@ -1,3 +1,4 @@
+import os.path
 from unittest.mock import patch
 
 from danielutils import AutoCWDTestCase, delete_directory, create_file, get_current_file_name, \
@@ -6,8 +7,27 @@ from danielutils import AutoCWDTestCase, delete_directory, create_file, get_curr
 from quickpub import MypyRunner, DefaultPythonProvider, Bound
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
-with open("./test_qa_runners/test_mypy_runner.py", "r") as f:
-    CODE: str = f.read()
+CODE: str = """
+from unittest.mock import patch
+
+from danielutils import AutoCWDTestCase, delete_directory, create_file, get_current_file_name, \
+    get_current_working_directory, AlwaysTeardownTestCase
+
+from quickpub import MypyRunner, DefaultPythonProvider, Bound
+class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
+    @patch("quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
+           return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\")
+    def test_no_mypy(self, *args):
+        with self.base:
+            self.base(f"python -m venv {TEMP_VENV_NAME}")
+            with self.assertRaises(SystemExit):
+                self.runner.run(
+                    target="./",
+                    executor=self.base,
+                    print_func=print,
+                    env_name=self.env_name
+                )
+"""
 
 CONFIG: str = """
 [mypy]
@@ -33,6 +53,10 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
     def test_no_mypy(self, *args):
         with self.base:
             self.base(f"python -m venv {TEMP_VENV_NAME}")
+            self.runner = MypyRunner(
+                bound="<15",
+                executable_path=os.path.join(TEMP_VENV_NAME, "Scripts", "python.exe"),
+            )
             with self.assertRaises(SystemExit):
                 self.runner.run(
                     target="./",
