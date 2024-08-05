@@ -14,7 +14,7 @@ class CondaPythonProvider(PythonProvider):
 
     @classmethod
     def _get_available_envs_impl(cls) -> Set[str]:
-        with LayeredCommand(instance_flush_stdout=False, instance_flush_stderr=False) as base:
+        with LayeredCommand() as base:
             code, out, err = base("conda env list")
         return set([line.split(' ')[0] for line in out[2:] if len(line.split(' ')) > 1])
 
@@ -24,8 +24,7 @@ class CondaPythonProvider(PythonProvider):
             if name not in available_envs:
                 warning(f"Couldn't find env '{name}'")
                 continue
-            yield name, LayeredCommand(f"conda activate {name}", instance_flush_stdout=False,
-                                       instance_flush_stderr=False)
+            yield name, LayeredCommand(f"conda activate {name}")
 
 
 __all__ = [

@@ -15,8 +15,7 @@ class SetuptoolsBuildSchema(BuildSchema):
             raise self.EXCEPTION_TYPE(f"Could not find {self._setup_file_path} file")
         if verbose:
             info("Creating new distribution...")
-        with LayeredCommand("", instance_flush_stdout=False, instance_flush_stderr=False,
-                            instance_raise_on_fail=False) as exc:
+        with LayeredCommand() as exc:
             ret, stdout, stderr = exc("python " + self._setup_file_path + " sdist")
         if ret != 0:
             raise self.EXCEPTION_TYPE(stderr)

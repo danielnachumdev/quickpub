@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "quickpub"
-version = "2.0.0"
+version = "2.0.1"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
-dependencies = ['danielutils>=0.9.92', 'requests']
+dependencies = ['danielutils>=0.9.94', 'requests']
 keywords = []
 license = { "file" = "./LICENSE" }
 description = "A python package to quickly configure and publish a new package"

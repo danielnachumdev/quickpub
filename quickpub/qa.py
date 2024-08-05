@@ -42,7 +42,7 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
     p = sys.executable if is_system_interpreter else "python"
     file_name = "./__sanity_check_main.py"
     with TemporaryFile(file_name) as f:
-        f.write([f"from {package_name} import *"])
+        f.writelines([f"from {package_name} import *"])
         code, _, _ = executor(f"{p} {file_name}")
         exit_if(code != 0,
                 f"Env '{env_name}' failed sanity check. "
@@ -133,12 +133,7 @@ def qa(
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
     pool = create_progress_bar_pool(python_provider, quality_assurance_strategies)
     pool_err = create_pool_print_error(pool)
-    with MultiContext(
-            AttrContext(LayeredCommand, 'class_flush_stdout', False),
-            AttrContext(LayeredCommand, 'class_flush_stderr', False),
-            AttrContext(LayeredCommand, 'class_raise_on_fail', False),
-            base := LayeredCommand()
-    ):
+    with LayeredCommand() as base:
         for env_name, executor in pool[0]:
             pool[0].desc = f"Env '{env_name}'"
             pool[0].update(0, refresh=True)

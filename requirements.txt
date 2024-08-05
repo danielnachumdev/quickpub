@@ -1,5 +1,5 @@
 twine
-danielutils>=0.9.92
+danielutils>=0.9.94
 pylint
 mypy
 types-requests
