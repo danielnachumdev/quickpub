@@ -56,7 +56,7 @@ class TestPylintRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
            return_value=f".\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m pylint .\\")
     def test_no_pylint(self, *args):
         with self.base:
-            self.base(f"python -m venv {TEMP_VENV_NAME}")
+            self.base(f"{sys.executable} -m venv {TEMP_VENV_NAME}")
             self.runner = PylintRunner(
                 bound=f"<{NUM_ERRORS + 1}",
                 executable_path=os.path.join(TEMP_VENV_NAME, "Scripts", "python.exe"),
@@ -136,9 +136,10 @@ class TestPylintRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
-
-        self.runner = PylintRunner(executable_path="\\".join(sys.executable.split("\\")[:-1]) + "\\pylint.exe",
-                                   bound=f"<={NUM_ERRORS}")
+        exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\pylint.exe"
+        if "conda" in sys.executable:
+            exe_path = exe_path.replace("pylint.exe", "Scripts\\pylint.exe")
+        self.runner = PylintRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")
         with self.base:
             self.runner.run(
                 target="./",

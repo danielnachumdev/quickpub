@@ -1,4 +1,5 @@
 import re
+import sys
 from typing import List, Union
 
 from danielutils import LayeredCommand
@@ -58,7 +59,7 @@ class PytestRunner(QualityAssuranceRunner):
         if self.has_config:
             #TODO
             assert False
-        return f"python -m pytest {self.target}"
+        return f"{sys.executable} -m pytest {self.target}"
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
         """
@@ -67,7 +68,7 @@ class PytestRunner(QualityAssuranceRunner):
         :param base: The base LayeredCommand object for executing commands.
         """
         with base:
-            base("pip install pytest")
+            base(f"{sys.executable} -m pip install pytest")
 
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         """

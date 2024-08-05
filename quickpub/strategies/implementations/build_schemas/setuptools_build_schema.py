@@ -1,3 +1,4 @@
+import sys
 from typing import Literal
 
 from danielutils import info, file_exists, LayeredCommand
@@ -16,7 +17,7 @@ class SetuptoolsBuildSchema(BuildSchema):
         if verbose:
             info("Creating new distribution...")
         with LayeredCommand() as exc:
-            ret, stdout, stderr = exc("python " + self._setup_file_path + " sdist")
+            ret, stdout, stderr = exc(sys.executable + " " + self._setup_file_path + " sdist")
         if ret != 0:
             raise self.EXCEPTION_TYPE(stderr)
 

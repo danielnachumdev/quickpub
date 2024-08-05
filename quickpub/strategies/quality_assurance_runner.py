@@ -1,6 +1,6 @@
 import sys
 from abc import abstractmethod
-from typing import Union, List, Optional, cast
+from typing import Union, List, Optional, cast, Dict, Tuple
 from danielutils import LayeredCommand, get_os, OSType, file_exists
 
 from quickpub import Bound
@@ -19,7 +19,7 @@ class Configurable:
 
 
 class HasOptionalExecutable:
-    PYTHON: str = "python" if get_os() == OSType.WINDOWS else "python3"
+    PYTHON: str = sys.executable
 
     @property
     def use_executable(self) -> bool:
@@ -44,6 +44,13 @@ class HasOptionalExecutable:
 
 from typing import Optional, Union, List
 from abc import abstractmethod
+
+SPEICLA_EXIT_CODES: Dict[int, Tuple[str, str]] = {
+    -1073741515: ("Can't find python in path.",
+                  "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND"),
+    3221225781: ("Can't find python in path.",
+                 "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND")
+}
 
 
 class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
@@ -139,6 +146,11 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         self._pre_command()
         try:
             ret, out, err = executor(command, command_raise_on_fail=False)
+            if ret in SPEICLA_EXIT_CODES:
+                title, explanation = SPEICLA_EXIT_CODES[ret]
+                unsigned_integer_ret = ret + 2 ** 32
+                raise RuntimeError(
+                    title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
             score = self._calculate_score(ret, "".join(out + err).splitlines(), verbose=verbose)
             exit_if(not self.bound.compare_against(score),
                     f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",

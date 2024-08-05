@@ -57,7 +57,7 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
            return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\")
     def test_no_mypy(self, *args):
         with self.base:
-            self.base(f"python -m venv {TEMP_VENV_NAME}")
+            self.base(f"{sys.executable} -m venv {TEMP_VENV_NAME}")
             self.runner = MypyRunner(
                 bound=f"<{NUM_ERRORS + 1}",
                 executable_path=os.path.join(TEMP_VENV_NAME, "Scripts", "python.exe"),
@@ -137,9 +137,10 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
-
-        self.runner = MypyRunner(executable_path="\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe",
-                                 bound=f"<={NUM_ERRORS}")
+        exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe"
+        if "conda" in sys.executable:
+            exe_path = exe_path.replace("mypy.exe", "Scripts\\mypy.exe")
+        self.runner = MypyRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")
         with self.base:
             self.runner.run(
                 target="./",

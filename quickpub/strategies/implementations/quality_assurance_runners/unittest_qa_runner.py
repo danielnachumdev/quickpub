@@ -6,6 +6,17 @@ from danielutils import get_current_working_directory, set_current_working_direc
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
+def _removesuffix(string: str, suffix: str) -> str:
+    """Remove a suffix from a string.
+
+    Replace this with str.removesuffix() from stdlib when minimum Python
+    version is 3.9.
+    """
+    if suffix and string.endswith(suffix):
+        return string[: -len(suffix)]
+    return string
+
+
 class UnittestRunner(QualityAssuranceRunner):
     NUM_TESTS_PATTERN: re.Pattern = re.compile(r"Ran (\d+) tests? in \d+\.\d+s")
     NUM_FAILED_PATTERN: re.Pattern = re.compile(r"FAILED \((?:failures=(\d+))?(?:, )?(?:errors=(\d+))?\)")
@@ -30,7 +41,7 @@ class UnittestRunner(QualityAssuranceRunner):
 
     def _build_command(self, src: str, *args, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
-        rel = os.path.relpath(src, self.target).removesuffix(src.lstrip("./\\"))
+        rel = _removesuffix(os.path.relpath(src, self.target), src.lstrip("./\\"))
         command += f" discover -s {rel}"
         return command  # f"cd {self.target}; {command}"  # f"; cd {self.target}"
 
