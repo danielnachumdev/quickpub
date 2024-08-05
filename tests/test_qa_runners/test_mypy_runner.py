@@ -1,4 +1,5 @@
 import os.path
+import sys
 from unittest.mock import patch
 
 from danielutils import AutoCWDTestCase, delete_directory, create_file, get_current_file_name, \
@@ -132,3 +133,17 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
 
     def test_with_explicit_executable(self):
         create_file("__init__.py")
+        with open("mypy.ini", "w") as f:
+            f.write(CONFIG)
+        with open("main.py", "w") as f:
+            f.write(CODE)
+
+        self.runner = MypyRunner(executable_path="\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe",
+                                 bound=f"<={NUM_ERRORS}")
+        with self.base:
+            self.runner.run(
+                target="./",
+                executor=self.base,
+                print_func=print,
+                env_name=self.env_name
+            )
