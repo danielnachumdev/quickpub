@@ -9,7 +9,7 @@ class TestCondaPythonProvider(unittest.TestCase):
         for env_name, executor in provider:
             expected_index: int = 0
             with executor:
-                code, stdout, stderr = executor("conda info", command_flush_stdout=False, command_flush_stderr=False)
+                code, stdout, stderr = executor.execute("conda info")
             self.assertEqual(0, code)
             self.assertTrue(len(stdout) > 0, "stdout should not be empty")
             self.assertTrue(len(stderr) == 0, "stderr should be empty")
