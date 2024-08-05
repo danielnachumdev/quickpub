@@ -1,4 +1,4 @@
-from typing import Literal, Callable, Dict
+from typing import Literal, Callable, Dict, Any
 
 from .version import Version
 
@@ -18,6 +18,14 @@ class Dependency:
         self.name: str = name
         self.operator: Literal["<", "<=", "==", ">", ">="] = operator
         self.ver: Version = ver or Version(0, 0, 0)
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Dependency):
+            return False
+        return self.name == other.name and self.operator == other.operator and self.ver == other.ver
+
+    def __hash__(self) -> int:
+        return hash((self.name, self.operator, self.ver))
 
     @staticmethod
     def from_string(s: str) -> 'Dependency':

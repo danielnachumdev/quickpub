@@ -56,8 +56,9 @@ class PytestRunner(QualityAssuranceRunner):
         :return: The command to run pytest as a string.
         """
         if self.has_config:
-            return "pytest"
-        return f"pytest {self.target}"
+            #TODO
+            assert False
+        return f"python -m pytest {self.target}"
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
         """

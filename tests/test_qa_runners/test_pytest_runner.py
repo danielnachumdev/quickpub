@@ -1,4 +1,4 @@
-import os
+import os,sys
 from danielutils import create_file, AutoCWDTestCase
 
 from quickpub import DefaultPythonProvider, PytestRunner
