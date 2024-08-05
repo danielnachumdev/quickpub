@@ -27,8 +27,10 @@ class PylintRunner(QualityAssuranceRunner):
 
     def _calculate_score(self, ret: int, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
+        if len(lines) == 0:
+            return 1
         if len(lines) == 1 and lines[0].endswith("No module named pylint"):
-            raise RuntimeError("No module named pylint found")
+            raise SystemExit("No module named pylint found")
         index = -2
         if lines[-1] == '\x1b[0m':
             index += -1
