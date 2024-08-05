@@ -14,7 +14,7 @@ class DefaultPythonProvider(PythonProvider):
         PythonProvider.__init__(self, requested_envs=["system"], explicit_versions=[], exit_on_fail=True)
 
     def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]:
-        return iter([("system", LayeredCommand("", instance_flush_stderr=False, instance_flush_stdout=False))])
+        return iter([("system", LayeredCommand())])
 
     @classmethod
     def _get_available_envs_impl(cls) -> Set[str]:
