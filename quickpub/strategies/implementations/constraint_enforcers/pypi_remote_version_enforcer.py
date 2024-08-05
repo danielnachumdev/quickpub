@@ -1,7 +1,7 @@
 from danielutils import RetryExecutor, ExponentialBackOffStrategy, ConstantBackOffStrategy
 from requests import Response
 
-from proxy import get  # type: ignore
+from quickpub.proxy import get  # type: ignore
 from quickpub import Version
 from ...constraint_enforcer import ConstraintEnforcer
 
