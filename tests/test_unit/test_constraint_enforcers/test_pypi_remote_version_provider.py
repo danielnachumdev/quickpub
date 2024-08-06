@@ -20,7 +20,7 @@ def create_response(include_content: bool = False, status_code: int = 200,
     response = Mock(status_code=status_code)
 
     if include_content:
-        with open("./test_constraint_enforcers/remote_example.html", "r",encoding="utf8") as f:
+        with open("./test_unit/test_constraint_enforcers/remote_example.html", "r",encoding="utf8") as f:
             raw_html = f.read()
         mock_html = raw_html.replace("quickpub", target_package_name)
         mock_html = mock_html.replace(f" {target_package_name} 1.0.3",

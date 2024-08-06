@@ -121,7 +121,7 @@ class TestPylintRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
-        self.runner = PylintRunner(configuration_path="../../.pylintrc", bound=f"<={NUM_ERRORS}")
+        self.runner = PylintRunner(configuration_path="../test_unit/test_qa_runners/.pylintrc", bound=f"<={NUM_ERRORS}")
         with self.base:
             self.runner.run(
                 target="./",

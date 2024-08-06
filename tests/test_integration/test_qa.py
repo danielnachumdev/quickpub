@@ -28,20 +28,20 @@ class MockRunner(QualityAssuranceRunner):
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         return 0
 
+def _new_print(*args, sep: str = " ", end: str = "\n", file=sys.stdout, flush: bool = False) -> None:
+    path = get_caller_file_name()
+    if path is None:
+        return
+    caller_file = path.split("\\")[-1]
+    if caller_file != "colors.py":
+        file.write(sep.join(args) + end)
+        if flush:
+            file.flush()
+        return
+    PRINT_QUEUE.append(args)
+
 
 class TestCondaPythonProvider(AutoCWDTestCase):
-    @staticmethod
-    def _new_print(*args, sep: str = " ", end: str = "\n", file=sys.stdout, flush: bool = False) -> None:
-        path = get_caller_file_name()
-        if path is None:
-            return
-        caller_file = path.split("\\")[-1]
-        if caller_file != "colors.py":
-            file.write(sep.join(args) + end)
-            if flush:
-                file.flush()
-            return
-        PRINT_QUEUE.append(args)
 
     def setUp(self):
         PRINT_QUEUE.clear()

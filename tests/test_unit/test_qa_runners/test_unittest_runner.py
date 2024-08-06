@@ -4,6 +4,8 @@ from danielutils import AutoCWDTestCase, create_file
 
 from quickpub import UnittestRunner, DefaultPythonProvider
 
+TEST_FILE_PATH: str = "./test_foo.py"
+
 
 class TestUnittestRunner(AutoCWDTestCase):
     @classmethod
@@ -42,7 +44,7 @@ class TestUnittestRunner(AutoCWDTestCase):
             bound=">0.8",
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -63,7 +65,7 @@ class TestFoo(unittest.TestCase):
             bound=">0.8",
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -85,7 +87,7 @@ class TestFoo(unittest.TestCase):
             bound=">0.8",
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -108,7 +110,7 @@ class TestFoo(unittest.TestCase):
             bound=">=0",
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -134,7 +136,7 @@ class TestFoo(unittest.TestCase):
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -161,7 +163,7 @@ class TestFoo(unittest.TestCase):
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -187,7 +189,7 @@ class TestFoo(unittest.TestCase):
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 
@@ -214,7 +216,7 @@ class TestFoo(unittest.TestCase):
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import unittest
 

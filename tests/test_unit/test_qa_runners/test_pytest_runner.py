@@ -3,7 +3,7 @@ from danielutils import create_file, AutoCWDTestCase
 
 from quickpub import DefaultPythonProvider, PytestRunner
 
-
+TEST_FILE_PATH: str = "./test_foo.py"
 class TestPytestRunner(AutoCWDTestCase):
     @classmethod
     def setUpClass(cls):
@@ -35,7 +35,7 @@ class TestPytestRunner(AutoCWDTestCase):
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
             """)
@@ -54,7 +54,7 @@ import pytest
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
         
@@ -75,7 +75,7 @@ def test_add():
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
 
@@ -97,7 +97,7 @@ def test_add():
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
 
@@ -121,7 +121,7 @@ def test_add2():
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
 
@@ -146,7 +146,7 @@ def test_add2():
             no_tests_score=0,
             target="./"
         )
-        with open(os.path.join("./", "test_foo.py"), "w") as f:
+        with open(TEST_FILE_PATH, "w") as f:
             f.write("""
 import pytest
 
