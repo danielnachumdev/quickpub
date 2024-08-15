@@ -1,18 +1,18 @@
-# quickpub V1.0.3
+# quickpub V2.0.2
 **Tested python versions**: `3.8.0`, `3.9.0`, `3.10.13`,
 
 Example usage of how this package was published
 
 ```python
-from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider,
-    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer,
+from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
+    PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer, \
     PypiRemoteVersionEnforcer, LocalVersionEnforcer
 
 
 def main() -> None:
     publish(
         name="quickpub",
-        version="1.0.3",
+        version="2.0.2",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
@@ -25,13 +25,12 @@ def main() -> None:
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
         python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
         global_quality_assurance_runners=[
-            MypyRunner(bound="<=15", configuration_path="./mypy.ini"),
+            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
             PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
-            UnittestRunner(bound=">=0.8"),
+            UnittestRunner(bound=">=0.95"),
         ],
-        dependencies=["danielutils>=0.9.92", "requests"],
+        dependencies=["danielutils>=0.9.94", "requests"],
         min_python="3.8.0",
-        demo=True
     )
 
 
