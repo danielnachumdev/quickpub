@@ -1,7 +1,9 @@
+import os
 import sys
+from pathlib import Path
 from typing import Literal
 
-from danielutils import info, file_exists, LayeredCommand
+from danielutils import info, file_exists, LayeredCommand, delete_file
 
 from ...build_schema import BuildSchema
 
@@ -16,6 +18,9 @@ class SetuptoolsBuildSchema(BuildSchema):
             raise self.EXCEPTION_TYPE(f"Could not find {self._setup_file_path} file")
         if verbose:
             info("Creating new distribution...")
+        sources_file_path: str = str(os.path.join(
+            str(Path(self._setup_file_path).parent.resolve()), "quickpub.egg-info/SOURCES.txt"))
+        delete_file(sources_file_path)
         with LayeredCommand() as exc:
             ret, stdout, stderr = exc(sys.executable + " " + self._setup_file_path + " sdist")
         if ret != 0:

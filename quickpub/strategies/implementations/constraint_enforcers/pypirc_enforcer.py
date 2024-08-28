@@ -21,7 +21,7 @@ class PypircEnforcer(ConstraintEnforcer):
                 text = f.read()
 
             if not self.PYPIRC_REGEX.match(text):
-                raise self.EXCEPTION_TYPE(f"Couldn't enforce '{self.path}'")
+                raise self.EXCEPTION_TYPE(f"'{self.path}' has an invalid format.")
 
 
 __all__ = [

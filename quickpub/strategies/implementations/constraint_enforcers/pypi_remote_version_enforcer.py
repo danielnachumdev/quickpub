@@ -1,4 +1,4 @@
-from danielutils import RetryExecutor, ExponentialBackOffStrategy, ConstantBackOffStrategy
+from danielutils import RetryExecutor, MultiplicativeBackoff, ConstantBackOffStrategy
 from requests import Response
 
 from quickpub.proxy import get  # type: ignore
@@ -14,7 +14,7 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
             return
         url = f"https://pypi.org/project/{name}/"
 
-        timeout_strategy = ExponentialBackOffStrategy(1.1, 1.5)
+        timeout_strategy = MultiplicativeBackoff(2)
 
         def wrapper() -> Response:
             return get(url, timeout=timeout_strategy.get_backoff())

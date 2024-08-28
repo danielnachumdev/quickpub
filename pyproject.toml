@@ -8,7 +8,7 @@ version = "2.0.2"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
-dependencies = ['danielutils>=0.9.94', 'requests']
+dependencies = ['danielutils>=1.0.0', 'requests']
 keywords = []
 license = { "file" = "./LICENSE" }
 description = "A python package to quickly configure and publish a new package"
