@@ -1,35 +1,40 @@
-import os,sys
+import os, sys
+import unittest
+
 from danielutils import create_file, AutoCWDTestCase
 
+from enforcers import ExitEarlyError
 from quickpub import DefaultPythonProvider, PytestRunner
 
 TEST_FILE_PATH: str = "./test_foo.py"
-class TestPytestRunner(AutoCWDTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.env_name, cls.base = next(iter(DefaultPythonProvider()))  # type: ignore
-        cls.base._instance_flush_stdout = False
-        cls.base._instance_flush_stderr = False
 
-    def setUp(self):
+
+class TestPytestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
+    async def asyncSetUp(self):
+        async for name, base in DefaultPythonProvider():
+            self.env_name, self.base = name, base
+            break
+        self.base._instance_flush_stdout = False
+        self.base._instance_flush_stderr = False
         create_file("./__init__.py")
 
-    def test_default_no_tests(self):
+    async def test_default_no_tests(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
             target="./"
         )
-        with self.assertRaises(SystemExit):
+        # TODO fix
+        with self.assertRaises(ExitEarlyError):
             with self.base:  # type: ignore
-                runner.run(
+                await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
 
-    def test_default_empty_tests(self):
+    async def test_default_empty_tests(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
@@ -39,16 +44,17 @@ class TestPytestRunner(AutoCWDTestCase):
             f.write("""
 import pytest
             """)
-        with self.assertRaises(SystemExit):
+        #     TODO fix
+        with self.assertRaises(ExitEarlyError):
             with self.base:  # type: ignore
-                runner.run(
+                await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
 
-    def test_only_one_test_that_passes(self):
+    async def test_only_one_test_that_passes(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
@@ -62,14 +68,14 @@ def test_add():
     assert 1 + 1 == 2        
                     """)
         with self.base:  # type: ignore
-            runner.run(
+            await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
                 print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
-    def test_only_one_test_that_fails(self):
+    async def test_only_one_test_that_fails(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
@@ -82,16 +88,17 @@ import pytest
 def test_add():
     assert 1 + 1 == 1        
                     """)
-        with self.assertRaises(SystemExit):
+        #     TODO fix
+        with self.assertRaises(ExitEarlyError):
             with self.base:  # type: ignore
-                runner.run(
+                await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
 
-    def test_combined(self):
+    async def test_combined(self):
         runner = PytestRunner(
             bound=">=0",
             no_tests_score=0,
@@ -108,14 +115,14 @@ def test_add2():
     assert 1 + 1 == 2        
                             """)
         with self.base:  # type: ignore
-            runner.run(
+            await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
                 print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
-    def test_combined_with_bound_should_fail(self):
+    async def test_combined_with_bound_should_fail(self):
         runner = PytestRunner(
             bound=">0.8",
             no_tests_score=0,
@@ -131,16 +138,17 @@ def test_add():
 def test_add2():
     assert 1 + 1 == 2        
                             """)
-        with self.assertRaises(SystemExit):
+        #     TODO fix
+        with self.assertRaises(ExitEarlyError):
             with self.base:  # type: ignore
-                runner.run(
+                await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
 
-    def test_combined_with_bound_should_pass(self):
+    async def test_combined_with_bound_should_pass(self):
         runner = PytestRunner(
             bound=">=0.5",
             no_tests_score=0,
@@ -157,7 +165,7 @@ def test_add2():
     assert 1 + 1 == 2         
                             """)
         with self.base:  # type: ignore
-            runner.run(
+            await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
                 print_func=print,

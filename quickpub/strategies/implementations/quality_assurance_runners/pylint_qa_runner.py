@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
+from enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
@@ -31,8 +32,8 @@ class PylintRunner(QualityAssuranceRunner):
             return 1
         if len(lines) == 1:
             if lines[0].endswith("No module named pylint"):
-                raise SystemExit("No module named pylint found")
-            raise SystemExit("Got an unexpected error!")
+                raise ExitEarlyError("No module named pylint found")
+            raise ExitEarlyError("Got an unexpected error!")
         index = -2
         if lines[-1] == '\x1b[0m':
             index += -1

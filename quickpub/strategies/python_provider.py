@@ -1,12 +1,12 @@
-
+import asyncio
 
 from .quickpub_strategy import QuickpubStrategy
 from abc import abstractmethod
-from typing import Tuple, Set, List, AsyncIterator
+from typing import Tuple, Set, List, AsyncIterator, Iterator, Iterable
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 
-class PythonProvider(QuickpubStrategy):
+class PythonProvider(AsyncIterator, QuickpubStrategy):
     def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: List[str],
                  explicit_versions: List[str],
                  exit_on_fail: bool = False) -> None:
@@ -14,9 +14,14 @@ class PythonProvider(QuickpubStrategy):
         self.requested_envs = requested_envs
         self.explicit_versions = explicit_versions
         self.exit_on_fail = exit_on_fail
+        self.aiter_index = 0
+
+    def __aiter__(self) -> AsyncIterator[Tuple[str, AsyncLayeredCommand]]:
+        self.aiter_index = 0
+        return self
 
     @abstractmethod
-    async def __aiter__(self) -> AsyncIterator[Tuple[str, AsyncLayeredCommand]]: ...
+    async def __anext__(self) -> Tuple[str, AsyncLayeredCommand]: ...
 
     @classmethod
     async def get_available_envs(cls) -> Set[str]:
@@ -29,13 +34,15 @@ class PythonProvider(QuickpubStrategy):
 
     @classmethod
     @abstractmethod
-    async def _get_available_envs_impl(cls) -> Set[str]: ...
+    async def _get_available_envs_impl(cls) -> Set[str]:
+        ...
 
     def __len__(self) -> int:
         return len(self.requested_envs)
 
     @abstractmethod
-    def get_python_executable_name(self) -> str: ...
+    def get_python_executable_name(self) -> str:
+        ...
 
 
 __all__ = [

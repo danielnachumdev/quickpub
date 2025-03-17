@@ -3,6 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
+from enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
@@ -34,7 +35,7 @@ class MypyRunner(QualityAssuranceRunner):
             return 0.0
 
         if rating_line.endswith("No module named mypy"):
-            raise SystemExit("Mypy is not installed.")
+            raise ExitEarlyError("Mypy is not installed.")
 
         if rating_line.startswith("Success"):
             return 0.0

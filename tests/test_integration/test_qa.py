@@ -1,3 +1,4 @@
+import asyncio
 import os
 import sys
 from typing import List
@@ -27,6 +28,7 @@ class MockRunner(QualityAssuranceRunner):
 
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         return 0
+
 
 def _new_print(*args, sep: str = " ", end: str = "\n", file=sys.stdout, flush: bool = False) -> None:
     path = get_caller_file_name()
@@ -69,13 +71,13 @@ class TestCondaPythonProvider(AutoCWDTestCase):
     @patch("builtins.print", _new_print)
     def test_non_existing_env_should_warn(self, *args):
         NON_EXISTENT_ENV_NAME: str = "sdjbnglksjdgnwkerjg"
-        qa(
+        asyncio.get_event_loop().run_until_complete(qa(
             python_provider=CondaPythonProvider([NON_EXISTENT_ENV_NAME]),
             quality_assurance_strategies=[],
             package_name=PACKAGE_NAME,
             dependencies=[],
             src_folder_path=f"./{NON_EXISTENT_ENV_NAME}"
-        )
+        ))
         self.assertListEqual(
             [
                 ('\x1b[38;2;255;165;0mWARNING\x1b[0m: ',),

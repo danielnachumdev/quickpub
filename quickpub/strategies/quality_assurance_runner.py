@@ -126,7 +126,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         pass
 
     async def run(self, target: str, executor: AsyncLayeredCommand, *, verbose: bool = True,  # type: ignore
-            use_system_interpreter: bool = False, print_func, env_name: str) -> None:
+                  use_system_interpreter: bool = False, print_func, env_name: str) -> None:
         """
         Runs the QA process on the specified target.
 
@@ -158,7 +158,8 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
                     verbose=verbose, err_func=print_func)
         except Exception as e:
             raise RuntimeError(
-                f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}") from e
+                f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}",
+                e) from e
         finally:
             self._post_command()
 
