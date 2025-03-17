@@ -1,11 +1,14 @@
+import json
 import re
 import sys
-from functools import wraps
-from typing import Optional, ContextManager, List, Callable, Tuple, Dict, Union
-from danielutils import AttrContext, LayeredCommand, AsciiProgressBar, ColoredText, ProgressBarPool, TemporaryFile
+from datetime import datetime
+from typing import ContextManager, List, Callable, Tuple, Dict, Union, Any, Literal, Optional
+from danielutils import LayeredCommand, ColoredText, TemporaryFile, AsyncWorkerPool
+from danielutils.async_.async_layered_command import AsyncLayeredCommand
+from tqdm import tqdm
 
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
-from .structures import Dependency, Version, Bound  # pylint: disable=relative-beyond-top-level
+from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 
 try:
@@ -27,13 +30,20 @@ except ImportError:
         def __getitem__(self, index):
             return self.contexts[index]
 
+ASYNC_POOL_NAME: str = "Quickpub QA"
 
-def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_system_interpreter: bool,
-                               env_name: str, err_print_func) -> None:
+
+async def global_import_sanity_check(
+        package_name: str,
+        executor: AsyncLayeredCommand,
+        is_system_interpreter: bool,
+        env_name: str,
+        err_print_func
+) -> None:
     """
     Will check that importing from the package works as a sanity check.
     :param package_name: Name of the package
-    :param executor: the previously ued LayeredCommand executor
+    :param executor: the previously ued AsyncLayeredCommand executor
     :param is_system_interpreter: whether or not the system interpreter is used
     :param env_name: The name of the currently tested environment
     :param err_print_func: the function to print our errors
@@ -43,7 +53,8 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
     file_name = "./__sanity_check_main.py"
     with TemporaryFile(file_name) as f:
         f.writelines([f"from {package_name} import *"])
-        code, _, _ = executor(f"{p} {file_name}")
+        cmd = f"{p} {file_name}"
+        code, _, _ = await executor(cmd)
         exit_if(code != 0,
                 f"Env '{env_name}' failed sanity check. "
                 f"Try manually running the following script 'from {package_name} import *'",
@@ -53,20 +64,24 @@ def global_import_sanity_check(package_name: str, executor: LayeredCommand, is_s
 VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
-def validate_dependencies(python_manager: PythonProvider, required_dependencies: List[Dependency],
-                          executor: LayeredCommand,
-                          env_name: str, err_print_func: Callable) -> None:
+async def validate_dependencies(
+        validation_exit_on_fail: bool,
+        required_dependencies: List[Dependency],
+        executor: AsyncLayeredCommand,
+        env_name: str,
+        err_print_func: Callable
+) -> None:
     """
     will check if all the dependencies of the package are installed on current env.
-    :param python_manager: the manager to use
+    :param validation_exit_on_fail:
     :param required_dependencies: the dependencies to check
-    :param executor: the current LayeredCommand executor
+    :param executor: the current AsyncLayeredCommand executor
     :param env_name: name of the currently checked environment
     :param err_print_func: function to print errors
     :return: None
     """
-    if python_manager.exit_on_fail:
-        code, out, err = executor("pip list")
+    if validation_exit_on_fail:
+        code, out, err = await executor("pip list")
         exit_if(code != 0, f"Failed executing 'pip list' at env '{env_name}'", err_func=err_print_func)
         split_lines = (line.split(' ') for line in out[2:])
         version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
@@ -82,7 +97,7 @@ def validate_dependencies(python_manager: PythonProvider, required_dependencies:
                 v = currently_installed[req.name]
                 if isinstance(v, str):
                     not_installed_properly.append(
-                        (req, "Verion format of dependecy is not currently supported by quickpub"))
+                        (req, "Version format of dependency is not currently supported by quickpub"))
                 elif isinstance(v, Dependency):
                     if not req.is_satisfied_by(v.ver):
                         not_installed_properly.append((req, "Invalid version installed"))
@@ -92,87 +107,119 @@ def validate_dependencies(python_manager: PythonProvider, required_dependencies:
                 err_func=err_print_func)
 
 
-def create_progress_bar_pool(python_version_manager: PythonProvider,
-                             quality_assurance_strategies: List[QualityAssuranceRunner]) -> ProgressBarPool:
-    return ProgressBarPool(
-        AsciiProgressBar,
-        2,
-        individual_options=[
-            dict(
-                iterator=python_version_manager,
-                desc="Envs",
-                total=len(python_version_manager.requested_envs)
-            ),
-            dict(
-                iterator=quality_assurance_strategies or [],
-                desc="Runners",
-                total=len(quality_assurance_strategies or [])
-            ),
-        ]
+def print_error(*args, **kwargs):
+    msg = "".join([ColoredText.red("[ERROR]"), " ", *args])
+    tqdm.write(msg, **kwargs)
+
+
+is_config_run_success: List[bool] = []
+
+
+async def run_config(
+        env_name: str,
+        async_executor: AsyncLayeredCommand,
+        runner: QualityAssuranceRunner,
+        config_id: int,
+        *,
+        is_system_interpreter: bool,
+        validation_exit_on_fail: bool,
+        package_name: str,
+        src_folder_path: str,
+        dependencies: list
+) -> None:
+    cur = f"env '{env_name}' + qa runner '{runner.__class__.__qualname__}'"
+    MyAsyncWorkerPool.log("INFO", f"Testing {cur}", pool=ASYNC_POOL_NAME)
+
+    with async_executor:
+        step1 = validate_dependencies(
+            validation_exit_on_fail,
+            dependencies,
+            async_executor,
+            env_name,
+            print_error
+        )
+        step2 = global_import_sanity_check(
+            package_name,
+            async_executor,
+            is_system_interpreter,
+            env_name,
+            print_error
+        )
+        step3 = runner.run(
+            src_folder_path,
+            async_executor,
+            use_system_interpreter=is_system_interpreter,
+            print_func=print_error,
+            env_name=env_name
+        )
+
+        for step in [step1, step2, step3]:
+            try:
+                await step
+            except SystemExit:
+                MyAsyncWorkerPool.log("ERROR", f"Failed {cur}", pool=ASYNC_POOL_NAME)
+                return
+            except Exception as e:
+                manual_command = async_executor._build_command(runner._build_command(src_folder_path))
+                MyAsyncWorkerPool.log("ERROR", pool=ASYNC_POOL_NAME,
+                                      message=f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. Try manually: '{manual_command}'.",
+                                      exception=e)
+                if validation_exit_on_fail:
+                    raise RuntimeError(e) from e
+                return
+
+    is_config_run_success[config_id] = True
+
+
+class MyAsyncWorkerPool(AsyncWorkerPool):
+    DEFAULT_ORDER_IF_KEY_EXISTS = (
+        "pool", "timestamp", "level", "message", "exception"
     )
 
+    @classmethod
+    def log(
+            self,
+            level: Literal["INFO", "WARNING", "ERROR"],
+            message: str,
+            order: Optional[List[str]] = DEFAULT_ORDER_IF_KEY_EXISTS,
+            **kwargs
+    ) -> None:
+        kwargs["level"] = level
+        kwargs["message"] = message
+        kwargs["timestamp"] = datetime.now().isoformat()
+        ordered_kwargs = kwargs
+        if order:
+            ordered_kwargs = {key: kwargs[key] for key in order if key in kwargs}
+        tqdm.write(json.dumps(ordered_kwargs, default=str))
 
-def create_pool_print_error(pool: ProgressBarPool):
-    @wraps(pool.write)
-    def func(*args, **kwargs):
-        msg = "".join([ColoredText.red("ERROR"), ": ", *args])
-        pool.write(msg, **kwargs)
 
-    return func
-
-
-def qa(
+async def qa(
         python_provider: PythonProvider,
         quality_assurance_strategies: List[QualityAssuranceRunner],
         package_name: str,
         src_folder_path: str,
         dependencies: list
 ) -> bool:
+    is_config_run_success.clear()
     from .strategies import DefaultPythonProvider
-    result = True
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
-    pool = create_progress_bar_pool(python_provider, quality_assurance_strategies)
-    pool_err = create_pool_print_error(pool)
-    with LayeredCommand() as base:
-        for env_name, executor in pool[0]:
-            pool[0].desc = f"Env '{env_name}'"
-            pool[0].update(0, refresh=True)
-            with executor:
-                executor._prev_instance = base
-                try:
-                    validate_dependencies(python_provider, dependencies, executor, env_name, pool_err)
-                except SystemExit:
-                    result = False
-                    continue
-                try:
-                    global_import_sanity_check(package_name, executor, is_system_interpreter, env_name, pool_err)
-                except SystemExit:
-                    result = False
-                    continue
-                for runner in pool[1]:
-                    pool[1].desc = f"Runner '{runner.__class__.__name__}'"
-                    pool[1].update(0, refresh=True)
-                    try:
-                        runner.run(
-                            src_folder_path,
-                            executor,
-                            use_system_interpreter=is_system_interpreter,
-                            print_func=pool_err,
-                            env_name=env_name
-                        )
-                    except SystemExit:
-                        result = False
-                        continue
-                    except Exception as e:
-                        result = False
-                        manual_command = executor._build_command(runner._build_command(src_folder_path))
-                        pool_err(
-                            f"Failed running '{runner.__class__.__name__}' on env '{env_name}'. "
-                            f"Try manually: '{manual_command}'.")
-                        pool.write(f"\tCaused by '{e.__cause__ or e}'")
-                        if python_provider.exit_on_fail:
-                            raise RuntimeError() from e
-    return result
+    pool = MyAsyncWorkerPool(ASYNC_POOL_NAME, num_workers=5)
+    i = 0
+    async for env_name, async_executor in python_provider:
+        for runner in quality_assurance_strategies:
+            await pool.submit(
+                run_config,
+                *(env_name, async_executor, runner, i),
+                is_system_interpreter=is_system_interpreter,
+                validation_exit_on_fail=python_provider.exit_on_fail,
+                **dict(package_name=package_name, src_folder_path=src_folder_path, dependencies=dependencies)
+            )
+            i += 1
+    for _ in range(i):
+        is_config_run_success.append(False)
+    await pool.start()
+    await pool.join()
+    return all(is_config_run_success)
 
 
 __all__ = [

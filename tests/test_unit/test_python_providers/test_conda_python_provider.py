@@ -20,7 +20,7 @@ def run_async(coroutine: Coroutine) -> Optional[Exception]:
 
 class TestCondaPythonProvider(unittest.IsolatedAsyncioTestCase):
     async def test_all_envs_should_succeed(self):
-        envs = CondaPythonProvider.get_available_envs()
+        envs = await CondaPythonProvider.get_available_envs()
         provider = CondaPythonProvider(list(envs))
         futures = []
         with ThreadPoolExecutor() as pool:

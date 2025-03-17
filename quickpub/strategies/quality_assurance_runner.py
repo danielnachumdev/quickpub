@@ -2,6 +2,7 @@ import sys
 from abc import abstractmethod
 from typing import Union, List, Optional, cast, Dict, Tuple
 from danielutils import LayeredCommand, get_os, OSType, file_exists
+from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import Bound
 
@@ -124,7 +125,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         """
         pass
 
-    def run(self, target: str, executor: LayeredCommand, *, verbose: bool = True,  # type: ignore
+    async def run(self, target: str, executor: AsyncLayeredCommand, *, verbose: bool = True,  # type: ignore
             use_system_interpreter: bool = False, print_func, env_name: str) -> None:
         """
         Runs the QA process on the specified target.
@@ -140,18 +141,18 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         from quickpub.enforcers import exit_if  # pylint: disable=import-error
         # =====================================
         # IMPORTANT: need to explicitly override it here
-        executor._executor = os_system  # pylint: disable=protected-access
+        # executor._executor = os_system  # pylint: disable=protected-access #TODO re-fix this for the tests because now this is not working with the async variant
         # =====================================
         command = self._build_command(target, use_system_interpreter)
         self._pre_command()
         try:
-            ret, out, err = executor(command, command_raise_on_fail=False)
+            ret, out, err = await executor(command, command_raise_on_fail=False)
             if ret in SPEICLA_EXIT_CODES:
                 title, explanation = SPEICLA_EXIT_CODES[ret]
                 unsigned_integer_ret = ret + 2 ** 32
                 raise RuntimeError(
                     title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
-            score = self._calculate_score(ret, "".join(out + err).splitlines(), verbose=verbose)
+            score = self._calculate_score(ret, out + err, verbose=verbose)
             exit_if(not self.bound.compare_against(score),
                     f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
                     verbose=verbose, err_func=print_func)

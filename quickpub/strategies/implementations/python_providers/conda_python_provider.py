@@ -1,5 +1,6 @@
-from typing import Tuple, Optional, Set, Iterator, List
+from typing import Tuple, Optional, Set, Iterator, List, AsyncIterator
 from danielutils import LayeredCommand, warning
+from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from ...python_provider import PythonProvider
 
@@ -13,18 +14,18 @@ class CondaPythonProvider(PythonProvider):
         self._cached_available_envs: Optional[Set[str]] = None
 
     @classmethod
-    def _get_available_envs_impl(cls) -> Set[str]:
-        with LayeredCommand() as base:
-            code, out, err = base("conda env list")
+    async def _get_available_envs_impl(cls) -> Set[str]:
+        with AsyncLayeredCommand() as base:
+            code, out, err = await base("conda env list")
         return set([line.split(' ')[0] for line in out[2:] if len(line.split(' ')) > 1])
 
-    def __iter__(self) -> Iterator[Tuple[str, LayeredCommand]]:
-        available_envs = self.get_available_envs()
+    async def __aiter__(self) -> AsyncIterator[Tuple[str, AsyncLayeredCommand]]:
+        available_envs = await self.get_available_envs()
         for name in self.requested_envs:
             if name not in available_envs:
                 warning(f"Couldn't find env '{name}'")
                 continue
-            yield name, LayeredCommand(f"conda activate {name}")
+            yield name, AsyncLayeredCommand(f"conda activate {name}")
 
 
 __all__ = [

@@ -1,7 +1,10 @@
-from typing import Optional, Union, List, Any
+import asyncio
+import json
+from typing import Optional, Union, List, Any, Literal
 
 import fire
-from danielutils import warning, error
+from tqdm import tqdm
+from danielutils import warning, error, AsyncWorkerPool
 
 from .strategies import BuildSchema, ConstraintEnforcer, UploadTarget, QualityAssuranceRunner, PythonProvider, \
     DefaultPythonProvider
@@ -70,18 +73,16 @@ def publish(
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
-
     for enforcer in enforcers or []:
         enforcer.enforce(name=name, version=version, demo=demo)
-
     try:
-        res = qa(
+        res = asyncio.get_event_loop().run_until_complete(qa(
             python_interpreter_provider,
             global_quality_assurance_runners or [],
             name,
             explicit_src_folder_path,
             validated_dependencies
-        )
+        ))
         if not res:
             error(f"quickpub.publish exited early as '{name}' "
                   "did not pass quality assurance step, see above "

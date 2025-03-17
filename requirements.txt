@@ -1,5 +1,5 @@
 twine
-danielutils>=1.0.0
+danielutils>=1.0.37
 pylint
 mypy
 types-requests
@@ -7,3 +7,4 @@ requests
 beautifulsoup4
 setuptools
 fire
+tqdm
