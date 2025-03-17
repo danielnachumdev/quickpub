@@ -3,10 +3,11 @@ import re
 import sys
 from datetime import datetime
 from typing import ContextManager, List, Callable, Tuple, Dict, Union, Any, Literal, Optional
-from danielutils import LayeredCommand, ColoredText, TemporaryFile, AsyncWorkerPool
+from danielutils import LayeredCommand, ColoredText, TemporaryFile, AsyncWorkerPool, RandomDataGenerator
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 from tqdm import tqdm
 
+from enforcers import ExitEarlyError
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
@@ -50,7 +51,7 @@ async def global_import_sanity_check(
     :return: None
     """
     p = sys.executable if is_system_interpreter else "python"
-    file_name = "./__sanity_check_main.py"
+    file_name = f"./{RandomDataGenerator().name(15)}__sanity_check_main.py"
     with TemporaryFile(file_name) as f:
         f.writelines([f"from {package_name} import *"])
         cmd = f"{p} {file_name}"
@@ -107,11 +108,6 @@ async def validate_dependencies(
                 err_func=err_print_func)
 
 
-def print_error(*args, **kwargs):
-    msg = "".join([ColoredText.red("[ERROR]"), " ", *args])
-    tqdm.write(msg, **kwargs)
-
-
 is_config_run_success: List[bool] = []
 
 
@@ -156,7 +152,7 @@ async def run_config(
         for step in [step1, step2, step3]:
             try:
                 await step
-            except SystemExit:
+            except ExitEarlyError:
                 MyAsyncWorkerPool.log("ERROR", f"Failed {cur}", pool=ASYNC_POOL_NAME)
                 return
             except Exception as e:
@@ -168,6 +164,7 @@ async def run_config(
                     raise RuntimeError(e) from e
                 return
 
+    MyAsyncWorkerPool.log("INFO", f"Finished successfully {cur}", pool=ASYNC_POOL_NAME)
     is_config_run_success[config_id] = True
 
 
@@ -191,6 +188,11 @@ class MyAsyncWorkerPool(AsyncWorkerPool):
         if order:
             ordered_kwargs = {key: kwargs[key] for key in order if key in kwargs}
         tqdm.write(json.dumps(ordered_kwargs, default=str))
+
+
+def print_error(*args, **kwargs):
+    msg = " ".join(args)
+    MyAsyncWorkerPool.log("ERROR", msg, pool=ASYNC_POOL_NAME, **kwargs)
 
 
 async def qa(
