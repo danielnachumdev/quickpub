@@ -3,6 +3,7 @@ import os
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
+from ....enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
@@ -61,7 +62,7 @@ class UnittestRunner(QualityAssuranceRunner):
             return 1 - ((num_failed + num_errors) / num_tests)
 
         except Exception as e:
-            raise SystemExit(f"Failed running Unittest, got exit code {ret}. "
+            raise ExitEarlyError(f"Failed running Unittest, got exit code {ret}. "
                              f"try running manually using: {self._build_command('TARGET')}") from e
 
 

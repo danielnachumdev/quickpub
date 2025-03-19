@@ -4,7 +4,8 @@ from typing import List, Union
 
 from danielutils import LayeredCommand
 
-from quickpub import Bound
+from ....enforcers import ExitEarlyError
+from ....structures import Bound
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
@@ -85,7 +86,7 @@ class PytestRunner(QualityAssuranceRunner):
         if "no tests ran" in rating_line:
             return self.no_tests_score
         if not (m := self.PYTEST_REGEX.match(rating_line)):
-            raise SystemExit(1)
+            raise ExitEarlyError(f"Can't calculate score for pytest on the following line: {rating_line}")
 
         dct = m.groupdict()
         failed = int(dct["failed"] or "0")
