@@ -37,12 +37,18 @@ class MypyRunner(QualityAssuranceRunner):
         if rating_line.endswith("No module named mypy"):
             raise ExitEarlyError("Mypy is not installed.")
 
+        if rating_line.startswith("mypy: error: Cannot find config file"):
+            raise ExitEarlyError(rating_line)
+
         if rating_line.startswith("Success"):
             return 0.0
 
-        exit_if(not (m := self.RATING_PATTERN.match(rating_line)),
-                f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
-                verbose=verbose)
+        exit_if(
+            not (m := self.RATING_PATTERN.match(rating_line)),
+            f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
+            verbose=verbose,
+            err_func=lambda msg: None  # TODO remove
+        )
         num_failed = float(m.group(1))  # type :ignore
         # active_files = float(m.group(2))  # type :ignore
         # total_files = float(m.group(3))  # type :ignore

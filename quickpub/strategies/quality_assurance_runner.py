@@ -20,7 +20,7 @@ class Configurable:
 
 
 class HasOptionalExecutable:
-    PYTHON: str = sys.executable
+    PYTHON: str = "python"  # sys.executable
 
     @property
     def use_executable(self) -> bool:
@@ -126,7 +126,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         pass
 
     async def run(self, target: str, executor: AsyncLayeredCommand, *, verbose: bool = True,  # type: ignore
-                  use_system_interpreter: bool = False, print_func, env_name: str) -> None:
+                  use_system_interpreter: bool = False, env_name: str) -> None:
         """
         Runs the QA process on the specified target.
 
@@ -134,7 +134,6 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         :param executor: The executor object to run the command.
         :param verbose: Whether to output verbose logs, default is True.
         :param use_system_interpreter: Whether to use the system interpreter, default is False.
-        :param print_func: The function to use for printing output.
         :param env_name: The name of the environment in which the QA runner is executed.
         """
         from quickpub.proxy import os_system  # pylint: disable=import-error
@@ -153,9 +152,12 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
                 raise RuntimeError(
                     title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
             score = self._calculate_score(ret, out + err, verbose=verbose)
-            exit_if(not self.bound.compare_against(score),
-                    f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
-                    verbose=verbose, err_func=print_func)
+            exit_if(
+                not self.bound.compare_against(score),
+                f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
+                verbose=verbose,
+                err_func=lambda msg: None  # TODO remove
+            )
         except Exception as e:
             raise RuntimeError(
                 f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}",
