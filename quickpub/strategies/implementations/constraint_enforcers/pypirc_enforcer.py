@@ -15,7 +15,7 @@ class PypircEnforcer(ConstraintEnforcer):
 
     def enforce(self, **kwargs) -> None:
         if not file_exists(self.path):
-            raise SystemExit(f"Couldn't find '{self.path}'")
+            raise self.EXCEPTION_TYPE(f"Couldn't find '{self.path}'")
         if self.should_enforce_expected_format:
             with open(self.path, "r") as f:
                 text = f.read()

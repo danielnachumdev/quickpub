@@ -1,11 +1,10 @@
 import asyncio
-import json
-from typing import Optional, Union, List, Any, Literal
+from typing import Optional, Union, List, Any
 
 import fire
-from tqdm import tqdm
-from danielutils import warning, error, AsyncWorkerPool
+from danielutils import warning, error
 
+from quickpub import ExitEarlyError
 from .strategies import BuildSchema, ConstraintEnforcer, UploadTarget, QualityAssuranceRunner, PythonProvider, \
     DefaultPythonProvider
 from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
@@ -87,8 +86,8 @@ def publish(
             error(f"quickpub.publish exited early as '{name}' "
                   "did not pass quality assurance step, see above "
                   "logs to pass this step.")
-            raise SystemExit(1)
-    except SystemExit as e:
+            raise ExitEarlyError(1)
+    except ExitEarlyError as e:
         raise e
     except Exception as e:
         raise RuntimeError("Quality assurance stage has failed") from e

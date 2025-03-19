@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase
 
-from quickpub import PylintRunner, DefaultPythonProvider, Bound
+from quickpub import PylintRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 CODE: str = """
@@ -62,13 +62,14 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
                 bound=f"<{NUM_ERRORS + 1}",
                 executable_path=os.path.join(TEMP_VENV_NAME, "Scripts", "python.exe"),
             )
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
                     target="./",
                     executor=self.base,
                     print_func=print,
                     env_name=self.env_name
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self):
         with self.base:
@@ -95,13 +96,14 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             f.write(CODE)
         self.runner.bound = Bound.from_string("<=0")
         with self.base:
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
                     target="./",
                     executor=self.base,
                     print_func=print,
                     env_name=self.env_name
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_bound_should_succeed(self):
         create_file("__init__.py")

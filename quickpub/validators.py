@@ -45,5 +45,6 @@ __all__ = [
     "validate_version",
     "validate_python_version",
     "validate_keywords",
-    "validate_dependencies"
+    "validate_dependencies",
+    "validate_source"
 ]

@@ -22,15 +22,16 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
         executor: RetryExecutor[Response] = RetryExecutor(ConstantBackOffStrategy(1))
         response = executor.execute(wrapper, 5)
         if response is None:
-            raise SystemExit(self._HTTP_FAILED_MESSAGE)
+            raise self.EXCEPTION_TYPE(self._HTTP_FAILED_MESSAGE)
         html = response.content.decode()
         i = html.index(f" {name} ")
         try:
             remote_version = Version.from_str(html[i:i + 50].splitlines()[0].strip().split()[1])
         except Exception as e:
-            raise SystemExit(f"{self.__class__.__name__} encountered an unexpected error while parsing.") from e
+            raise self.EXCEPTION_TYPE(f"{self.__class__.__name__} encountered an unexpected error while parsing.",
+                                      e) from e
         if not version > remote_version:
-            raise SystemExit(
+            raise self.EXCEPTION_TYPE(
                 f"Specified version is '{version}' but (remotely available) latest existing is '{remote_version}'")
 
 

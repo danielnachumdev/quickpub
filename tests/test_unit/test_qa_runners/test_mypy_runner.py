@@ -3,11 +3,9 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from danielutils import AutoCWDTestCase, delete_directory, create_file, get_current_file_name, \
-    get_current_working_directory, AlwaysTeardownTestCase
+from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase
 
-from enforcers import ExitEarlyError
-from quickpub import MypyRunner, DefaultPythonProvider, Bound
+from quickpub import MypyRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 CODE: str = """
@@ -15,7 +13,7 @@ from unittest.mock import patch
 
 from danielutils import AutoCWDTestCase, AlwaysTeardownTestCase, LayeredCommand
 
-from quickpub import MypyRunner
+from quickpub import MypyRunner, ExitEarlyError
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 base: int = LayeredCommand()
@@ -28,14 +26,14 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
     def test_no_mypy(self, *args) -> int:
         with base:
             base(f"python -m venv {TEMP_VENV_NAME}")
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(ExitEarlyError):
                 runner.run(
                     target="./",
                     executor=base,
                     print_func=print,
                 )
 """
-NUM_ERRORS: int = 8
+NUM_ERRORS: int = 10
 CONFIG: str = """
 [mypy]
 strict = True
@@ -64,13 +62,14 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
                 bound=f"<{NUM_ERRORS + 1}",
                 executable_path=os.path.join(TEMP_VENV_NAME, "Scripts", "python.exe"),
             )
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
                     target="./",
                     executor=self.base,
                     print_func=print,
                     env_name=self.env_name
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self):
         with self.base:

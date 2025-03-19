@@ -1,11 +1,12 @@
 from abc import abstractmethod
 from typing import Type
 
+from ..enforcers import ExitEarlyError
 from .quickpub_strategy import QuickpubStrategy
 
 
 class ConstraintEnforcer(QuickpubStrategy):
-    EXCEPTION_TYPE: Type[BaseException] = SystemExit
+    EXCEPTION_TYPE: Type[BaseException] = ExitEarlyError
 
     @abstractmethod
     def enforce(self, **kwargs) -> None: ...

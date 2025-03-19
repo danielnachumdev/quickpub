@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock, Mock
 from danielutils import warning, get_current_working_directory
 from requests import Response
 
-from quickpub import PypiRemoteVersionEnforcer, Version
+from quickpub import PypiRemoteVersionEnforcer, Version, ExitEarlyError
 
 PACKAGE_NAME: str = "foo"
 LOWEST_VERSION: Version = Version.from_str("0.0.0")
@@ -34,14 +34,14 @@ class TestPypiRemoteVersionProvider(unittest.TestCase):
     @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
            return_value=None)
     def test_request_failed(self, *args):
-        with self.assertRaises(SystemExit) as e:
+        with self.assertRaises(ExitEarlyError) as e:
             PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, HIGHER_VERSION)
-        self.assertEqual(e.exception.code, PypiRemoteVersionEnforcer._HTTP_FAILED_MESSAGE)
+        self.assertEqual(str(e.exception), PypiRemoteVersionEnforcer._HTTP_FAILED_MESSAGE)
 
     @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
            return_value=create_response(include_content=True, target_package_version=HIGHER_VERSION))
     def test_should_fail(self, *args):
-        with self.assertRaises(SystemExit) as e:
+        with self.assertRaises(ExitEarlyError) as e:
             PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, LOWEST_VERSION)
 
     @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",

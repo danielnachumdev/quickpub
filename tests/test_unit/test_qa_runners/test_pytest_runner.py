@@ -25,14 +25,15 @@ class TestPytestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
             target="./"
         )
         # TODO fix
-        with self.assertRaises(ExitEarlyError):
-            with self.base:  # type: ignore
+        with self.base:  # type: ignore
+            with self.assertRaises(RuntimeError) as e:
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_default_empty_tests(self):
         runner = PytestRunner(
@@ -45,14 +46,15 @@ class TestPytestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
 import pytest
             """)
         #     TODO fix
-        with self.assertRaises(ExitEarlyError):
-            with self.base:  # type: ignore
+        with self.base:  # type: ignore
+            with self.assertRaises(RuntimeError) as e:
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_only_one_test_that_passes(self):
         runner = PytestRunner(
@@ -89,14 +91,15 @@ def test_add():
     assert 1 + 1 == 1        
                     """)
         #     TODO fix
-        with self.assertRaises(ExitEarlyError):
-            with self.base:  # type: ignore
+        with self.base:  # type: ignore
+            with self.assertRaises(RuntimeError) as e:
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_combined(self):
         runner = PytestRunner(
@@ -139,14 +142,15 @@ def test_add2():
     assert 1 + 1 == 2        
                             """)
         #     TODO fix
-        with self.assertRaises(ExitEarlyError):
-            with self.base:  # type: ignore
+        with self.base:  # type: ignore
+            with self.assertRaises(RuntimeError) as e:
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
                     print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
+            self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_combined_with_bound_should_pass(self):
         runner = PytestRunner(
