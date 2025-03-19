@@ -1,10 +1,8 @@
-import os, sys
 import unittest
 
 from danielutils import create_file, AutoCWDTestCase
 
-from enforcers import ExitEarlyError
-from quickpub import DefaultPythonProvider, PytestRunner
+from quickpub import DefaultPythonProvider, PytestRunner, ExitEarlyError
 
 TEST_FILE_PATH: str = "./test_foo.py"
 

@@ -86,7 +86,7 @@ def publish(
             error(f"quickpub.publish exited early as '{name}' "
                   "did not pass quality assurance step, see above "
                   "logs to pass this step.")
-            raise ExitEarlyError(1)
+            raise ExitEarlyError("QA step Failed")
     except ExitEarlyError as e:
         raise e
     except Exception as e:

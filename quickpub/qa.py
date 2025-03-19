@@ -7,7 +7,7 @@ from danielutils import LayeredCommand, ColoredText, TemporaryFile, AsyncWorkerP
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 from tqdm import tqdm
 
-from enforcers import ExitEarlyError
+from .enforcers import ExitEarlyError
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level

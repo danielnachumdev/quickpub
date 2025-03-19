@@ -3,7 +3,7 @@ from typing import Optional, List
 
 from danielutils import LayeredCommand
 
-from enforcers import ExitEarlyError
+from ....enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
 
 
