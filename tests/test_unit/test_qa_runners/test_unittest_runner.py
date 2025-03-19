@@ -27,7 +27,6 @@ class TestUnittestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -36,7 +35,6 @@ class TestUnittestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -57,7 +55,6 @@ class TestFoo(unittest.TestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -80,7 +77,6 @@ class TestFoo(unittest.TestCase):
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -103,7 +99,6 @@ class TestFoo(unittest.TestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -129,7 +124,6 @@ class TestFoo(unittest.TestCase):
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -156,7 +150,6 @@ class TestFoo(unittest.TestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -183,7 +176,6 @@ class TestFoo(unittest.TestCase):
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -210,7 +202,6 @@ class TestFoo(unittest.TestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -240,6 +231,5 @@ class TestFoo(unittest.TestCase):
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )

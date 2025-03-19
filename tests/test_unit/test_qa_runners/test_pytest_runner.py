@@ -28,7 +28,6 @@ class TestPytestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -49,7 +48,6 @@ import pytest
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -71,7 +69,6 @@ def test_add():
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -94,7 +91,6 @@ def test_add():
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -119,7 +115,6 @@ def test_add2():
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )
 
@@ -145,7 +140,6 @@ def test_add2():
                 await runner.run(
                     target="./",
                     executor=self.base,  # type: ignore
-                    print_func=print,
                     env_name=self.env_name  # type: ignore
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -170,6 +164,5 @@ def test_add2():
             await runner.run(
                 target="./",
                 executor=self.base,  # type: ignore
-                print_func=print,
                 env_name=self.env_name  # type: ignore
             )

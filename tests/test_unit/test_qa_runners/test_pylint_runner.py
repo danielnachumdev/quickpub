@@ -30,7 +30,6 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
                 runner.run(
                     target="./",
                     executor=base,
-                    print_func=print,
                 )
 """
 NUM_ERRORS: int = 8
@@ -66,7 +65,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
                 await self.runner.run(
                     target="./",
                     executor=self.base,
-                    print_func=print,
                     env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -76,7 +74,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -86,7 +83,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -100,7 +96,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
                 await self.runner.run(
                     target="./",
                     executor=self.base,
-                    print_func=print,
                     env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -114,7 +109,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -129,7 +123,6 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -147,6 +140,5 @@ class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysT
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )

@@ -30,7 +30,6 @@ class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
                 runner.run(
                     target="./",
                     executor=base,
-                    print_func=print,
                 )
 """
 NUM_ERRORS: int = 10
@@ -66,7 +65,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
                 await self.runner.run(
                     target="./",
                     executor=self.base,
-                    print_func=print,
                     env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
@@ -76,7 +74,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -86,7 +83,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -101,7 +97,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
                 await self.runner.run(
                     target="./",
                     executor=self.base,
-                    print_func=print,
                     env_name=self.env_name
                 )
             except Exception as e:
@@ -116,7 +111,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -131,7 +125,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -149,7 +142,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
             await self.runner.run(
                 target="./",
                 executor=self.base,
-                print_func=print,
                 env_name=self.env_name
             )
 
@@ -186,7 +178,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #                 runner.run(
 #                     target="./",
 #                     executor=base,
-#                     print_func=print,
 #                 )
 # """
 # NUM_ERRORS: int = 8
@@ -222,7 +213,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #                 self.runner.run(
 #                     target="./",
 #                     executor=self.base,
-#                     print_func=print,
 #                     env_name=self.env_name
 #                 )
 #
@@ -231,7 +221,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #             self.runner.run(
 #                 target="./",
 #                 executor=self.base,
-#                 print_func=print,
 #                 env_name=self.env_name
 #             )
 #
@@ -241,7 +230,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #             self.runner.run(
 #                 target="./",
 #                 executor=self.base,
-#                 print_func=print,
 #                 env_name=self.env_name
 #             )
 #
@@ -255,7 +243,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #                 self.runner.run(
 #                     target="./",
 #                     executor=self.base,
-#                     print_func=print,
 #                     env_name=self.env_name
 #                 )
 #
@@ -268,7 +255,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #             self.runner.run(
 #                 target="./",
 #                 executor=self.base,
-#                 print_func=print,
 #                 env_name=self.env_name
 #             )
 #
@@ -283,7 +269,6 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #             self.runner.run(
 #                 target="./",
 #                 executor=self.base,
-#                 print_func=print,
 #                 env_name=self.env_name
 #             )
 #
@@ -301,6 +286,5 @@ class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTe
 #             self.runner.run(
 #                 target="./",
 #                 executor=self.base,
-#                 print_func=print,
 #                 env_name=self.env_name
 #             )
