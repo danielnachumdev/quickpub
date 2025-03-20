@@ -177,29 +177,29 @@ async def qa(
     i = 0
     with AsyncLayeredCommand() as base:
         async for env_name, async_executor in python_provider:
-            for runner in quality_assurance_strategies:
+            with async_executor:
                 async_executor.prev = base
-                with async_executor:
-                    await pool.submit(
-                        validate_dependencies,
-                        args=[
-                            python_provider.exit_on_fail,
-                            dependencies,
-                            async_executor,
-                            env_name,
-                        ],
-                        name=f"Validate dependencies for env '{env_name}'",
-                    )
-                    await pool.submit(
-                        global_import_sanity_check,
-                        args=[
-                            package_name,
-                            async_executor,
-                            is_system_interpreter,
-                            env_name,
-                        ],
-                        name=f"Global Import Sanity Check for env '{env_name}'",
-                    )
+                await pool.submit(
+                    validate_dependencies,
+                    args=[
+                        python_provider.exit_on_fail,
+                        dependencies,
+                        async_executor,
+                        env_name,
+                    ],
+                    name=f"Validate dependencies for env '{env_name}'",
+                )
+                await pool.submit(
+                    global_import_sanity_check,
+                    args=[
+                        package_name,
+                        async_executor,
+                        is_system_interpreter,
+                        env_name,
+                    ],
+                    name=f"Global Import Sanity Check for env '{env_name}'",
+                )
+                for runner in quality_assurance_strategies:
                     await pool.submit(
                         run_config,
                         args=[env_name, async_executor, runner, i],
@@ -208,11 +208,12 @@ async def qa(
                                     validation_exit_on_fail=python_provider.exit_on_fail),
                         name=f"Run config for '{env_name}' + '{runner.__class__.__qualname__}'",
                     )
-                i += 1
-        for _ in range(i):
-            is_config_run_success.append(False)
-        await pool.start()
-        await pool.join()
+                    i += 1
+    for _ in range(i):
+        is_config_run_success.append(False)
+    await pool.start()
+    await pool.join()
+
     return all(is_config_run_success)
 
 
