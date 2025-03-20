@@ -33,6 +33,10 @@ class PylintRunner(QualityAssuranceRunner):
         if len(lines) == 1:
             if lines[0].endswith("No module named pylint"):
                 raise ExitEarlyError("No module named pylint found")
+
+            if lines[0].startswith("The config file") and lines[0].endswith("doesn't exist!"):
+                raise ExitEarlyError(lines[0])
+
             raise ExitEarlyError("Got an unexpected error!")
         index = -2
         if lines[-1] == '\x1b[0m':
