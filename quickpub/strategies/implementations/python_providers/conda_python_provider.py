@@ -25,10 +25,12 @@ class CondaPythonProvider(PythonProvider):
         available_envs = await self.get_available_envs()
         self.aiter_index += 1
         name = self.requested_envs[self.aiter_index - 1]
-        if name not in available_envs:
-            warning(f"Couldn't find env '{name}'")
-            return name, None
-        return name, AsyncLayeredCommand(f"conda activate {name}")
+        while name not in available_envs and self.aiter_index < len(self.requested_envs):
+            self.aiter_index += 1
+            name = self.requested_envs[self.aiter_index - 1]
+        if self.aiter_index < len(self.requested_envs):
+            return name, AsyncLayeredCommand(f"conda activate {name}")
+        raise StopAsyncIteration
 
 
 __all__ = [
