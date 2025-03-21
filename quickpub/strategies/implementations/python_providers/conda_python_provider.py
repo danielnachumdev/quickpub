@@ -1,7 +1,7 @@
-from typing import Tuple, Optional, Set, Iterator, List, AsyncIterator
-from danielutils import LayeredCommand, warning
-from danielutils.async_.async_layered_command import AsyncLayeredCommand
+from typing import Tuple, Optional, Set, List
+from danielutils import AsyncLayeredCommand
 
+from ....enforcers import ExitEarlyError
 from ...python_provider import PythonProvider
 
 
@@ -25,12 +25,9 @@ class CondaPythonProvider(PythonProvider):
         available_envs = await self.get_available_envs()
         self.aiter_index += 1
         name = self.requested_envs[self.aiter_index - 1]
-        while name not in available_envs and self.aiter_index < len(self.requested_envs):
-            self.aiter_index += 1
-            name = self.requested_envs[self.aiter_index - 1]
-        if self.aiter_index < len(self.requested_envs):
-            return name, AsyncLayeredCommand(f"conda activate {name}")
-        raise StopAsyncIteration
+        if name not in available_envs:
+            raise ExitEarlyError(f"Can't find env '{name}' in list of conda environments, try 'conda env list'")
+        return name, AsyncLayeredCommand(f"conda activate {name}")
 
 
 __all__ = [
