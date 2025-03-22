@@ -1,11 +1,9 @@
-import json
 import re
 import sys
 from datetime import datetime
 from typing import ContextManager, List, Callable, Tuple, Dict, Union, Any, Literal, Optional
-from danielutils import LayeredCommand, ColoredText, TemporaryFile, AsyncWorkerPool, RandomDataGenerator
+from danielutils import TemporaryFile, AsyncWorkerPool, RandomDataGenerator
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
-from tqdm import tqdm
 
 from .enforcers import ExitEarlyError
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
@@ -144,35 +142,38 @@ async def run_config(
     is_config_run_success[config_id] = True
 
 
-class MyAsyncWorkerPool(AsyncWorkerPool):
-    @classmethod
-    def log(
-            self,
-            level: Literal["INFO", "WARNING", "ERROR"],
-            message: str,
-            order: Optional[List[str]] = AsyncWorkerPool.DEFAULT_ORDER_IF_KEY_EXISTS,
-            **kwargs
-    ) -> None:
-        kwargs["level"] = level
-        kwargs["message"] = message
-        kwargs["timestamp"] = datetime.now().isoformat()
-        ordered_kwargs = kwargs
-        if order:
-            ordered_kwargs = {key: kwargs[key] for key in order if key in kwargs}
-            ordered_kwargs.update(kwargs)
-        tqdm.write(json.dumps(ordered_kwargs, default=str))
-
-
 async def qa(
         python_provider: PythonProvider,
         quality_assurance_strategies: List[QualityAssuranceRunner],
         package_name: str,
         src_folder_path: str,
-        dependencies: list
+        dependencies: list,
+        log: Optional[Callable[[Any], None]] = None
 ) -> bool:
     is_config_run_success.clear()
     from .strategies import DefaultPythonProvider
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
+
+    class MyAsyncWorkerPool(AsyncWorkerPool):
+        @classmethod
+        def log(
+                self,
+                level: Literal["INFO", "WARNING", "ERROR"],
+                message: str,
+                order: Optional[List[str]] = AsyncWorkerPool.DEFAULT_ORDER_IF_KEY_EXISTS,
+                **kwargs
+        ) -> None:
+            kwargs["level"] = level
+            kwargs["message"] = message
+            kwargs["timestamp"] = datetime.now().isoformat()
+            ordered_kwargs = kwargs
+            if order:
+                ordered_kwargs = {key: kwargs[key] for key in order if key in kwargs}
+                ordered_kwargs.update(kwargs)
+
+            if log:
+                log(ordered_kwargs)
+
     pool = MyAsyncWorkerPool(ASYNC_POOL_NAME, num_workers=5)
     i = 0
     with AsyncLayeredCommand() as base:

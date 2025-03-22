@@ -1,7 +1,10 @@
+import json
+
+from tqdm import tqdm
+
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
     PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer, \
     PypiRemoteVersionEnforcer, LocalVersionEnforcer
-
 
 def main() -> None:
     publish(
@@ -13,7 +16,7 @@ def main() -> None:
         homepage="https://github.com/danielnachumdev/quickpub",
         enforcers=[
             PypircEnforcer(), ReadmeEnforcer(), LicenseEnforcer(),
-            LocalVersionEnforcer()#, PypiRemoteVersionEnforcer()
+            LocalVersionEnforcer()  # , PypiRemoteVersionEnforcer()
         ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
@@ -25,9 +28,9 @@ def main() -> None:
         ],
         dependencies=["danielutils>=1.0.0", "requests", "fire"],
         min_python="3.8.0",
+        log=lambda obj: tqdm.write(json.dumps(obj, default=str)),
         demo=True
     )
-
 
 if __name__ == '__main__':
     main()

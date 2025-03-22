@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional, Union, List, Any
+from typing import Optional, Union, List, Any, Callable
 
 import fire
 from danielutils import warning, error
@@ -37,10 +37,13 @@ def publish(
         keywords: Optional[List[str]] = None,
         explicit_src_folder_path: Optional[str] = None,
 
+        log: Optional[Callable[[Any], None]] = None,
+
         demo: bool = False,
         config: Optional[Any] = None,
 ) -> None:
     """The main function for publishing a package. It performs all necessary steps to prepare and publish the package.
+
 
      :param name: The name of the package.
      :param author: The name of the author.
@@ -58,6 +61,7 @@ def publish(
      :param min_python: The minimum Python version required for the package. Defaults to the Python version running this script.
      :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
      :param dependencies: A list of dependencies for the package. Defaults to None.
+     :param log: A function to receive log statements about the process and print them (or do something else idk)
      :param demo: Whether to perform checks without making any changes. Defaults to False.
      :param config: Reserved for future use. Defaults to None.
 
@@ -80,7 +84,8 @@ def publish(
             global_quality_assurance_runners or [],
             name,
             explicit_src_folder_path,
-            validated_dependencies
+            validated_dependencies,
+            log
         ))
         if not res:
             error(f"quickpub.publish exited early as '{name}' "
