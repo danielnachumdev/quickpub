@@ -95,7 +95,7 @@ def publish(
     except ExitEarlyError as e:
         raise e
     except Exception as e:
-        raise RuntimeError("Quality assurance stage has failed") from e
+        raise RuntimeError("Quality assurance stage has failed", e) from e
 
     create_setup()
     create_toml(

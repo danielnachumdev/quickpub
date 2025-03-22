@@ -51,11 +51,15 @@ async def global_import_sanity_check(
     with TemporaryFile(file_name) as f:
         f.writelines([f"from {package_name} import *"])
         cmd = f"{p} {file_name}"
-        code, _, _ = await executor(cmd)
+        code, stdout, stderr = await executor(cmd)
+        msg = f"Env '{env_name}' failed sanity check."
+        if stderr:
+            if stderr[0] == 'Traceback (most recent call last):':
+                msg += f" Got error '{stderr[-1]}' when tried 'from {package_name} import *'"
+        else:
+            msg += f" Try manually running the following script 'from {package_name} import *'"
         exit_if(
-            code != 0,
-            f"Env '{env_name}' failed sanity check. "
-            f"Try manually running the following script 'from {package_name} import *'",
+            code != 0, msg,
             verbose=True,
             err_func=lambda msg: None  # TODO remove
         )

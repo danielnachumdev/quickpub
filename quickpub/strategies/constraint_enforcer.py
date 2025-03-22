@@ -6,7 +6,7 @@ from .quickpub_strategy import QuickpubStrategy
 
 
 class ConstraintEnforcer(QuickpubStrategy):
-    EXCEPTION_TYPE: Type[BaseException] = ExitEarlyError
+    EXCEPTION_TYPE: Type[Exception] = ExitEarlyError
 
     @abstractmethod
     def enforce(self, **kwargs) -> None: ...

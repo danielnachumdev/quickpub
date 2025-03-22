@@ -10,6 +10,7 @@ TEST_FILE_PATH: str = "./test_foo.py"
 class TestPytestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
     async def asyncSetUp(self):
         async for name, base in DefaultPythonProvider():
+            base.prev = None
             self.env_name, self.base = name, base
             break
         self.base._instance_flush_stdout = False

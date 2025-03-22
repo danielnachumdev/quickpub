@@ -1,10 +1,12 @@
-twine
 danielutils>=1.0.37
+pytest
+requests
+tqdm
+fire
+# ===== DEV =====
+twine
 pylint
 mypy
 types-requests
-requests
 beautifulsoup4
 setuptools
-fire
-tqdm

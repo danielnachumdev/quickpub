@@ -39,10 +39,11 @@ strict = True
 """
 
 
-class TestPylintRunner(unittest.IsolatedAsyncioTestCase,AutoCWDTestCase, AlwaysTeardownTestCase):
+class TestPylintRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTeardownTestCase):
 
     async def asyncSetUp(self):
         async for name, base in DefaultPythonProvider():
+            base.prev = None
             self.env_name, self.base = name, base
             break
         self.runner = PylintRunner(
