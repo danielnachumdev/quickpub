@@ -1,14 +1,14 @@
 import os
 import unittest
 
-from danielutils import AutoCWDTestCase, create_file
+from danielutils import AutoCWDTestCase, create_file, AsyncAutoCWDTestCase
 
 from quickpub import UnittestRunner, DefaultPythonProvider, ExitEarlyError
 
 TEST_FILE_PATH: str = "./test_foo.py"
 
 
-class TestUnittestRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
+class TestUnittestRunner(AsyncAutoCWDTestCase):
     async def asyncSetUp(self):
         async for name, base in DefaultPythonProvider():
             base.prev = None

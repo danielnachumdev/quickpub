@@ -3,7 +3,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase
+from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase, AsyncAutoCWDTestCase
 
 from quickpub import MypyRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
@@ -39,7 +39,7 @@ strict = True
 """
 
 
-class TestMypyRunner(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase, AlwaysTeardownTestCase):
+class TestMypyRunner(AsyncAutoCWDTestCase, AlwaysTeardownTestCase):
     async def asyncSetUp(self):
         async for name, base in DefaultPythonProvider():
             base.prev = None

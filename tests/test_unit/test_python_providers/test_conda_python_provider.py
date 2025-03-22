@@ -1,9 +1,7 @@
-import asyncio
 import unittest
-from concurrent.futures import ThreadPoolExecutor
-from typing import Coroutine, Optional, AsyncIterator, Tuple, TypeVar
+from typing import AsyncIterator, Tuple, TypeVar
 
-from danielutils import AsyncWorkerPool
+from danielutils import AsyncWorkerPool, AutoCWDTestCase
 
 from quickpub import CondaPythonProvider
 
@@ -17,7 +15,7 @@ async def async_enumerate(iterable: AsyncIterator[T], start: int = 0) -> AsyncIt
         index += 1
 
 
-class TestCondaPythonProvider(unittest.IsolatedAsyncioTestCase):
+class TestCondaPythonProvider(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
     async def test_all_envs_should_succeed(self):
         envs = await CondaPythonProvider.get_available_envs()
         provider = CondaPythonProvider(list(envs))
