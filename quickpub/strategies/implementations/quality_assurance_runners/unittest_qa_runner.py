@@ -25,26 +25,22 @@ class UnittestRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
 
-    def _pre_command(self):
-        self._cwd = get_current_working_directory()
-        if self.target is None:
-            self.target = ""
-            warning("This is not supposed to happen. See quickpub's UnitestRunner._pre_command")
-        set_current_working_directory(os.path.join(self._cwd, self.target))
+    def _pre_command(self) -> None:
+        pass
 
     def _post_command(self):
-        set_current_working_directory(self._cwd)
+        pass
+        # set_current_working_directory(self._cwd)
 
     def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8", no_tests_score: float = 0) -> None:
         QualityAssuranceRunner.__init__(self, name="unittest", bound=bound, target=target)
-        self._cwd = ""
         self.no_tests_score = no_tests_score
 
     def _build_command(self, src: str, *args, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
         rel = _removesuffix(os.path.relpath(src, self.target), src.lstrip("./\\"))
         command += f" discover -s {rel}"
-        return command  # f"cd {self.target}; {command}"  # f"; cd {self.target}"
+        return f"cd {os.path.join(os.getcwd(), self.target)} & {command} & cd {os.getcwd()}" # This is for concurrency reasons
 
     def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
         num_tests_ran_line = lines[-3]
@@ -63,7 +59,7 @@ class UnittestRunner(QualityAssuranceRunner):
 
         except Exception as e:
             raise ExitEarlyError(f"Failed running Unittest, got exit code {ret}. "
-                             f"try running manually using: {self._build_command('TARGET')}") from e
+                                 f"try running manually using: {self._build_command('TARGET')}") from e
 
 
 __all__ = [
