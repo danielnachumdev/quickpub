@@ -1,12 +1,11 @@
 import sys
-import unittest
 
-from danielutils import get_python_version, AutoCWDTestCase
+from danielutils import get_python_version, AsyncAutoCWDTestCase
 
 from quickpub import DefaultPythonProvider
 
 
-class TestDefaultPythonProvider(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
+class TestDefaultPythonProvider(AsyncAutoCWDTestCase):
     async def test_correct_version(self):
         async for x in DefaultPythonProvider():
             name, extr = x

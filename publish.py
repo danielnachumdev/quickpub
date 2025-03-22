@@ -9,7 +9,7 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
 def main() -> None:
     publish(
         name="quickpub",
-        version="2.0.4",
+        version="3.0.0",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",

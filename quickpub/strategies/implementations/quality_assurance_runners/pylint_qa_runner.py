@@ -37,7 +37,7 @@ class PylintRunner(QualityAssuranceRunner):
             if lines[0].startswith("The config file") and lines[0].endswith("doesn't exist!"):
                 raise ExitEarlyError(lines[0])
 
-            raise ExitEarlyError("Got an unexpected error!")
+            raise ExitEarlyError(f"Got an unexpected error: {lines[0]}")
         index = -2
         if lines[-1] == '\x1b[0m':
             index += -1

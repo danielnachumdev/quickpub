@@ -36,8 +36,9 @@ def publish(
         dependencies: Optional[List[Union[str, Dependency]]] = None,
         keywords: Optional[List[str]] = None,
         explicit_src_folder_path: Optional[str] = None,
-
+        # ========== QA Parameters ==========
         log: Optional[Callable[[Any], None]] = None,
+        show_pbar: bool = False,
 
         demo: bool = False,
         config: Optional[Any] = None,

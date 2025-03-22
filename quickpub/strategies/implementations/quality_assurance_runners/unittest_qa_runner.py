@@ -1,5 +1,6 @@
 import re
 import os
+from pathlib import Path
 from typing import Optional, List
 from danielutils import get_current_working_directory, set_current_working_directory, LayeredCommand, warning
 
@@ -40,7 +41,8 @@ class UnittestRunner(QualityAssuranceRunner):
         command: str = self.get_executable()
         rel = _removesuffix(os.path.relpath(src, self.target), src.lstrip("./\\"))
         command += f" discover -s {rel}"
-        return f"cd {os.path.join(os.getcwd(), self.target)} & {command} & cd {os.getcwd()}" # This is for concurrency reasons
+        normalized_target_path = Path(os.path.join(os.getcwd(), self.target)).resolve()
+        return f"cd {normalized_target_path} & {command} & cd {Path(os.getcwd()).resolve()}"  # This is for concurrency reasons
 
     def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
         num_tests_ran_line = lines[-3]

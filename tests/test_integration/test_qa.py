@@ -1,6 +1,5 @@
 import os
-import unittest
-from danielutils import create_file, create_directory, AutoCWDTestCase
+from danielutils import create_file, create_directory, AsyncAutoCWDTestCase
 
 from quickpub import CondaPythonProvider, ExitEarlyError
 from quickpub.qa import qa
@@ -8,7 +7,7 @@ from quickpub.qa import qa
 PACKAGE_NAME: str = "foo"
 
 
-class TestCondaPythonProvider(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase):
+class TestCondaPythonProvider(AsyncAutoCWDTestCase):
 
     async def asyncSetUp(self):
         create_directory(PACKAGE_NAME)

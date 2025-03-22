@@ -1,8 +1,9 @@
 danielutils>=1.0.37
-pytest
 requests
 tqdm
 fire
+# ===== TESTING =====
+pytest
 # ===== DEV =====
 twine
 pylint
