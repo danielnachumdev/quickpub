@@ -2,7 +2,7 @@ import os
 import unittest
 from danielutils import create_file, create_directory, AutoCWDTestCase
 
-from quickpub import CondaPythonProvider
+from quickpub import CondaPythonProvider, ExitEarlyError
 from quickpub.qa import qa
 
 PACKAGE_NAME: str = "foo"
@@ -34,7 +34,6 @@ class TestCondaPythonProvider(unittest.IsolatedAsyncioTestCase, AutoCWDTestCase)
 
     async def test_non_existing_env_should_skip(self):
         NON_EXISTENT_ENV_NAME: str = "sdjbnglksjdgnwkerjg"
-        l = []
-        async for x in CondaPythonProvider([NON_EXISTENT_ENV_NAME]):
-            l.append(x)
-        self.assertEqual(l, [])
+        with self.assertRaises(ExitEarlyError):
+            async for x in CondaPythonProvider([NON_EXISTENT_ENV_NAME]):
+                pass
