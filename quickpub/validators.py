@@ -2,12 +2,13 @@ from typing import Optional, Union, List
 
 from danielutils import get_python_version
 
+from .enforcers import ExitEarlyError
 from .structures import Version, Dependency
 
 
 def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
-    if version is None:
-        return Version(0, 0, 1)
+    if not bool(version):
+        raise ExitEarlyError(f"Must supply a version number. got '{version}'")
     return version if isinstance(version, Version) else Version.from_str(version)  # type: ignore
 
 

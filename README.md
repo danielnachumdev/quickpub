@@ -1,4 +1,4 @@
-# quickpub V2.0.2
+# quickpub V3.0.0
 **Tested python versions**: `3.8.0`, `3.9.0`, `3.10.13`,
 
 Example usage of how this package was published
