@@ -20,7 +20,7 @@ class Configurable:
 
 
 class HasOptionalExecutable:
-    PYTHON: str = "python"  # sys.executable
+    PYTHON: str = sys.executable
 
     @property
     def use_executable(self) -> bool:

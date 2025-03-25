@@ -7,9 +7,14 @@ from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 
 class PythonProvider(AsyncIterator, QuickpubStrategy):
-    def __init__(self, auto_install_dependencies: bool = True, *, requested_envs: List[str],
-                 explicit_versions: List[str],
-                 exit_on_fail: bool = False) -> None:
+    def __init__(
+            self,
+            auto_install_dependencies: bool = True,
+            *,
+            requested_envs: List[str],
+            explicit_versions: List[str],
+            exit_on_fail: bool = False
+    ) -> None:
         self.auto_install_dependencies = auto_install_dependencies
         self.requested_envs = requested_envs
         self.explicit_versions = explicit_versions

@@ -36,7 +36,7 @@ class TestCondaPythonProvider(AsyncAutoCWDTestCase):
 
         async for i, tup in async_enumerate(provider):
             env_name, executor = tup
-            await pool.submit(wrapper, env_name, executor)
+            await pool.submit(wrapper, args=[env_name, executor])
 
         await pool.start()
         await pool.join()

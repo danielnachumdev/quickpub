@@ -12,7 +12,7 @@ from .validators import validate_version, validate_python_version, validate_keyw
 from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
-from .qa import qa
+from .qa import qa, SupportsProgress
 
 
 def publish(
@@ -38,7 +38,7 @@ def publish(
         explicit_src_folder_path: Optional[str] = None,
         # ========== QA Parameters ==========
         log: Optional[Callable[[Any], None]] = None,
-        show_pbar: bool = False,
+        pbar: Optional[SupportsProgress] = None,  # tqdm
 
         demo: bool = False,
         config: Optional[Any] = None,
@@ -63,6 +63,7 @@ def publish(
      :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
      :param dependencies: A list of dependencies for the package. Defaults to None.
      :param log: A function to receive log statements about the process and print them (or do something else idk)
+     :param pbar: and object that can be notified about an update of progress like a tqdm progress bar.
      :param demo: Whether to perform checks without making any changes. Defaults to False.
      :param config: Reserved for future use. Defaults to None.
 
@@ -86,7 +87,8 @@ def publish(
             name,
             explicit_src_folder_path,
             validated_dependencies,
-            log
+            log,
+            pbar
         ))
         if not res:
             error(f"quickpub.publish exited early as '{name}' "

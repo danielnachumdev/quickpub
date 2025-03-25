@@ -6,10 +6,11 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
     PypircUploadTarget, SetuptoolsBuildSchema, GithubUploadTarget, PypircEnforcer, ReadmeEnforcer, LicenseEnforcer, \
     PypiRemoteVersionEnforcer, LocalVersionEnforcer
 
+
 def main() -> None:
     publish(
         name="quickpub",
-        version="3.0.0",
+        version="2.0.4",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
@@ -29,8 +30,9 @@ def main() -> None:
         dependencies=["danielutils>=1.0.0", "requests", "fire"],
         min_python="3.8.0",
         log=lambda obj: tqdm.write(json.dumps(obj, default=str)),
-        demo=True
+        pbar=tqdm(desc="QA task", leave=False),
     )
+
 
 if __name__ == '__main__':
     main()
