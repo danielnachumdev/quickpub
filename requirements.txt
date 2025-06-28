@@ -1,10 +1,10 @@
 danielutils>=1.0.39
 requests
-tqdm
 fire
 # ===== TESTING =====
 pytest
 # ===== DEV =====
+tqdm
 twine
 pylint
 mypy
