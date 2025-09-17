@@ -1,7 +1,10 @@
+import logging
 import sys
 from typing import Union, Callable
 
 from danielutils import error
+
+logger = logging.getLogger(__name__)
 
 
 class ExitEarlyError(Exception):
@@ -16,6 +19,7 @@ def exit_if(
         err_func: Callable[[str], None] = error
 ) -> None:
     if (isinstance(predicate, bool) and predicate) or (callable(predicate) and predicate()):
+        logger.error(f"Exit condition met: {msg}")
         if verbose:
             err_func(msg)
         raise ExitEarlyError(msg)

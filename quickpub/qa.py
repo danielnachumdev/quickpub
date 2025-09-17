@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from abc import abstractmethod
@@ -11,6 +12,8 @@ from .enforcers import ExitEarlyError
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
+
+logger = logging.getLogger(__name__)
 
 try:
     from danielutils import MultiContext  # type:ignore
@@ -64,13 +67,19 @@ async def global_import_sanity_check(
     :param env_name: The name of the currently tested environment
     :return: None
     """
+    logger.info(f"Running global import sanity check for package '{package_name}' on environment '{env_name}'")
     try:
         p = sys.executable if is_system_interpreter else "python"
         file_name = f"./{RandomDataGenerator().name(15)}__sanity_check_main.py"
         with TemporaryFile(file_name) as f:
             f.writelines([f"from {package_name} import *"])
             cmd = f"{p} {file_name}"
+            logger.debug(f"Executing sanity check command: {cmd}")
             code, stdout, stderr = await executor(cmd)
+            
+            if code != 0:
+                logger.error(f"Sanity check failed for package '{package_name}' on environment '{env_name}' with return code {code}")
+            
             msg = f"Env '{env_name}' failed sanity check."
             if stderr:
                 if stderr[0] == 'Traceback (most recent call last):':
@@ -82,6 +91,7 @@ async def global_import_sanity_check(
                 verbose=True,
                 err_func=lambda msg: None  # TODO remove
             )
+        logger.info(f"Sanity check passed for package '{package_name}' on environment '{env_name}'")
     finally:
         if pbar is not None:
             pbar.update(1)
@@ -105,8 +115,10 @@ async def validate_dependencies(
     :param env_name: name of the currently checked environment
     :return: None
     """
+    logger.info(f"Validating dependencies on environment '{env_name}'")
     try:
         if validation_exit_on_fail:
+            logger.debug(f"Executing 'pip list' on environment '{env_name}'")
             code, out, err = await executor("pip list")
             exit_if(code != 0, f"Failed executing 'pip list' at env '{env_name}'",
                     err_func=lambda msg: None  # TODO remove
@@ -118,6 +130,8 @@ async def validate_dependencies(
                 s[0]: Dependency(s[0], "==", Version.from_str(s[-1]))
                 for s in filtered_tuples}
             currently_installed.update(**{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])})
+            logger.debug(f"Found {len(currently_installed)} installed packages")
+            
             not_installed_properly: List[Tuple[Dependency, str]] = []
             for req in required_dependencies:
                 if req.name not in currently_installed:
@@ -130,6 +144,11 @@ async def validate_dependencies(
                     elif isinstance(v, Dependency):
                         if not req.is_satisfied_by(v.ver):
                             not_installed_properly.append((req, "Invalid version installed"))
+
+            if not_installed_properly:
+                logger.error(f"Dependency validation failed on environment '{env_name}': {not_installed_properly}")
+            else:
+                logger.info(f"Dependency validation passed on environment '{env_name}'")
 
             exit_if(bool(not_installed_properly),
                     f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
@@ -154,6 +173,7 @@ async def run_config(
         src_folder_path: str,
         pbar: Optional[SupportsProgress] = None
 ) -> None:
+    logger.info(f"Running QA config {config_id} on environment '{env_name}' with runner '{runner.__class__.__name__}'")
     try:
         await runner.run(
             src_folder_path,
@@ -161,9 +181,12 @@ async def run_config(
             use_system_interpreter=is_system_interpreter,
             env_name=env_name
         )
+        logger.info(f"QA config {config_id} completed successfully on environment '{env_name}'")
     except ExitEarlyError as e:
+        logger.error(f"QA config {config_id} failed on environment '{env_name}': {e}")
         raise e
     except Exception as e:
+        logger.error(f"QA config {config_id} encountered unexpected error on environment '{env_name}': {e}")
         if validation_exit_on_fail:
             raise RuntimeError(e) from e
         return
@@ -179,38 +202,19 @@ async def qa(
         package_name: str,
         src_folder_path: str,
         dependencies: list,
-        log: Optional[Callable[[Any], None]] = None,
         pbar: Optional[SupportsProgress] = None
 ) -> bool:
+    logger.info(f"Starting QA process for package '{package_name}' with {len(quality_assurance_strategies)} QA strategies")
     is_config_run_success.clear()
     from .strategies import DefaultPythonProvider
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
 
-    class MyAsyncWorkerPool(AsyncWorkerPool):
-        @classmethod
-        def log(
-                self,
-                level: Literal["INFO", "WARNING", "ERROR"],
-                message: str,
-                order: Optional[List[str]] = AsyncWorkerPool.DEFAULT_ORDER_IF_KEY_EXISTS,
-                **kwargs
-        ) -> None:
-            kwargs["level"] = level
-            kwargs["message"] = message
-            kwargs["timestamp"] = datetime.now().isoformat()
-            ordered_kwargs = kwargs
-            if order:
-                ordered_kwargs = {key: kwargs[key] for key in order if key in kwargs}
-                ordered_kwargs.update(kwargs)
-
-            if log:
-                log(ordered_kwargs)
-
-    pool = MyAsyncWorkerPool(ASYNC_POOL_NAME, num_workers=5)
+    pool = AsyncWorkerPool(ASYNC_POOL_NAME, num_workers=5)
     total = 0
     i = 0
     with AsyncLayeredCommand() as base:
         async for env_name, async_executor in python_provider:
+            logger.debug(f"Setting up QA tasks for environment '{env_name}'")
             with async_executor:
                 async_executor.prev = base
                 await pool.submit(
@@ -253,10 +257,14 @@ async def qa(
         pbar.total = total
     for _ in range(i):
         is_config_run_success.append(False)
+    
+    logger.info(f"Starting QA worker pool with {total} total tasks")
     await pool.start()
     await pool.join()
 
-    return all(is_config_run_success)
+    success = all(is_config_run_success)
+    logger.info(f"QA process completed. Success: {success}")
+    return success
 
 
 __all__ = [

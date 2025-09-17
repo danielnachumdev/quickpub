@@ -1,6 +1,9 @@
+import logging
 from typing import Literal, Callable, Dict, Any
 
 from .version import Version
+
+logger = logging.getLogger(__name__)
 
 
 class Dependency:
@@ -18,6 +21,7 @@ class Dependency:
         self.name: str = name
         self.operator: Literal["<", "<=", "==", ">", ">="] = operator
         self.ver: Version = ver or Version(0, 0, 0)
+        logger.debug(f"Dependency created: {self.name} {self.operator} {self.ver}")
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Dependency):
@@ -29,12 +33,17 @@ class Dependency:
 
     @staticmethod
     def from_string(s: str) -> 'Dependency':
+        logger.debug(f"Parsing dependency from string: '{s}'")
         # the order of iteration matters, weak inequality operators should be first.
         for op in [">=", "<=", ">", "<", "=="]:
             splits = s.split(op)
             if len(splits) == 2:
-                return Dependency(splits[0], op, Version.from_str(splits[-1]))  # type:ignore
-        return Dependency(s, ">=", Version(0, 0, 0))
+                dep = Dependency(splits[0], op, Version.from_str(splits[-1]))  # type:ignore
+                logger.debug(f"Parsed dependency: {dep}")
+                return dep
+        dep = Dependency(s, ">=", Version(0, 0, 0))
+        logger.debug(f"Parsed dependency (default): {dep}")
+        return dep
 
     def __str__(self) -> str:
         if self.ver == Version(0, 0, 0):
@@ -45,7 +54,9 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', operator='{self.operator}', version='{self.ver}')"
 
     def is_satisfied_by(self, ver: Version) -> bool:
-        return self._build_func_map()[self.operator](ver)
+        result = self._build_func_map()[self.operator](ver)
+        logger.debug(f"Dependency '{self}' satisfied by version '{ver}': {result}")
+        return result
 
 
 __all__ = [

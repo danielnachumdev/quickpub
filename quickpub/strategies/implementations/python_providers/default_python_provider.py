@@ -1,3 +1,4 @@
+import logging
 import sys
 from typing import Set, Tuple, Iterator, AsyncIterator, Iterable
 
@@ -5,6 +6,8 @@ from danielutils import LayeredCommand
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from ...python_provider import PythonProvider
+
+logger = logging.getLogger(__name__)
 
 
 async def cast_aiter(itr: Iterable) -> AsyncIterator:
@@ -18,10 +21,12 @@ class DefaultPythonProvider(PythonProvider):
 
     def __init__(self) -> None:
         PythonProvider.__init__(self, requested_envs=["system"], explicit_versions=[], exit_on_fail=True)
+        logger.info(f"Initialized DefaultPythonProvider with system Python: {sys.executable}")
 
     async def __anext__(self):
         if self.aiter_index == 0:
             self.aiter_index += 1
+            logger.info("Using system Python environment")
             return "system", AsyncLayeredCommand()
         raise StopAsyncIteration
 

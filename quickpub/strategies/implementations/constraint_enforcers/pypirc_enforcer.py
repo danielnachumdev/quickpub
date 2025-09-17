@@ -1,8 +1,11 @@
+import logging
 import re
 
 from danielutils import file_exists
 
 from ...constraint_enforcer import ConstraintEnforcer
+
+logger = logging.getLogger(__name__)
 
 
 class PypircEnforcer(ConstraintEnforcer):
@@ -14,14 +17,21 @@ class PypircEnforcer(ConstraintEnforcer):
         self.should_enforce_expected_format = should_enforce_expected_format
 
     def enforce(self, **kwargs) -> None:
+        logger.info(f"Validating .pypirc file at '{self.path}'")
+        
         if not file_exists(self.path):
+            logger.error(f"Could not find .pypirc file at '{self.path}'")
             raise self.EXCEPTION_TYPE(f"Couldn't find '{self.path}'")
+        
         if self.should_enforce_expected_format:
             with open(self.path, "r") as f:
                 text = f.read()
 
             if not self.PYPIRC_REGEX.match(text):
+                logger.error(f"Invalid .pypirc format at '{self.path}'")
                 raise self.EXCEPTION_TYPE(f"'{self.path}' has an invalid format.")
+        
+        logger.info(f".pypirc file validation passed for '{self.path}'")
 
 
 __all__ = [

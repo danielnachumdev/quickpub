@@ -1,3 +1,4 @@
+import logging
 import re
 import sys
 from typing import List, Union
@@ -7,6 +8,8 @@ from danielutils import LayeredCommand
 from ....enforcers import ExitEarlyError
 from ....structures import Bound
 from ...quality_assurance_runner import QualityAssuranceRunner
+
+logger = logging.getLogger(__name__)
 
 
 class PytestRunner(QualityAssuranceRunner):
@@ -48,6 +51,8 @@ class PytestRunner(QualityAssuranceRunner):
         if not (0.0 <= no_output_score <= 1.0):
             raise RuntimeError("no_output_score should be between 0.0 and 1.0 (including both).")
         self.no_output_score = no_output_score
+        
+        logger.info(f"Initialized PytestRunner with bound='{bound}', target='{target}', no_tests_score={no_tests_score}, no_output_score={no_output_score}")
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         """
@@ -68,6 +73,7 @@ class PytestRunner(QualityAssuranceRunner):
 
         :param base: The base LayeredCommand object for executing commands.
         """
+        logger.info("Installing pytest dependencies")
         with base:
             base(f"{sys.executable} -m pip install pytest")
 
@@ -80,12 +86,19 @@ class PytestRunner(QualityAssuranceRunner):
         :param verbose: Whether to output verbose logs. Default is False.
         :return: The calculated test score as a float.
         """
+        logger.info("Calculating pytest score from test results")
+        
         if len(command_output) == 0:
+            logger.info(f"No pytest output, returning no_output_score: {self.no_output_score}")
             return self.no_output_score
+        
         rating_line = command_output[-1]
         if "no tests ran" in rating_line:
+            logger.info(f"No tests ran, returning no_tests_score: {self.no_tests_score}")
             return self.no_tests_score
+        
         if not (m := self.PYTEST_REGEX.match(rating_line)):
+            logger.error(f"Failed to parse pytest output: {rating_line}")
             raise ExitEarlyError(f"Can't calculate score for pytest on the following line: {rating_line}")
 
         dct = m.groupdict()
@@ -93,6 +106,11 @@ class PytestRunner(QualityAssuranceRunner):
         passed = int(dct["passed"] or "0")
         assert failed >= 0
         assert passed >= 0
+        
         if failed + passed == 0:
+            logger.info(f"No test results found, returning no_tests_score: {self.no_tests_score}")
             return self.no_tests_score
-        return passed / (passed + failed)
+        
+        score = passed / (passed + failed)
+        logger.info(f"Pytest score calculated: {score:.3f} (passed: {passed}, failed: {failed})")
+        return score

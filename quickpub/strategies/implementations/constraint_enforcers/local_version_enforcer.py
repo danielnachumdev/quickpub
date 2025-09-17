@@ -1,7 +1,10 @@
+import logging
 from danielutils import directory_exists, get_files, get_python_version
 
 from quickpub import Version
 from ...constraint_enforcer import ConstraintEnforcer
+
+logger = logging.getLogger(__name__)
 
 
 def _remove_suffix(s: str, suffix: str) -> str:
@@ -36,11 +39,15 @@ class LocalVersionEnforcer(ConstraintEnforcer):
         if demo:
             return
 
+        logger.info(f"Checking local version for package '{name}' against version '{version}'")
+
         if not directory_exists("./dist"):
+            logger.info("No dist directory found, skipping local version check")
             return
 
         prev_builds = get_files("./dist")
         if len(prev_builds) == 0:
+            logger.info("No previous builds found in dist directory")
             return
 
         max_local_version = Version(0, 0, 0)
@@ -48,9 +55,13 @@ class LocalVersionEnforcer(ConstraintEnforcer):
             d = _remove_suffix(_remove_prefix(d, f"{name}-"), ".tar.gz")
             v: Version = Version.from_str(d)
             max_local_version = max(max_local_version, v)
+        
         if version <= max_local_version:
+            logger.error(f"Version conflict: specified '{version}' is not greater than local '{max_local_version}'")
             raise self.EXCEPTION_TYPE(
                 f"Specified version is '{version}' but (locally available) latest existing is '{max_local_version}'")
+        
+        logger.info(f"Local version check passed: '{version}' > '{max_local_version}'")
 
 
 __all__ = [

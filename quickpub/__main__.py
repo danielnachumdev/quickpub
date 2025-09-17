@@ -13,7 +13,9 @@ from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
 from .qa import qa, SupportsProgress
+from .logging_ import setup_logging
 
+setup_logging()
 
 def publish(
         *,
@@ -37,7 +39,6 @@ def publish(
         keywords: Optional[List[str]] = None,
         explicit_src_folder_path: Optional[str] = None,
         # ========== QA Parameters ==========
-        log: Optional[Callable[[Any], None]] = None,
         pbar: Optional[SupportsProgress] = None,  # tqdm
 
         demo: bool = False,
@@ -87,7 +88,6 @@ def publish(
             name,
             explicit_src_folder_path,
             validated_dependencies,
-            log,
             pbar
         ))
         if not res:

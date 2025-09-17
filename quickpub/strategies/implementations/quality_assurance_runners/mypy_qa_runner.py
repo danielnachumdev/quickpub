@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import Optional, List
 
@@ -6,6 +7,8 @@ from danielutils import LayeredCommand
 from ....enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
 
+logger = logging.getLogger(__name__)
+
 
 class MypyRunner(QualityAssuranceRunner):
     NO_TESTS_PATTERN: re.Pattern = re.compile(r"There are no \.py\[i\] files in directory '[\w\.\\\/]+'")
@@ -13,6 +16,7 @@ class MypyRunner(QualityAssuranceRunner):
         r"Found (\d+(?:\.\d+)?) errors? in (\d+(?:\.\d+)?) files? \(checked (\d+(?:\.\d+)?) source files?\)")
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
+        logger.info("Installing mypy dependencies")
         with base:
             base("pip install mypy")
 
@@ -27,20 +31,27 @@ class MypyRunner(QualityAssuranceRunner):
                  executable_path: Optional[str] = None) -> None:
         QualityAssuranceRunner.__init__(self, name="mypy", bound=bound, configuration_path=configuration_path,
                                         executable_path=executable_path)
+        logger.info(f"Initialized MypyRunner with bound='{bound}', config='{configuration_path}', executable='{executable_path}'")
 
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
+        logger.info("Calculating mypy score from type checking results")
+        
         rating_line = lines[-1]
         if self.NO_TESTS_PATTERN.match(rating_line):
+            logger.info("No Python files found for type checking, returning score: 0.0")
             return 0.0
 
         if rating_line.endswith("No module named mypy"):
+            logger.error("Mypy module not found")
             raise ExitEarlyError("Mypy is not installed.")
 
         if rating_line.startswith("mypy: error: Cannot find config file"):
+            logger.error(f"Config file error: {rating_line}")
             raise ExitEarlyError(rating_line)
 
         if rating_line.startswith("Success"):
+            logger.info("Mypy type checking successful, returning score: 0.0")
             return 0.0
 
         exit_if(
@@ -52,6 +63,7 @@ class MypyRunner(QualityAssuranceRunner):
         num_failed = float(m.group(1))  # type :ignore
         # active_files = float(m.group(2))  # type :ignore
         # total_files = float(m.group(3))  # type :ignore
+        logger.info(f"Mypy score calculated: {num_failed} type errors found")
         return num_failed
 
 

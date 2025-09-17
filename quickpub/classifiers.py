@@ -1,5 +1,8 @@
+import logging
 from abc import ABC, abstractmethod
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class Classifier(Enum):
@@ -36,7 +39,9 @@ class Classifier(Enum):
     def __str__(self) -> str:
         name = Classifier._split_name(self.__class__.__qualname__)
         value = self._str()
-        return f"{name} :: {value}"
+        result = f"{name} :: {value}"
+        logger.debug(f"Classifier string representation: {result}")
+        return result
 
 
 class DevelopmentStatusClassifier(Classifier):

@@ -1,3 +1,4 @@
+import logging
 import sys
 from abc import abstractmethod
 from typing import Union, List, Optional, cast, Dict, Tuple
@@ -5,6 +6,8 @@ from danielutils import LayeredCommand, get_os, OSType, file_exists
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import Bound
+
+logger = logging.getLogger(__name__)
 
 
 class Configurable:
@@ -15,7 +18,9 @@ class Configurable:
     def __init__(self, config_path: Optional[str] = None):
         self.config_path = config_path
         if self.has_config:
+            logger.debug(f"Using configuration file: {self.config_path}")
             if not file_exists(self.config_path):
+                logger.error(f"Configuration file not found: {self.config_path}")
                 raise FileNotFoundError(f"Can't find config file {self.config_path}")
 
 
@@ -30,8 +35,12 @@ class HasOptionalExecutable:
         self.name = name
         self.executable_path = executable_path
         if self.use_executable:
+            logger.debug(f"Using custom executable: {self.executable_path}")
             if not file_exists(self.executable_path):
+                logger.error(f"Executable not found: {self.executable_path}")
                 raise FileNotFoundError(f"Executable not found {self.executable_path}")
+        else:
+            logger.debug(f"Using system executable for: {name}")
 
     def get_executable(self, use_system_interpreter: bool = False) -> str:
         if self.use_executable:
@@ -43,8 +52,6 @@ class HasOptionalExecutable:
         return f"{p} -m {self.name}"
 
 
-from typing import Optional, Union, List
-from abc import abstractmethod
 
 SPEICLA_EXIT_CODES: Dict[int, Tuple[str, str]] = {
     -1073741515: ("Can't find python in path.",
@@ -92,6 +99,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         HasOptionalExecutable.__init__(self, name, executable_path)
         self.bound: Bound = bound if isinstance(bound, Bound) else Bound.from_string(bound)
         self.target = target
+        logger.debug(f"QualityAssuranceRunner '{name}' initialized with bound={self.bound}, target={target}")
 
     @abstractmethod
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
@@ -138,20 +146,32 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         """
         from quickpub.proxy import os_system  # pylint: disable=import-error
         from quickpub.enforcers import exit_if  # pylint: disable=import-error
+        
+        logger.info(f"Running {self.__class__.__name__} on environment '{env_name}' with target '{target}'")
+        
         # =====================================
         # IMPORTANT: need to explicitly override it here
         # executor._executor = os_system  # pylint: disable=protected-access #TODO re-fix this for the tests because now this is not working with the async variant
         # =====================================
         command = self._build_command(target, use_system_interpreter)
+        logger.debug(f"Built command: {command}")
+        
         self._pre_command()
         try:
             ret, out, err = await executor(command, command_raise_on_fail=False)
             if ret in SPEICLA_EXIT_CODES:
                 title, explanation = SPEICLA_EXIT_CODES[ret]
                 unsigned_integer_ret = ret + 2 ** 32
+                logger.error(f"Special exit code {ret} encountered: {title}")
                 raise RuntimeError(
                     title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
+            
             score = self._calculate_score(ret, out + err, verbose=verbose)
+            logger.info(f"QA runner '{self.__class__.__name__}' scored {score:.3f} (bound: {self.bound})")
+            
+            if not self.bound.compare_against(score):
+                logger.error(f"QA runner '{self.__class__.__name__}' failed bound check: {score} vs {self.bound}")
+            
             exit_if(
                 not self.bound.compare_against(score),
                 f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
@@ -159,6 +179,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
                 err_func=lambda msg: None  # TODO remove
             )
         except Exception as e:
+            logger.error(f"QA runner '{self.__class__.__name__}' failed on env '{env_name}': {e}")
             raise RuntimeError(
                 f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}",
                 e) from e

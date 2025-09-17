@@ -1,3 +1,4 @@
+import logging
 import re
 import os
 from pathlib import Path
@@ -6,6 +7,8 @@ from danielutils import get_current_working_directory, set_current_working_direc
 
 from ....enforcers import ExitEarlyError
 from ...quality_assurance_runner import QualityAssuranceRunner
+
+logger = logging.getLogger(__name__)
 
 
 def _removesuffix(string: str, suffix: str) -> str:
@@ -36,6 +39,7 @@ class UnittestRunner(QualityAssuranceRunner):
     def __init__(self, target: Optional[str] = "./tests", bound: str = ">=0.8", no_tests_score: float = 0) -> None:
         QualityAssuranceRunner.__init__(self, name="unittest", bound=bound, target=target)
         self.no_tests_score = no_tests_score
+        logger.info(f"Initialized UnittestRunner with target='{target}', bound='{bound}', no_tests_score={no_tests_score}")
 
     def _build_command(self, src: str, *args, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
@@ -45,21 +49,29 @@ class UnittestRunner(QualityAssuranceRunner):
         return f"cd {normalized_target_path} & {command} & cd {Path(os.getcwd()).resolve()}"  # This is for concurrency reasons
 
     def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
+        logger.info("Calculating unittest score from test results")
+        
         num_tests_ran_line = lines[-3]
         num_tests_failed_line = lines[-1]
         try:
             num_tests = int(self.NUM_TESTS_PATTERN.match(num_tests_ran_line).group(1))
             if num_tests == 0:
+                logger.info(f"No tests found, returning no_tests_score: {self.no_tests_score}")
                 return self.no_tests_score
+            
             num_failed = 0
             num_errors = 0
             if num_tests_failed_line != "OK":
                 m = self.NUM_FAILED_PATTERN.match(num_tests_failed_line)
                 num_failed = int(m.group(1) or "0")
                 num_errors = int(m.group(2) or "0")
-            return 1 - ((num_failed + num_errors) / num_tests)
+            
+            score = 1 - ((num_failed + num_errors) / num_tests)
+            logger.info(f"Unittest score calculated: {score:.3f} (tests: {num_tests}, failed: {num_failed}, errors: {num_errors})")
+            return score
 
         except Exception as e:
+            logger.error(f"Failed to calculate unittest score: {e}")
             raise ExitEarlyError(f"Failed running Unittest, got exit code {ret}. "
                                  f"try running manually using: {self._build_command('TARGET')}") from e
 

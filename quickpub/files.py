@@ -1,8 +1,11 @@
+import logging
 from typing import List
 from danielutils import get_files
 
 from .classifiers import Classifier
 from .structures import Version, Dependency
+
+logger = logging.getLogger(__name__)
 
 
 def create_toml(
@@ -21,14 +24,18 @@ def create_toml(
         dependencies: List[Dependency],
         classifiers: List[Classifier]
 ) -> None:
+    logger.info(f"Creating pyproject.toml for package '{name}' version '{version}'")
+    
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
+    
     py_typed = ""
     for file in get_files(src_folder_path):
         if file == "py.typed":
             py_typed = f"""[tool.setuptools.package-data]
 "{name}" = ["py.typed"]"""
+            logger.debug("Found py.typed file, adding package-data configuration")
             break
 
     s = f"""[build-system]
@@ -59,16 +66,21 @@ packages = ["{name}"]
 """
     with open("pyproject.toml", "w", encoding="utf8") as f:
         f.write(s)
+    logger.info("Successfully created pyproject.toml")
 
 
 def create_setup() -> None:
+    logger.info("Creating setup.py file")
     with open("./setup.py", "w", encoding="utf8") as f:
         f.write("from setuptools import setup\n\nsetup()\n")
+    logger.info("Successfully created setup.py")
 
 
 def create_manifest(*, name: str) -> None:
+    logger.info(f"Creating MANIFEST.in for package '{name}'")
     with open("./MANIFEST.in", "w", encoding="utf8") as f:
         f.write(f"recursive-include {name} *.py")
+    logger.info("Successfully created MANIFEST.in")
 
 
 __all__ = [

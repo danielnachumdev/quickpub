@@ -1,9 +1,12 @@
 import asyncio
+import logging
 
 from .quickpub_strategy import QuickpubStrategy
 from abc import abstractmethod
 from typing import Tuple, Set, List, AsyncIterator, Iterator, Iterable
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
+
+logger = logging.getLogger(__name__)
 
 
 class PythonProvider(AsyncIterator, QuickpubStrategy):
@@ -32,9 +35,12 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
     async def get_available_envs(cls) -> Set[str]:
         KEY = "__available_envs__"
         if (res := getattr(cls, KEY, None)) is not None:
+            logger.debug(f"Using cached available environments for {cls.__name__}")
             return res
 
+        logger.debug(f"Fetching available environments for {cls.__name__}")
         setattr(cls, KEY, res := await cls._get_available_envs_impl())
+        logger.debug(f"Found {len(res)} available environments for {cls.__name__}")
         return res
 
     @classmethod
