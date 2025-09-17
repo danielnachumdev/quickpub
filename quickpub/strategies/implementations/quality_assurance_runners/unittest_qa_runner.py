@@ -25,7 +25,10 @@ def _removesuffix(string: str, suffix: str) -> str:
 class UnittestRunner(QualityAssuranceRunner):
     """Quality assurance runner for unittest testing."""
     NUM_TESTS_PATTERN: re.Pattern = re.compile(r"Ran (\d+) tests? in \d+\.\d+s")
-    NUM_FAILED_PATTERN: re.Pattern = re.compile(r"FAILED \((?:failures=(\d+))?(?:, )?(?:errors=(\d+))?\)")
+    NUM_FAILED_PATTERN: re.Pattern = re.compile(
+        r"FAILED \((?:failures=(\d+))?(?:, )?(?:errors=(\d+))?(?:, )?(?:skipped=(\d+))?\)|"
+        r"FAILED \((?:errors=(\d+))?(?:, )?(?:failures=(\d+))?(?:, )?(?:skipped=(\d+))?\)|"
+        r"FAILED \((?:skipped=(\d+))?(?:, )?(?:failures=(\d+))?(?:, )?(?:errors=(\d+))?\)")
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
         return None
@@ -53,9 +56,9 @@ class UnittestRunner(QualityAssuranceRunner):
     def _calculate_score(self, ret: int, lines: List[str], *, verbose: bool = False) -> float:
         logger.info("Calculating unittest score from test results")
 
-        num_tests_ran_line = lines[-3]
-        num_tests_failed_line = lines[-1]
         try:
+            num_tests_ran_line = lines[-3]
+            num_tests_failed_line = lines[-1]
             num_tests = int(self.NUM_TESTS_PATTERN.match(num_tests_ran_line).group(1))
             if num_tests == 0:
                 logger.info("No tests found, returning no_tests_score: %s", self.no_tests_score)
@@ -64,9 +67,30 @@ class UnittestRunner(QualityAssuranceRunner):
             num_failed = 0
             num_errors = 0
             if num_tests_failed_line != "OK":
-                m = self.NUM_FAILED_PATTERN.match(num_tests_failed_line)
-                num_failed = int(m.group(1) or "0")
-                num_errors = int(m.group(2) or "0")
+                if num_tests_failed_line.startswith("FAILED"):
+                    m = self.NUM_FAILED_PATTERN.match(num_tests_failed_line)
+                    if m:
+                        # Handle different group positions based on the pattern that matched
+                        groups = m.groups()
+                        if groups[0] is not None:  # failures= first pattern
+                            num_failed = int(groups[0] or "0")
+                            num_errors = int(groups[1] or "0")
+                        elif groups[3] is not None:  # errors= first pattern
+                            num_failed = int(groups[4] or "0")
+                            num_errors = int(groups[3] or "0")
+                        elif groups[6] is not None:  # skipped= first pattern
+                            num_failed = int(groups[7] or "0")
+                            num_errors = int(groups[8] or "0")
+                        else:
+                            # Fallback to original logic if no groups match
+                            num_failed = int(m.group(1) or "0")
+                            num_errors = int(m.group(2) or "0")
+                    else:
+                        # If regex doesn't match, treat as malformed
+                        raise ValueError(f"Failed to parse FAILED line: {num_tests_failed_line}")
+                elif num_tests_failed_line.startswith("OK"):
+                    # 'OK (skipped=3)' could it also be other stuff?
+                    pass
 
             score = 1 - ((num_failed + num_errors) / num_tests)
             logger.info("Unittest score calculated: %.3f (tests: %d, failed: %d, errors: %d)", score, num_tests,
