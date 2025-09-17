@@ -16,10 +16,8 @@ class Version:
         :return: Version object
         :raises ValueError: If string format is invalid
         """
-        logger.debug("Parsing version from string: '%s'", version_str)
         try:
             version = Version(*list(map(int, version_str.split("."))))
-            logger.debug("Parsed version: %s", version)
             return version
         except Exception as e:
             logger.error("Failed to parse version from string '%s': %s", version_str, e)
@@ -36,7 +34,6 @@ class Version:
         self.major = major
         self.minor = minor
         self.patch = patch
-        logger.debug("Version created: %s", self)
 
     def __str__(self) -> str:
         return f"{self.major}.{self.minor}.{self.patch}"
