@@ -25,11 +25,9 @@ def create_toml(
         classifiers: List[Classifier]
 ) -> None:
     logger.info(f"Creating pyproject.toml for package '{name}' version '{version}'")
-    
     classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
-    
     py_typed = ""
     for file in get_files(src_folder_path):
         if file == "py.typed":

@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional, Union, List, Any, Callable
+from typing import Optional, Union, List, Any
 
 import fire
 from danielutils import warning, error

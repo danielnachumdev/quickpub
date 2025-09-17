@@ -76,10 +76,10 @@ async def global_import_sanity_check(
             cmd = f"{p} {file_name}"
             logger.debug(f"Executing sanity check command: {cmd}")
             code, stdout, stderr = await executor(cmd)
-            
+
             if code != 0:
                 logger.error(f"Sanity check failed for package '{package_name}' on environment '{env_name}' with return code {code}")
-            
+
             msg = f"Env '{env_name}' failed sanity check."
             if stderr:
                 if stderr[0] == 'Traceback (most recent call last):':
@@ -131,7 +131,7 @@ async def validate_dependencies(
                 for s in filtered_tuples}
             currently_installed.update(**{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])})
             logger.debug(f"Found {len(currently_installed)} installed packages")
-            
+
             not_installed_properly: List[Tuple[Dependency, str]] = []
             for req in required_dependencies:
                 if req.name not in currently_installed:
@@ -257,7 +257,7 @@ async def qa(
         pbar.total = total
     for _ in range(i):
         is_config_run_success.append(False)
-    
+
     logger.info(f"Starting QA worker pool with {total} total tasks")
     await pool.start()
     await pool.join()

@@ -12,15 +12,14 @@ logger = logging.getLogger(__name__)
 def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
     logger.debug(f"Validating version: {version}")
     if not bool(version):
-        logger.error(f"Version validation failed: no version provided")
+        logger.error("Version validation failed: no version provided")
         raise ExitEarlyError(f"Must supply a version number. got '{version}'")
-    
+
     if isinstance(version, Version):
         logger.debug(f"Version is already a Version object: {version}")
         return version
-    else:
-        logger.debug(f"Converting string version to Version object: {version}")
-        return Version.from_str(version)  # type: ignore
+    logger.debug(f"Converting string version to Version object: {version}")
+    return Version.from_str(version)  # type: ignore
 
 
 def validate_python_version(min_python: Optional[Version]) -> Version:
@@ -28,7 +27,7 @@ def validate_python_version(min_python: Optional[Version]) -> Version:
     if min_python is not None:
         logger.debug(f"Using provided minimum Python version: {min_python}")
         return min_python
-    
+
     current_version = Version(*get_python_version())
     logger.debug(f"Using current Python version: {current_version}")
     return current_version
@@ -48,7 +47,7 @@ def validate_dependencies(dependencies: Optional[List[Union[str, Dependency]]]) 
     if dependencies is None:
         logger.debug("No dependencies provided, returning empty list")
         return []
-    
+
     res = []
     for dep in dependencies:
         if isinstance(dep, str):
@@ -57,7 +56,7 @@ def validate_dependencies(dependencies: Optional[List[Union[str, Dependency]]]) 
         else:
             logger.debug(f"Using existing Dependency object: {dep}")
             res.append(dep)
-    
+
     logger.debug(f"Validated {len(res)} dependencies")
     return res
 
@@ -67,7 +66,7 @@ def validate_source(name: str, src: Optional[str] = None) -> str:
     if src is not None:
         logger.debug(f"Using provided source path: {src}")
         return src
-    
+
     default_src = f"./{name}"
     logger.debug(f"Using default source path: {default_src}")
     return default_src

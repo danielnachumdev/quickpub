@@ -124,14 +124,12 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         Hook method to be executed before running the main command.
         Can be overridden by subclasses.
         """
-        pass
 
     def _post_command(self) -> None:
         """
         Hook method to be executed after running the main command.
         Can be overridden by subclasses.
         """
-        pass
 
     async def run(self, target: str, executor: AsyncLayeredCommand, *, verbose: bool = True,  # type: ignore
                   use_system_interpreter: bool = False, env_name: str) -> None:
@@ -196,7 +194,6 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         :param verbose: Whether to output verbose logs, default is False.
         :return: The calculated score as a float.
         """
-        ...
 
 
 __all__ = [
