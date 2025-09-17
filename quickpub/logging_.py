@@ -1,6 +1,14 @@
 import logging
 import sys
 
+class QuickpubLogFilter(logging.Filter):
+    """
+    Filter that only allows logs from the quickpub package.
+    """
+    
+    def filter(self, record):
+        return record.name.startswith('quickpub')
+
 class TqdmLoggingHandler(logging.Handler):
     """
     Custom logging handler that uses tqdm.write to avoid conflicts with progress bars.
@@ -50,19 +58,19 @@ def setup_logging(level: int = logging.INFO):
 
         # Use tqdm.write if tqdm is available
         handler = TqdmLoggingHandler()
-        handler.setLevel(level)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
     except ImportError:
-        # Fall back to standard StreamHandler if tqdm is not available
         handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(level)
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+    handler.setLevel(level)
+    handler.setFormatter(formatter)
+    
+    # Add filter to only allow quickpub logs
+    handler.addFilter(QuickpubLogFilter())
+    
+    logger.addHandler(handler)
 
 
 
 __all__ = [
-    "setup_logging"
+    "setup_logging",
+    "QuickpubLogFilter"
 ]

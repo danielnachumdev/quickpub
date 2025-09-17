@@ -8,6 +8,7 @@ tqdm
 twine
 pylint
 mypy
+types-tqdm
 types-requests
 beautifulsoup4
 setuptools

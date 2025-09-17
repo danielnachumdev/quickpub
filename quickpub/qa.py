@@ -12,7 +12,7 @@ from .enforcers import ExitEarlyError
 from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
-
+from .worker_pool import WorkerPool
 logger = logging.getLogger(__name__)
 
 try:
@@ -253,7 +253,7 @@ async def qa(
     from .strategies import DefaultPythonProvider
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
 
-    pool = AsyncWorkerPool(ASYNC_POOL_NAME, num_workers=5)
+    pool = WorkerPool(ASYNC_POOL_NAME, num_workers=5)
     total = 0
     i = 0
     with AsyncLayeredCommand() as base:
