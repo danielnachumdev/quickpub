@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Dependency:
+    """Represents a package dependency with version constraints."""
     def _build_func_map(self) -> Dict[str, Callable[[Version], bool]]:
         return {
             "==": lambda v: v == self.ver,
@@ -21,7 +22,7 @@ class Dependency:
         self.name: str = name
         self.operator: Literal["<", "<=", "==", ">", ">="] = operator
         self.ver: Version = ver or Version(0, 0, 0)
-        logger.debug(f"Dependency created: {self.name} {self.operator} {self.ver}")
+        logger.debug("Dependency created: %s %s %s", self.name, self.operator, self.ver)
 
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Dependency):
@@ -33,16 +34,22 @@ class Dependency:
 
     @staticmethod
     def from_string(s: str) -> 'Dependency':
-        logger.debug(f"Parsing dependency from string: '{s}'")
+        """
+        Create a Dependency from a string representation.
+        
+        :param s: String representation of the dependency
+        :return: Dependency object
+        """
+        logger.debug("Parsing dependency from string: '%s'", s)
         # the order of iteration matters, weak inequality operators should be first.
         for op in [">=", "<=", ">", "<", "=="]:
             splits = s.split(op)
             if len(splits) == 2:
                 dep = Dependency(splits[0], op, Version.from_str(splits[-1]))  # type:ignore
-                logger.debug(f"Parsed dependency: {dep}")
+                logger.debug("Parsed dependency: %s", dep)
                 return dep
         dep = Dependency(s, ">=", Version(0, 0, 0))
-        logger.debug(f"Parsed dependency (default): {dep}")
+        logger.debug("Parsed dependency (default): %s", dep)
         return dep
 
     def __str__(self) -> str:
@@ -54,8 +61,14 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', operator='{self.operator}', version='{self.ver}')"
 
     def is_satisfied_by(self, ver: Version) -> bool:
+        """
+        Check if a version satisfies this dependency.
+        
+        :param ver: Version to check
+        :return: True if version satisfies the dependency
+        """
         result = self._build_func_map()[self.operator](ver)
-        logger.debug(f"Dependency '{self}' satisfied by version '{ver}': {result}")
+        logger.debug("Dependency '%s' satisfied by version '%s': %s", self, ver, result)
         return result
 
 

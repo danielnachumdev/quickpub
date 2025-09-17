@@ -6,6 +6,7 @@ from ..enforcers import ExitEarlyError
 
 
 class QuickpubStrategy(Strategy):
+    """Base strategy class for quickpub operations."""
     EXCEPTION_TYPE: Type[Exception] = ExitEarlyError
 
 

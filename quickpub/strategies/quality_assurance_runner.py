@@ -11,38 +11,67 @@ logger = logging.getLogger(__name__)
 
 
 class Configurable:
+    """Mixin class for objects that can be configured with a file."""
     @property
     def has_config(self) -> bool:
+        """
+        Check if configuration file is set.
+        
+        :return: True if config path is set
+        """
         return self.config_path is not None
 
     def __init__(self, config_path: Optional[str] = None):
+        """
+        Initialize with optional configuration file.
+        
+        :param config_path: Path to configuration file
+        """
         self.config_path = config_path
         if self.has_config:
-            logger.debug(f"Using configuration file: {self.config_path}")
+            logger.debug("Using configuration file: %s", self.config_path)
             if not file_exists(self.config_path):
-                logger.error(f"Configuration file not found: {self.config_path}")
+                logger.error("Configuration file not found: %s", self.config_path)
                 raise FileNotFoundError(f"Can't find config file {self.config_path}")
 
 
 class HasOptionalExecutable:
+    """Mixin class for objects that can use an optional executable."""
     PYTHON: str = sys.executable
 
     @property
     def use_executable(self) -> bool:
+        """
+        Check if custom executable is set.
+        
+        :return: True if executable path is set
+        """
         return self.executable_path is not None
 
     def __init__(self, name, executable_path: Optional[str] = None) -> None:
+        """
+        Initialize with optional executable path.
+        
+        :param name: Name of the executable
+        :param executable_path: Path to executable file
+        """
         self.name = name
         self.executable_path = executable_path
         if self.use_executable:
-            logger.debug(f"Using custom executable: {self.executable_path}")
+            logger.debug("Using custom executable: %s", self.executable_path)
             if not file_exists(self.executable_path):
-                logger.error(f"Executable not found: {self.executable_path}")
+                logger.error("Executable not found: %s", self.executable_path)
                 raise FileNotFoundError(f"Executable not found {self.executable_path}")
         else:
-            logger.debug(f"Using system executable for: {name}")
+            logger.debug("Using system executable for: %s", name)
 
     def get_executable(self, use_system_interpreter: bool = False) -> str:
+        """
+        Get the executable path.
+        
+        :param use_system_interpreter: Whether to use system interpreter
+        :return: Path to executable
+        """
         if self.use_executable:
             return cast(str, self.executable_path)
 
@@ -50,7 +79,6 @@ class HasOptionalExecutable:
         if use_system_interpreter:
             p = sys.executable
         return f"{p} -m {self.name}"
-
 
 
 SPEICLA_EXIT_CODES: Dict[int, Tuple[str, str]] = {
@@ -99,7 +127,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         HasOptionalExecutable.__init__(self, name, executable_path)
         self.bound: Bound = bound if isinstance(bound, Bound) else Bound.from_string(bound)
         self.target = target
-        logger.debug(f"QualityAssuranceRunner '{name}' initialized with bound={self.bound}, target={target}")
+        logger.debug("QualityAssuranceRunner '%s' initialized with bound=%s, target=%s", name, self.bound, target)
 
     @abstractmethod
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
@@ -144,32 +172,32 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         """
         from quickpub.proxy import os_system  # pylint: disable=import-error
         from quickpub.enforcers import exit_if  # pylint: disable=import-error
-        
-        logger.info(f"Running {self.__class__.__name__} on environment '{env_name}' with target '{target}'")
-        
+
+        logger.info("Running %s on environment '%s' with target '%s'", self.__class__.__name__, env_name, target)
+
         # =====================================
         # IMPORTANT: need to explicitly override it here
         # executor._executor = os_system  # pylint: disable=protected-access #TODO re-fix this for the tests because now this is not working with the async variant
         # =====================================
         command = self._build_command(target, use_system_interpreter)
-        logger.debug(f"Built command: {command}")
-        
+        logger.debug("Built command: %s", command)
+
         self._pre_command()
         try:
             ret, out, err = await executor(command, command_raise_on_fail=False)
             if ret in SPEICLA_EXIT_CODES:
                 title, explanation = SPEICLA_EXIT_CODES[ret]
                 unsigned_integer_ret = ret + 2 ** 32
-                logger.error(f"Special exit code {ret} encountered: {title}")
+                logger.error("Special exit code %d encountered: %s", ret, title)
                 raise RuntimeError(
                     title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
-            
+
             score = self._calculate_score(ret, out + err, verbose=verbose)
-            logger.info(f"QA runner '{self.__class__.__name__}' scored {score:.3f} (bound: {self.bound})")
-            
+            logger.info("QA runner '%s' scored %.3f (bound: %s)", self.__class__.__name__, score, self.bound)
+
             if not self.bound.compare_against(score):
-                logger.error(f"QA runner '{self.__class__.__name__}' failed bound check: {score} vs {self.bound}")
-            
+                logger.error("QA runner '%s' failed bound check: %s vs %s", self.__class__.__name__, score, self.bound)
+
             exit_if(
                 not self.bound.compare_against(score),
                 f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
@@ -177,7 +205,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
                 err_func=lambda msg: None  # TODO remove
             )
         except Exception as e:
-            logger.error(f"QA runner '{self.__class__.__name__}' failed on env '{env_name}': {e}")
+            logger.error("QA runner '%s' failed on env '%s': %s", self.__class__.__name__, env_name, e)
             raise RuntimeError(
                 f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}",
                 e) from e

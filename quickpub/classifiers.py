@@ -39,7 +39,7 @@ class Classifier(Enum):
         name = Classifier._split_name(self.__class__.__qualname__)
         value = self._str()
         result = f"{name} :: {value}"
-        logger.debug(f"Classifier string representation: {result}")
+        logger.debug("Classifier string representation: %s", result)
         return result
 
 

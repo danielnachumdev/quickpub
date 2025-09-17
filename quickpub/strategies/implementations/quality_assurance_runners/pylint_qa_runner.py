@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class PylintRunner(QualityAssuranceRunner):
+    """Quality assurance runner for pylint code analysis."""
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pylint dependencies")
         with base:
@@ -22,7 +23,8 @@ class PylintRunner(QualityAssuranceRunner):
                  executable_path: Optional[str] = None) -> None:
         QualityAssuranceRunner.__init__(self, name="pylint", bound=bound, configuration_path=configuration_path,
                                         executable_path=executable_path)
-        logger.info(f"Initialized PylintRunner with bound='{bound}', config='{configuration_path}', executable='{executable_path}'")
+        logger.info("Initialized PylintRunner with bound='%s', config='%s', executable='%s'", bound, configuration_path,
+                    executable_path)
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable()
@@ -34,7 +36,7 @@ class PylintRunner(QualityAssuranceRunner):
     def _calculate_score(self, ret: int, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
         logger.info("Calculating pylint score from analysis results")
-        
+
         if len(lines) == 0:
             logger.info("No pylint output, returning perfect score: 1.0")
             return 1
@@ -44,12 +46,12 @@ class PylintRunner(QualityAssuranceRunner):
                 raise ExitEarlyError("No module named pylint found")
 
             if lines[0].startswith("The config file") and lines[0].endswith("doesn't exist!"):
-                logger.error(f"Config file error: {lines[0]}")
+                logger.error("Config file error: %s", lines[0])
                 raise ExitEarlyError(lines[0])
 
-            logger.error(f"Unexpected pylint error: {lines[0]}")
+            logger.error("Unexpected pylint error: %s", lines[0])
             raise ExitEarlyError(f"Got an unexpected error: {lines[0]}")
-        
+
         index = -2
         if lines[-1] == '\x1b[0m':
             index += -1
@@ -60,7 +62,7 @@ class PylintRunner(QualityAssuranceRunner):
         rating_string = m.group(1)  # type:ignore
         numerator, denominator = rating_string.split("/")
         score = float(numerator) / float(denominator)
-        logger.info(f"Pylint score calculated: {score:.3f} ({numerator}/{denominator})")
+        logger.info("Pylint score calculated: %.3f (%s/%s)", score, numerator, denominator)
         return score
 
 

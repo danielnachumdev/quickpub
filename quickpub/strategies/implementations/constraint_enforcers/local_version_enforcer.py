@@ -35,11 +35,12 @@ def _remove_prefix(s: str, prefix: str) -> str:
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
+    """Enforces that the new version is greater than the local version."""
     def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
         if demo:
             return
 
-        logger.info(f"Checking local version for package '{name}' against version '{version}'")
+        logger.info("Checking local version for package '%s' against version '%s'", name, version)
 
         if not directory_exists("./dist"):
             logger.info("No dist directory found, skipping local version check")
@@ -55,13 +56,13 @@ class LocalVersionEnforcer(ConstraintEnforcer):
             d = _remove_suffix(_remove_prefix(d, f"{name}-"), ".tar.gz")
             v: Version = Version.from_str(d)
             max_local_version = max(max_local_version, v)
-        
+
         if version <= max_local_version:
-            logger.error(f"Version conflict: specified '{version}' is not greater than local '{max_local_version}'")
+            logger.error("Version conflict: specified '%s' is not greater than local '%s'", version, max_local_version)
             raise self.EXCEPTION_TYPE(
                 f"Specified version is '{version}' but (locally available) latest existing is '{max_local_version}'")
-        
-        logger.info(f"Local version check passed: '{version}' > '{max_local_version}'")
+
+        logger.info("Local version check passed: '%s' > '%s'", version, max_local_version)
 
 
 __all__ = [

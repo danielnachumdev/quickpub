@@ -10,13 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class PypiRemoteVersionEnforcer(ConstraintEnforcer):
+    """Enforces that the new version is greater than the remote PyPI version."""
     _HTTP_FAILED_MESSAGE: str = "Failed to send http request"
 
     def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
         if demo:
             return
-        
-        logger.info(f"Checking remote version for package '{name}' against version '{version}'")
+
+        logger.info("Checking remote version for package '%s' against version '%s'", name, version)
         url = f"https://pypi.org/simple/{name}/"
 
         timeout_strategy = MultiplicativeBackoff(2)
@@ -28,7 +29,7 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
             ConstantBackOffStrategy(1))
         response = executor.execute(wrapper, 5)
         if response is None:
-            logger.error(f"Failed to fetch package information from PyPI for '{name}'")
+            logger.error("Failed to fetch package information from PyPI for '%s'", name)
             raise self.EXCEPTION_TYPE(self._HTTP_FAILED_MESSAGE)
         html = response.content.decode()
 
@@ -40,7 +41,7 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
         matches = version_pattern.findall(html)
 
         if not matches:
-            logger.error(f"No versions found for package '{name}' on PyPI")
+            logger.error("No versions found for package '%s' on PyPI", name)
             raise self.EXCEPTION_TYPE(
                 f"No versions found for package '{name}' on PyPI")
 
@@ -55,18 +56,18 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
                 continue
 
         if not versions:
-            logger.error(f"No valid versions found for package '{name}' on PyPI")
+            logger.error("No valid versions found for package '%s' on PyPI", name)
             raise self.EXCEPTION_TYPE(
                 f"No valid versions found for package '{name}' on PyPI")
 
         remote_version = max(versions)
 
         if not version > remote_version:
-            logger.error(f"Version conflict: specified '{version}' is not greater than remote '{remote_version}'")
+            logger.error("Version conflict: specified '%s' is not greater than remote '%s'", version, remote_version)
             raise self.EXCEPTION_TYPE(
                 f"Specified version is '{version}' but (remotely available) latest existing is '{remote_version}'")
-        
-        logger.info(f"Version check passed: '{version}' > '{remote_version}'")
+
+        logger.info("Version check passed: '%s' > '%s'", version, remote_version)
 
 
 __all__ = [

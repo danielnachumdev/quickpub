@@ -12,6 +12,11 @@ def build(
         *,
         verbose: bool = True
 ) -> None:
+    """
+    Build the package distribution.
+    
+    :param verbose: Whether to display verbose output
+    """
     logger.info("Starting build process")
     if verbose:
         info("Creating new distribution...")
@@ -20,7 +25,7 @@ def build(
     ret, stdout, stderr = quickpub.proxy.cm("python", "setup.py", "sdist")
 
     if ret != 0:
-        logger.error(f"Build failed with return code {ret}: {stderr.decode(encoding='utf8')}")
+        logger.error("Build failed with return code %d: %s", ret, stderr.decode(encoding='utf8'))
         exit_if(
             ret != 0,
             stderr.decode(encoding="utf8")
@@ -35,7 +40,14 @@ def upload(
         version: Version,
         verbose: bool = True
 ) -> None:
-    logger.info(f"Starting upload process for package '{name}' version '{version}'")
+    """
+    Upload the package to PyPI.
+    
+    :param name: Package name
+    :param version: Package version
+    :param verbose: Whether to display verbose output
+    """
+    logger.info("Starting upload process for package '%s' version '%s'", name, version)
     if verbose:
         info("Uploading")
         logger.info("Uploading package to PyPI")
@@ -44,13 +56,13 @@ def upload(
                                             f"dist/{name}-{version}.tar.gz")
 
     if ret != 0:
-        logger.error(f"Upload failed with return code {ret}: {stderr.decode(encoding='utf8')}")
+        logger.error("Upload failed with return code %d: %s", ret, stderr.decode(encoding='utf8'))
         exit_if(
             ret != 0,
             f"Failed uploading the package to pypi. Try running the following command manually:\n\ttwine upload --config-file .pypirc dist/{name}-{version}.tar.gz"
         )
 
-    logger.info(f"Successfully uploaded package '{name}' version '{version}'")
+    logger.info("Successfully uploaded package '%s' version '%s'", name, version)
 
 
 def commit(
@@ -58,7 +70,13 @@ def commit(
         version: Version,
         verbose: bool = True
 ) -> None:
-    logger.info(f"Starting Git commit process for version '{version}'")
+    """
+    Commit and push changes to Git repository.
+    
+    :param version: Package version
+    :param verbose: Whether to display verbose output
+    """
+    logger.info("Starting Git commit process for version '%s'", version)
 
     if verbose:
         info("Git")
@@ -67,7 +85,7 @@ def commit(
 
     ret, stdout, stderr = quickpub.proxy.cm("git add .")
     if ret != 0:
-        logger.error(f"Git add failed with return code {ret}: {stderr.decode(encoding='utf8')}")
+        logger.error("Git add failed with return code %d: %s", ret, stderr.decode(encoding='utf8'))
         exit_if(
             ret != 0,
             stderr.decode(encoding="utf8")
@@ -75,11 +93,11 @@ def commit(
 
     if verbose:
         info("\tCommitting")
-        logger.info(f"Committing changes with message 'updated to version {version}'")
+        logger.info("Committing changes with message 'updated to version %s'", version)
 
     ret, stdout, stderr = quickpub.proxy.cm(f"git commit -m \"updated to version {version}\"")
     if ret != 0:
-        logger.error(f"Git commit failed with return code {ret}: {stderr.decode(encoding='utf8')}")
+        logger.error("Git commit failed with return code %d: %s", ret, stderr.decode(encoding='utf8'))
         exit_if(
             ret != 0,
             stderr.decode(encoding="utf8")
@@ -91,13 +109,13 @@ def commit(
 
     ret, stdout, stderr = quickpub.proxy.cm("git push")
     if ret != 0:
-        logger.error(f"Git push failed with return code {ret}: {stderr.decode(encoding='utf8')}")
+        logger.error("Git push failed with return code %d: %s", ret, stderr.decode(encoding='utf8'))
         exit_if(
             ret != 0,
             stderr.decode(encoding="utf8")
         )
 
-    logger.info(f"Successfully committed and pushed version '{version}'")
+    logger.info("Successfully committed and pushed version '%s'", version)
 
 
 __all__ = [

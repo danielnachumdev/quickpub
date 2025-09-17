@@ -7,17 +7,18 @@ logger = logging.getLogger(__name__)
 
 
 class LicenseEnforcer(ConstraintEnforcer):
+    """Enforces the presence of a license file."""
     def __init__(self, path: str = "./LICENSE") -> None:
         self.path = path
 
     def enforce(self, **kwargs) -> None:
-        logger.info(f"Checking for license file at '{self.path}'")
-        
+        logger.info("Checking for license file at '%s'", self.path)
+
         if not file_exists(self.path):
-            logger.error(f"License file not found at '{self.path}'")
+            logger.error("License file not found at '%s'", self.path)
             raise self.EXCEPTION_TYPE(f"Could not find license file at '{self.path}'")
-        
-        logger.info(f"License file found at '{self.path}'")
+
+        logger.info("License file found at '%s'", self.path)
 
 
 __all__ = [
