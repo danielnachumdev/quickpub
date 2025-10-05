@@ -1,5 +1,3 @@
-import json
-
 from tqdm import tqdm
 
 from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPythonProvider, \
@@ -10,7 +8,7 @@ from quickpub import publish, MypyRunner, PylintRunner, UnittestRunner, CondaPyt
 def main() -> None:
     publish(
         name="quickpub",
-        version="3.0.1",
+        version="3.0.5",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A python package to quickly configure and publish a new package",
@@ -30,7 +28,6 @@ def main() -> None:
         dependencies=["danielutils>=1.0.0", "requests", "fire"],
         min_python="3.8.0",
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
-        demo=True
     )
 
 
