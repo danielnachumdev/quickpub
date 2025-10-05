@@ -13,6 +13,7 @@ from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disabl
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 from .worker_pool import WorkerPool
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -40,11 +41,12 @@ ASYNC_POOL_NAME: str = "Quickpub QA"
 @runtime_checkable
 class SupportsProgress(Protocol):
     """Protocol for objects that support progress tracking."""
+
     @abstractmethod
     def update(self, amount: int) -> None:
         """
         Update progress by the given amount.
-        
+
         :param amount: Amount to update progress by
         """
         ...
@@ -54,7 +56,7 @@ class SupportsProgress(Protocol):
     def total(self) -> int:
         """
         Get the total progress amount.
-        
+
         :return: Total progress amount
         """
         ...
@@ -64,7 +66,7 @@ class SupportsProgress(Protocol):
     def total(self, amount: int) -> None:
         """
         Set the total progress amount.
-        
+
         :param amount: Total progress amount
         """
         ...
@@ -194,7 +196,7 @@ async def run_config(
 ) -> None:
     """
     Run a QA configuration on a specific environment.
-    
+
     :param env_name: Name of the environment
     :param async_executor: Async command executor
     :param runner: QA runner instance
@@ -214,6 +216,7 @@ async def run_config(
             env_name=env_name
         )
         logger.info("QA config %d completed successfully on environment '%s'", config_id, env_name)
+        is_config_run_success[config_id] = True
     except ExitEarlyError as e:
         logger.error("QA config %d failed on environment '%s': %s", config_id, env_name, e)
         raise e
@@ -225,7 +228,6 @@ async def run_config(
     finally:
         if pbar is not None:
             pbar.update(1)
-    is_config_run_success[config_id] = True
 
 
 async def qa(
@@ -238,7 +240,7 @@ async def qa(
 ) -> bool:
     """
     Run quality assurance checks on the package.
-    
+
     :param python_provider: Python environment provider
     :param quality_assurance_strategies: List of QA runners
     :param package_name: Name of the package
