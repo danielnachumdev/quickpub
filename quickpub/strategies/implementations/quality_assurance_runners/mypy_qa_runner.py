@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 class MypyRunner(QualityAssuranceRunner):
     """Quality assurance runner for mypy type checking."""
-    NO_TESTS_PATTERN: re.Pattern = re.compile(r"There are no \.py\[i\] files in directory '[\w\.\\\/]+'")
+    NO_TESTS_PATTERN: re.Pattern = re.compile(
+        r"There are no \.py\[i\] files in directory '[\w\.\\\/]+'")
     RATING_PATTERN: re.Pattern = re.compile(
         r"Found (\d+(?:\.\d+)?) errors? in (\d+(?:\.\d+)?) files? \(checked (\d+(?:\.\d+)?) source files?\)")
 
@@ -37,11 +38,12 @@ class MypyRunner(QualityAssuranceRunner):
 
     def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
-        logger.info("Calculating mypy score from type checking results")
+        logger.debug("Calculating mypy score from type checking results")
 
         rating_line = lines[-1]
         if self.NO_TESTS_PATTERN.match(rating_line):
-            logger.info("No Python files found for type checking, returning score: 0.0")
+            logger.debug(
+                "No Python files found for type checking, returning score: 0.0")
             return 0.0
 
         if rating_line.endswith("No module named mypy"):
@@ -53,7 +55,7 @@ class MypyRunner(QualityAssuranceRunner):
             raise ExitEarlyError(rating_line)
 
         if rating_line.startswith("Success"):
-            logger.info("Mypy type checking successful, returning score: 0.0")
+            logger.debug("Mypy type checking successful, returning score: 0.0")
             return 0.0
 
         exit_if(
@@ -65,7 +67,7 @@ class MypyRunner(QualityAssuranceRunner):
         num_failed = float(m.group(1))  # type :ignore
         # active_files = float(m.group(2))  # type :ignore
         # total_files = float(m.group(3))  # type :ignore
-        logger.info("Mypy score calculated: %s type errors found", num_failed)
+        logger.debug("Mypy score calculated: %s type errors found", num_failed)
         return num_failed
 
 

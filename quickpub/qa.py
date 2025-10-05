@@ -103,7 +103,7 @@ async def global_import_sanity_check(
                              package_name, env_name, code)
                 is_task_run_success[task_id] = False
             else:
-                logger.info("Sanity check passed for package '%s' on environment '%s'", package_name, env_name)
+                logger.debug("Sanity check passed for package '%s' on environment '%s'", package_name, env_name)
                 is_task_run_success[task_id] = True
 
             msg = f"Env '{env_name}' failed sanity check."
@@ -180,7 +180,7 @@ async def validate_dependencies(
                 logger.error("Dependency validation failed on environment '%s': %s", env_name, not_installed_properly)
                 is_task_run_success[task_id] = False
             else:
-                logger.info("Dependency validation passed on environment '%s'", env_name)
+                logger.debug("Dependency validation passed on environment '%s'", env_name)
                 is_task_run_success[task_id] = True
 
             exit_if(bool(not_installed_properly),
@@ -233,7 +233,7 @@ async def run_config(
             use_system_interpreter=is_system_interpreter,
             env_name=env_name
         )
-        logger.info("QA config %d completed successfully on environment '%s'", config_id, env_name)
+        logger.debug("QA config %d completed successfully on environment '%s'", config_id, env_name)
         is_task_run_success[task_id] = True
     except ExitEarlyError as e:
         logger.error("QA config %d failed on environment '%s': %s", config_id, env_name, e)

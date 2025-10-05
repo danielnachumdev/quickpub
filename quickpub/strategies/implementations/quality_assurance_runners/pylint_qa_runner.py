@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PylintRunner(QualityAssuranceRunner):
     """Quality assurance runner for pylint code analysis."""
+
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pylint dependencies")
         with base:
@@ -35,10 +36,10 @@ class PylintRunner(QualityAssuranceRunner):
 
     def _calculate_score(self, ret: int, lines: List[str], verbose: bool = False) -> float:
         from quickpub.enforcers import exit_if
-        logger.info("Calculating pylint score from analysis results")
+        logger.debug("Calculating pylint score from analysis results")
 
         if len(lines) == 0:
-            logger.info("No pylint output, returning perfect score: 1.0")
+            logger.debug("No pylint output, returning perfect score: 1.0")
             return 1
         if len(lines) == 1:
             if lines[0].endswith("No module named pylint"):
@@ -62,7 +63,8 @@ class PylintRunner(QualityAssuranceRunner):
         rating_string = m.group(1)  # type:ignore
         numerator, denominator = rating_string.split("/")
         score = float(numerator) / float(denominator)
-        logger.info("Pylint score calculated: %.3f (%s/%s)", score, numerator, denominator)
+        logger.debug("Pylint score calculated: %.3f (%s/%s)",
+                     score, numerator, denominator)
         return score
 
 
