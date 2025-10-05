@@ -77,6 +77,7 @@ async def global_import_sanity_check(
         executor: AsyncLayeredCommand,
         is_system_interpreter: bool,
         env_name: str,
+        task_id: int,
         pbar: Optional[SupportsProgress] = None
 ) -> None:
     """
@@ -100,6 +101,10 @@ async def global_import_sanity_check(
             if code != 0:
                 logger.error("Sanity check failed for package '%s' on environment '%s' with return code %d",
                              package_name, env_name, code)
+                is_task_run_success[task_id] = False
+            else:
+                logger.info("Sanity check passed for package '%s' on environment '%s'", package_name, env_name)
+                is_task_run_success[task_id] = True
 
             msg = f"Env '{env_name}' failed sanity check."
             if stderr:
@@ -112,7 +117,11 @@ async def global_import_sanity_check(
                 verbose=True,
                 err_func=lambda msg: None  # TODO remove
             )
-        logger.info("Sanity check passed for package '%s' on environment '%s'", package_name, env_name)
+    except Exception as e:
+        logger.error("Sanity check encountered unexpected error for package '%s' on environment '%s': %s", package_name,
+                     env_name, e)
+        is_task_run_success[task_id] = False
+        raise
     finally:
         if pbar is not None:
             pbar.update(1)
@@ -126,6 +135,7 @@ async def validate_dependencies(
         required_dependencies: List[Dependency],
         executor: AsyncLayeredCommand,
         env_name: str,
+        task_id: int,
         pbar: Optional[SupportsProgress] = None
 ) -> None:
     """
@@ -168,19 +178,26 @@ async def validate_dependencies(
 
             if not_installed_properly:
                 logger.error("Dependency validation failed on environment '%s': %s", env_name, not_installed_properly)
+                is_task_run_success[task_id] = False
             else:
                 logger.info("Dependency validation passed on environment '%s'", env_name)
+                is_task_run_success[task_id] = True
 
             exit_if(bool(not_installed_properly),
                     f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
                     err_func=lambda msg: None  # TODO remove
                     )
+    except Exception as e:
+        logger.error("Dependency validation encountered unexpected error on environment '%s': %s", env_name, e)
+        is_task_run_success[task_id] = False
+        raise
     finally:
         if pbar is not None:
             pbar.update(1)
 
 
-is_config_run_success: List[bool] = []
+# Track all QA tasks (dependencies, sanity checks, QA runners)
+is_task_run_success: List[bool] = []
 
 
 async def run_config(
@@ -188,6 +205,7 @@ async def run_config(
         async_executor: AsyncLayeredCommand,
         runner: QualityAssuranceRunner,
         config_id: int,
+        task_id: int,
         *,
         is_system_interpreter: bool,
         validation_exit_on_fail: bool,
@@ -216,12 +234,14 @@ async def run_config(
             env_name=env_name
         )
         logger.info("QA config %d completed successfully on environment '%s'", config_id, env_name)
-        is_config_run_success[config_id] = True
+        is_task_run_success[task_id] = True
     except ExitEarlyError as e:
         logger.error("QA config %d failed on environment '%s': %s", config_id, env_name, e)
+        is_task_run_success[task_id] = False
         raise e
     except Exception as e:
         logger.error("QA config %d encountered unexpected error on environment '%s': %s", config_id, env_name, e)
+        is_task_run_success[task_id] = False
         if validation_exit_on_fail:
             raise RuntimeError(e) from e
         return
@@ -251,13 +271,13 @@ async def qa(
     """
     logger.info("Starting QA process for package '%s' with %d QA strategies", package_name,
                 len(quality_assurance_strategies))
-    is_config_run_success.clear()
+    is_task_run_success.clear()
     from .strategies import DefaultPythonProvider
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
 
     pool = WorkerPool(ASYNC_POOL_NAME, num_workers=5)
     total = 0
-    i = 0
+    task_id = 0
     with AsyncLayeredCommand() as base:
         async for env_name, async_executor in python_provider:
             logger.debug("Setting up QA tasks for environment '%s'", env_name)
@@ -270,11 +290,13 @@ async def qa(
                         dependencies,
                         async_executor,
                         env_name,
+                        task_id,
                         pbar
                     ],
                     name=f"Validate dependencies for env '{env_name}'",
                 )
                 total += 1
+                task_id += 1
                 await pool.submit(
                     global_import_sanity_check,
                     args=[
@@ -282,15 +304,18 @@ async def qa(
                         async_executor,
                         is_system_interpreter,
                         env_name,
+                        task_id,
                         pbar
                     ],
                     name=f"Global Import Sanity Check for env '{env_name}'",
                 )
                 total += 1
+                task_id += 1
                 for runner in quality_assurance_strategies:
                     await pool.submit(
                         run_config,
-                        args=[env_name, async_executor, runner, i],
+                        args=[env_name, async_executor,
+                              runner, task_id, task_id],
                         kwargs=dict(src_folder_path=src_folder_path,
                                     is_system_interpreter=is_system_interpreter,
                                     validation_exit_on_fail=python_provider.exit_on_fail,
@@ -298,18 +323,20 @@ async def qa(
                         name=f"Run config for '{env_name}' + '{runner.__class__.__qualname__}'",
                     )
                     total += 1
-                    i += 1
+                    task_id += 1
     if pbar is not None:
         pbar.total = total
-    for _ in range(i):
-        is_config_run_success.append(False)
+    for _ in range(task_id):
+        is_task_run_success.append(False)
 
     logger.info("Starting QA worker pool with %d total tasks", total)
     await pool.start()
     await pool.join()
 
-    success = all(is_config_run_success)
+    # Use unified task tracking for overall success
+    success = all(is_task_run_success)
     logger.info("QA process completed. Success: %s", success)
+    logger.debug("Task success breakdown: %s", is_task_run_success)
     return success
 
 
