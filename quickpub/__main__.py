@@ -146,5 +146,11 @@ def publish(
             target.upload(name=name, version=version)
 
 
-if __name__ == "__main__":
+def main() -> None:
     fire.Fire(publish)
+
+
+if __name__ == "__main__":
+    main()
+
+__all__ = ["main", "publish"]
