@@ -3,8 +3,14 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase, AsyncAutoCWDTestCase, \
-    AsyncAlwaysTeardownTestCase
+from danielutils import (
+    AutoCWDTestCase,
+    delete_directory,
+    create_file,
+    AlwaysTeardownTestCase,
+    AsyncAutoCWDTestCase,
+    AsyncAlwaysTeardownTestCase,
+)
 
 from quickpub import PylintRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
@@ -47,15 +53,15 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             base.prev = None
             self.env_name, self.base = name, base
             break
-        self.runner = PylintRunner(
-            bound=f"<{NUM_ERRORS + 1}"
-        )
+        self.runner = PylintRunner(bound=f"<{NUM_ERRORS + 1}")
 
     async def asyncTearDown(self):
         delete_directory(TEMP_VENV_NAME)
 
-    @patch("quickpub.strategies.implementations.quality_assurance_runners.pylint_qa_runner.PylintRunner._build_command",
-           return_value=f".\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m pylint .\\")
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pylint_qa_runner.PylintRunner._build_command",
+        return_value=f".\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m pylint .\\",
+    )
     async def test_no_pylint(self, *args):
         with self.base:
             await self.base(f"{sys.executable} -m venv {TEMP_VENV_NAME}")
@@ -65,27 +71,21 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             )
             with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
-                    target="./",
-                    executor=self.base,
-                    env_name=self.env_name
+                    target="./", executor=self.base, env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self):
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_empty_package(self):
         create_file("__init__.py")
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_bound_should_fail(self):
@@ -96,9 +96,7 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         with self.base:
             with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
-                    target="./",
-                    executor=self.base,
-                    env_name=self.env_name
+                    target="./", executor=self.base, env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
@@ -109,9 +107,7 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         self.runner.bound = Bound("<", float("inf"))
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_with_config(self):
@@ -120,12 +116,13 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
-        self.runner = PylintRunner(configuration_path="../test_unit/test_qa_runners/.pylintrc", bound=f"<={NUM_ERRORS}")
+        self.runner = PylintRunner(
+            configuration_path="../test_unit/test_qa_runners/.pylintrc",
+            bound=f"<={NUM_ERRORS}",
+        )
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_with_explicit_executable(self):
@@ -140,7 +137,5 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         self.runner = PylintRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )

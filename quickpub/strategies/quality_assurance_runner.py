@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Configurable:
     """Mixin class for objects that can be configured with a file."""
+
     @property
     def has_config(self) -> bool:
         """
@@ -31,14 +32,13 @@ class Configurable:
         if self.has_config:
             logger.debug("Using configuration file: %s", self.config_path)
             if not file_exists(self.config_path):
-                logger.error("Configuration file not found: %s",
-                             self.config_path)
-                raise FileNotFoundError(
-                    f"Can't find config file {self.config_path}")
+                logger.error("Configuration file not found: %s", self.config_path)
+                raise FileNotFoundError(f"Can't find config file {self.config_path}")
 
 
 class HasOptionalExecutable:
     """Mixin class for objects that can use an optional executable."""
+
     PYTHON: str = sys.executable
 
     @property
@@ -63,8 +63,7 @@ class HasOptionalExecutable:
             logger.debug("Using custom executable: %s", self.executable_path)
             if not file_exists(self.executable_path):
                 logger.error("Executable not found: %s", self.executable_path)
-                raise FileNotFoundError(
-                    f"Executable not found {self.executable_path}")
+                raise FileNotFoundError(f"Executable not found {self.executable_path}")
         else:
             logger.debug("Using system executable for: %s", name)
 
@@ -85,10 +84,14 @@ class HasOptionalExecutable:
 
 
 SPEICLA_EXIT_CODES: Dict[int, Tuple[str, str]] = {
-    -1073741515: ("Can't find python in path.",
-                  "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND"),
-    3221225781: ("Can't find python in path.",
-                 "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND")
+    -1073741515: (
+        "Can't find python in path.",
+        "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND",
+    ),
+    3221225781: (
+        "Can't find python in path.",
+        "Executing command '{command}' failed with exit code {ret} which in hex is {hex} which corresponds to STATUS_DLL_NOT_FOUND",
+    ),
 }
 
 
@@ -110,12 +113,13 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
     """
 
     def __init__(
-            self, *,
-            name: str,
-            bound: Union[str, Bound],
-            target: Optional[str] = None,
-            configuration_path: Optional[str] = None,
-            executable_path: Optional[str] = None
+        self,
+        *,
+        name: str,
+        bound: Union[str, Bound],
+        target: Optional[str] = None,
+        configuration_path: Optional[str] = None,
+        executable_path: Optional[str] = None,
     ) -> None:
         """
         Initializes the QualityAssuranceRunner with the given parameters.
@@ -128,11 +132,16 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         """
         Configurable.__init__(self, configuration_path)
         HasOptionalExecutable.__init__(self, name, executable_path)
-        self.bound: Bound = bound if isinstance(
-            bound, Bound) else Bound.from_string(bound)
+        self.bound: Bound = (
+            bound if isinstance(bound, Bound) else Bound.from_string(bound)
+        )
         self.target = target
         logger.debug(
-            "QualityAssuranceRunner '%s' initialized with bound=%s, target=%s", name, self.bound, target)
+            "QualityAssuranceRunner '%s' initialized with bound=%s, target=%s",
+            name,
+            self.bound,
+            target,
+        )
 
     @abstractmethod
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
@@ -164,8 +173,15 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         Can be overridden by subclasses.
         """
 
-    async def run(self, target: str, executor: AsyncLayeredCommand, *, verbose: bool = True,  # type: ignore
-                  use_system_interpreter: bool = False, env_name: str) -> None:
+    async def run(
+        self,
+        target: str,
+        executor: AsyncLayeredCommand,
+        *,
+        verbose: bool = True,  # type: ignore
+        use_system_interpreter: bool = False,
+        env_name: str,
+    ) -> None:
         """
         Runs the QA process on the specified target.
 
@@ -178,8 +194,12 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         from quickpub.proxy import os_system  # pylint: disable=import-error
         from quickpub.enforcers import exit_if  # pylint: disable=import-error
 
-        logger.debug("Running %s on environment '%s' with target '%s'",
-                     self.__class__.__name__, env_name, target)
+        logger.debug(
+            "Running %s on environment '%s' with target '%s'",
+            self.__class__.__name__,
+            env_name,
+            target,
+        )
 
         # =====================================
         # IMPORTANT: need to explicitly override it here
@@ -193,37 +213,56 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
             ret, out, err = await executor(command, command_raise_on_fail=False)
             if ret in SPEICLA_EXIT_CODES:
                 title, explanation = SPEICLA_EXIT_CODES[ret]
-                unsigned_integer_ret = ret + 2 ** 32
-                logger.error(
-                    "Special exit code %d encountered: %s", ret, title)
+                unsigned_integer_ret = ret + 2**32
+                logger.error("Special exit code %d encountered: %s", ret, title)
                 raise RuntimeError(
-                    title + "\n\t" + explanation.format(command=command, ret=ret, hex=hex(unsigned_integer_ret)))
+                    title
+                    + "\n\t"
+                    + explanation.format(
+                        command=command, ret=ret, hex=hex(unsigned_integer_ret)
+                    )
+                )
 
             score = self._calculate_score(ret, out + err, verbose=verbose)
-            logger.debug("QA runner '%s' scored %.3f (bound: %s)",
-                         self.__class__.__name__, score, self.bound)
+            logger.debug(
+                "QA runner '%s' scored %.3f (bound: %s)",
+                self.__class__.__name__,
+                score,
+                self.bound,
+            )
 
             if not self.bound.compare_against(score):
-                logger.error("QA runner '%s' failed bound check: %s vs %s",
-                             self.__class__.__name__, score, self.bound)
+                logger.error(
+                    "QA runner '%s' failed bound check: %s vs %s",
+                    self.__class__.__name__,
+                    score,
+                    self.bound,
+                )
 
             exit_if(
                 not self.bound.compare_against(score),
                 f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
                 verbose=verbose,
-                err_func=lambda msg: None  # TODO remove
+                err_func=lambda msg: None,  # TODO remove
             )
         except Exception as e:
-            logger.error("QA runner '%s' failed on env '%s': %s",
-                         self.__class__.__name__, env_name, e)
+            logger.error(
+                "QA runner '%s' failed on env '%s': %s",
+                self.__class__.__name__,
+                env_name,
+                e,
+            )
             raise RuntimeError(
                 f"On env {env_name}, failed to run {self.__class__.__name__}. Try running manually:\n{executor._build_command(command)}",
-                e) from e
+                e,
+            ) from e
         finally:
             self._post_command()
 
     @abstractmethod
-    def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
+    def _calculate_score(
+        self, ret: int, command_output: List[str], *, verbose: bool = False
+    ) -> float:
         """
         Calculates the score based on the command's return code and output.
 
@@ -234,6 +273,4 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         """
 
 
-__all__ = [
-    "QualityAssuranceRunner"
-]
+__all__ = ["QualityAssuranceRunner"]

@@ -1,5 +1,4 @@
-
-.idea\
+.idea/*
 main.py
 !tests/*
 tmp/

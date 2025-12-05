@@ -12,3 +12,4 @@ types-tqdm
 types-requests
 beautifulsoup4
 setuptools
+black

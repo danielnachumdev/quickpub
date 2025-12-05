@@ -2,7 +2,9 @@ import unittest
 from unittest.mock import patch, MagicMock
 import re
 
-from quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner import UnittestRunner
+from quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner import (
+    UnittestRunner,
+)
 from quickpub.enforcers import ExitEarlyError
 
 
@@ -11,29 +13,19 @@ class TestUnittestCalculateScore(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.runner = UnittestRunner(target="./tests", bound=">=0.8", no_tests_score=0.5)
+        self.runner = UnittestRunner(
+            target="./tests", bound=">=0.8", no_tests_score=0.5
+        )
 
     def test_perfect_score_all_tests_pass(self):
         """Test perfect score when all tests pass."""
-        lines = [
-            "test_module.py",
-            ".",
-            "Ran 5 tests in 0.001s",
-            "",
-            "OK"
-        ]
+        lines = ["test_module.py", ".", "Ran 5 tests in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
     def test_perfect_score_with_skipped_tests(self):
         """Test perfect score when all tests pass but some are skipped."""
-        lines = [
-            "test_module.py",
-            ".",
-            "Ran 5 tests in 0.001s",
-            "",
-            "OK (skipped=2)"
-        ]
+        lines = ["test_module.py", ".", "Ran 5 tests in 0.001s", "", "OK (skipped=2)"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
@@ -44,7 +36,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "FF",
             "Ran 5 tests in 0.001s",
             "",
-            "FAILED (failures=2)"
+            "FAILED (failures=2)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (2 / 5)  # 1 - (2/5) = 0.6
@@ -57,7 +49,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "EE",
             "Ran 5 tests in 0.001s",
             "",
-            "FAILED (errors=2)"
+            "FAILED (errors=2)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (2 / 5)  # 1 - (2/5) = 0.6
@@ -70,7 +62,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "FFE",
             "Ran 5 tests in 0.001s",
             "",
-            "FAILED (failures=2, errors=1)"
+            "FAILED (failures=2, errors=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (2 + 1) / 5  # 1 - (3/5) = 0.4
@@ -83,7 +75,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "FFE",
             "Ran 5 tests in 0.001s",
             "",
-            "FAILED (failures=2, errors=1, skipped=1)"
+            "FAILED (failures=2, errors=1, skipped=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (2 + 1) / 5  # 1 - (3/5) = 0.4
@@ -96,7 +88,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F..",
             "Ran 3 tests in 0.001s",
             "",
-            "FAILED (failures=1)"
+            "FAILED (failures=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (1 / 3)  # 1 - (1/3) = 0.666...
@@ -104,38 +96,20 @@ class TestUnittestCalculateScore(unittest.TestCase):
 
     def test_zero_tests_returns_no_tests_score(self):
         """Test that zero tests returns the no_tests_score."""
-        lines = [
-            "test_module.py",
-            "",
-            "Ran 0 tests in 0.001s",
-            "",
-            "OK"
-        ]
+        lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, self.runner.no_tests_score)
 
     def test_zero_tests_with_custom_no_tests_score(self):
         """Test zero tests with custom no_tests_score."""
         runner = UnittestRunner(target="./tests", bound=">=0.8", no_tests_score=0.8)
-        lines = [
-            "test_module.py",
-            "",
-            "Ran 0 tests in 0.001s",
-            "",
-            "OK"
-        ]
+        lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
         score = runner._calculate_score(0, lines)
         self.assertEqual(score, 0.8)
 
     def test_single_test_passes(self):
         """Test score calculation with single passing test."""
-        lines = [
-            "test_module.py",
-            ".",
-            "Ran 1 test in 0.001s",
-            "",
-            "OK"
-        ]
+        lines = ["test_module.py", ".", "Ran 1 test in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
@@ -146,20 +120,14 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 1 test in 0.001s",
             "",
-            "FAILED (failures=1)"
+            "FAILED (failures=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
     def test_single_test_error(self):
         """Test score calculation with single test error."""
-        lines = [
-            "test_module.py",
-            "E",
-            "Ran 1 test in 0.001s",
-            "",
-            "FAILED (errors=1)"
-        ]
+        lines = ["test_module.py", "E", "Ran 1 test in 0.001s", "", "FAILED (errors=1)"]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
@@ -170,7 +138,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "FFF",
             "Ran 3 tests in 0.001s",
             "",
-            "FAILED (failures=3)"
+            "FAILED (failures=3)",
         ]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
@@ -182,7 +150,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "EEE",
             "Ran 3 tests in 0.001s",
             "",
-            "FAILED (errors=3)"
+            "FAILED (errors=3)",
         ]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
@@ -194,7 +162,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "FFE",
             "Ran 3 tests in 0.001s",
             "",
-            "FAILED (failures=2, errors=1)"
+            "FAILED (failures=2, errors=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
@@ -206,7 +174,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 1 test in 0.001s",
             "",
-            "FAILED (failures=1)"
+            "FAILED (failures=1)",
         ]
         score_verbose = self.runner._calculate_score(1, lines, verbose=True)
         score_normal = self.runner._calculate_score(1, lines, verbose=False)
@@ -219,16 +187,10 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "OK (skipped=5)",
             "OK (skipped=0)",
         ]
-        
+
         for ok_line in test_cases:
             with self.subTest(ok_line=ok_line):
-                lines = [
-                    "test_module.py",
-                    ".",
-                    "Ran 1 test in 0.001s",
-                    "",
-                    ok_line
-                ]
+                lines = ["test_module.py", ".", "Ran 1 test in 0.001s", "", ok_line]
                 score = self.runner._calculate_score(0, lines)
                 self.assertEqual(score, 1.0)
 
@@ -242,7 +204,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             ("FAILED (failures=1, errors=1, skipped=1)", 1, 1),
             ("FAILED (skipped=1, failures=1, errors=1)", 1, 1),
         ]
-        
+
         for failed_line, expected_failures, expected_errors in test_cases:
             with self.subTest(failed_line=failed_line):
                 lines = [
@@ -250,7 +212,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                     "F" * (expected_failures + expected_errors),
                     "Ran 3 tests in 0.001s",
                     "",
-                    failed_line
+                    failed_line,
                 ]
                 score = self.runner._calculate_score(1, lines)
                 expected_score = 1 - (expected_failures + expected_errors) / 3
@@ -258,17 +220,11 @@ class TestUnittestCalculateScore(unittest.TestCase):
 
     def test_malformed_num_tests_line_raises_exception(self):
         """Test that malformed num_tests line raises ExitEarlyError."""
-        lines = [
-            "test_module.py",
-            ".",
-            "Invalid tests line",
-            "",
-            "OK"
-        ]
-        
+        lines = ["test_module.py", ".", "Invalid tests line", "", "OK"]
+
         with self.assertRaises(ExitEarlyError) as context:
             self.runner._calculate_score(0, lines)
-        
+
         self.assertIn("Failed running Unittest", str(context.exception))
         self.assertIn("exit code 0", str(context.exception))
 
@@ -279,9 +235,9 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 1 test in 0.001s",
             "",
-            "INVALID_FAILED_LINE"
+            "INVALID_FAILED_LINE",
         ]
-        
+
         # The function treats non-matching FAILED lines as if they were OK
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 1.0)
@@ -295,30 +251,30 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 1 test in 0.001s",
             "",
-            "FAILED (failures=abc)"
+            "FAILED (failures=abc)",
         ]
-        
+
         with self.assertRaises(ExitEarlyError) as context:
             self.runner._calculate_score(1, lines)
-        
+
         self.assertIn("Failed running Unittest", str(context.exception))
 
     def test_insufficient_lines_raises_exception(self):
         """Test that insufficient lines raises IndexError which becomes ExitEarlyError."""
         lines = ["Only one line"]
-        
+
         with self.assertRaises(ExitEarlyError) as context:
             self.runner._calculate_score(0, lines)
-        
+
         self.assertIn("Failed running Unittest", str(context.exception))
 
     def test_empty_lines_raises_exception(self):
         """Test that empty lines list raises IndexError which becomes ExitEarlyError."""
         lines = []
-        
+
         with self.assertRaises(ExitEarlyError) as context:
             self.runner._calculate_score(0, lines)
-        
+
         self.assertIn("Failed running Unittest", str(context.exception))
 
     def test_regex_pattern_matching_edge_cases(self):
@@ -326,20 +282,14 @@ class TestUnittestCalculateScore(unittest.TestCase):
         # Test with different time formats
         test_cases = [
             "Ran 1 test in 0.001s",
-            "Ran 5 tests in 1.234s", 
+            "Ran 5 tests in 1.234s",
             "Ran 10 tests in 0.000s",
             "Ran 100 tests in 12.345s",
         ]
-        
+
         for test_line in test_cases:
             with self.subTest(test_line=test_line):
-                lines = [
-                    "test_module.py",
-                    ".",
-                    test_line,
-                    "",
-                    "OK"
-                ]
+                lines = ["test_module.py", ".", test_line, "", "OK"]
                 score = self.runner._calculate_score(0, lines)
                 self.assertEqual(score, 1.0)
 
@@ -352,7 +302,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             ("FAILED (failures=1, errors=0)", 1, 0),
             ("FAILED (failures=0, errors=1)", 0, 1),
         ]
-        
+
         for failed_line, expected_failures, expected_errors in test_cases:
             with self.subTest(failed_line=failed_line):
                 lines = [
@@ -360,7 +310,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                     "F" * (expected_failures + expected_errors),
                     "Ran 2 tests in 0.001s",
                     "",
-                    failed_line
+                    failed_line,
                 ]
                 score = self.runner._calculate_score(1, lines)
                 expected_score = 1 - (expected_failures + expected_errors) / 2
@@ -374,7 +324,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 3 tests in 0.001s",
             "",
-            "FAILED (failures=1)"
+            "FAILED (failures=1)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (1 / 3)  # 0.666...
@@ -387,7 +337,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F" * 100,  # 100 failures
             "Ran 1000 tests in 0.001s",
             "",
-            "FAILED (failures=100)"
+            "FAILED (failures=100)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (100 / 1000)  # 0.9
@@ -400,13 +350,15 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F" * 99,  # 99 failures
             "Ran 100 tests in 0.001s",
             "",
-            "FAILED (failures=99)"
+            "FAILED (failures=99)",
         ]
         score = self.runner._calculate_score(1, lines)
         expected_score = 1 - (99 / 100)  # 0.01
         self.assertEqual(score, expected_score)
 
-    @patch('quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger')
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
+    )
     def test_logging_calls(self, mock_logger):
         """Test that appropriate logging calls are made."""
         lines = [
@@ -414,47 +366,48 @@ class TestUnittestCalculateScore(unittest.TestCase):
             "F",
             "Ran 1 test in 0.001s",
             "",
-            "FAILED (failures=1)"
+            "FAILED (failures=1)",
         ]
-        
+
         self.runner._calculate_score(1, lines)
-        
+
         # Check that info logging was called
         self.assertTrue(mock_logger.info.called)
         info_calls = [call[0][0] for call in mock_logger.info.call_args_list]
         self.assertIn("Calculating unittest score from test results", info_calls)
-        self.assertIn("Unittest score calculated: %.3f (tests: %d, failed: %d, errors: %d)", info_calls)
+        self.assertIn(
+            "Unittest score calculated: %.3f (tests: %d, failed: %d, errors: %d)",
+            info_calls,
+        )
 
-    @patch('quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger')
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
+    )
     def test_logging_no_tests(self, mock_logger):
         """Test logging when no tests are found."""
-        lines = [
-            "test_module.py",
-            "",
-            "Ran 0 tests in 0.001s",
-            "",
-            "OK"
-        ]
-        
+        lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
+
         self.runner._calculate_score(0, lines)
-        
+
         # Check that no_tests_score logging was called
         info_calls = [call[0][0] for call in mock_logger.info.call_args_list]
         self.assertIn("No tests found, returning no_tests_score: %s", info_calls)
 
-    @patch('quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger')
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
+    )
     def test_logging_exception(self, mock_logger):
         """Test logging when exception occurs."""
         lines = ["Only one line"]  # This will cause an IndexError
-        
+
         with self.assertRaises(ExitEarlyError):
             self.runner._calculate_score(0, lines)
-        
+
         # Check that error logging was called
         self.assertTrue(mock_logger.error.called)
         error_calls = [call[0][0] for call in mock_logger.error.call_args_list]
         self.assertIn("Failed to calculate unittest score", error_calls[0])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

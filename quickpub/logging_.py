@@ -11,7 +11,7 @@ class QuickpubLogFilter(logging.Filter):
     """
 
     def filter(self, record):
-        return record.name.startswith('quickpub')
+        return record.name.startswith("quickpub")
 
 
 class TqdmLoggingHandler(logging.Handler):
@@ -26,6 +26,7 @@ class TqdmLoggingHandler(logging.Handler):
     def emit(self, record):
         try:
             import tqdm
+
             msg = self.format(record)
             tqdm.tqdm.write(msg, file=sys.stdout)
         except ImportError:
@@ -63,7 +64,7 @@ def setup_logging(level: int = None):
     # Common formatter for both handlers
     # Example output: 2024-01-15 10:30:45,123 - INFO - [quickpub.some_module - some_module.py:42] - This is a log message
     formatter = logging.Formatter(
-        '%(asctime)s - %(levelname)s - [%(name)s - %(filename)s:%(lineno)d] - %(message)s'
+        "%(asctime)s - %(levelname)s - [%(name)s - %(filename)s:%(lineno)d] - %(message)s"
     )
 
     try:
@@ -104,8 +105,4 @@ def set_log_level(level: int):
         handler.setLevel(level)
 
 
-__all__ = [
-    "setup_logging",
-    "set_log_level",
-    "QuickpubLogFilter"
-]
+__all__ = ["setup_logging", "set_log_level", "QuickpubLogFilter"]

@@ -23,14 +23,16 @@ class PytestRunner(QualityAssuranceRunner):
     """
 
     PYTEST_REGEX: re.Pattern = re.compile(
-        r"=+ (?:(?P<failed>\d+) failed,? )?(?:(?P<passed>\d+) passed )?in [\d\.]+s =+")
+        r"=+ (?:(?P<failed>\d+) failed,? )?(?:(?P<passed>\d+) passed )?in [\d\.]+s =+"
+    )
 
     def __init__(
-            self, *,
-            bound: Union[str, Bound] = ">=0.8",
-            target: str = "./tests",
-            no_output_score: float = 0.0,
-            no_tests_score: float = 1.0
+        self,
+        *,
+        bound: Union[str, Bound] = ">=0.8",
+        target: str = "./tests",
+        no_output_score: float = 0.0,
+        no_tests_score: float = 1.0,
     ):
         """
         Initializes the PytestRunner with a bound and target directory for tests.
@@ -39,21 +41,26 @@ class PytestRunner(QualityAssuranceRunner):
                       Default is ">=0.8".
         :param target: The target directory containing the tests. Default is "./tests".
         """
-        super().__init__(
-            name="pytest",
-            bound=bound,
-            target=target
-        )
+        super().__init__(name="pytest", bound=bound, target=target)
         if not (0.0 <= no_tests_score <= 1.0):
-            raise RuntimeError("no_tests_score should be between 0.0 and 1.0 (including both).")
+            raise RuntimeError(
+                "no_tests_score should be between 0.0 and 1.0 (including both)."
+            )
         self.no_tests_score = no_tests_score
 
         if not (0.0 <= no_output_score <= 1.0):
-            raise RuntimeError("no_output_score should be between 0.0 and 1.0 (including both).")
+            raise RuntimeError(
+                "no_output_score should be between 0.0 and 1.0 (including both)."
+            )
         self.no_output_score = no_output_score
 
-        logger.info("Initialized PytestRunner with bound='%s', target='%s', no_tests_score=%s, no_output_score=%s",
-                    bound, target, no_tests_score, no_output_score)
+        logger.info(
+            "Initialized PytestRunner with bound='%s', target='%s', no_tests_score=%s, no_output_score=%s",
+            bound,
+            target,
+            no_tests_score,
+            no_output_score,
+        )
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         """
@@ -78,7 +85,9 @@ class PytestRunner(QualityAssuranceRunner):
         with base:
             base(f"{sys.executable} -m pip install pytest")
 
-    def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
+    def _calculate_score(
+        self, ret: int, command_output: List[str], *, verbose: bool = False
+    ) -> float:
         """
         Calculates the test score based on the pytest command output.
 
@@ -90,17 +99,23 @@ class PytestRunner(QualityAssuranceRunner):
         logger.info("Calculating pytest score from test results")
 
         if len(command_output) == 0:
-            logger.info("No pytest output, returning no_output_score: %s", self.no_output_score)
+            logger.info(
+                "No pytest output, returning no_output_score: %s", self.no_output_score
+            )
             return self.no_output_score
 
         rating_line = command_output[-1]
         if "no tests ran" in rating_line:
-            logger.info("No tests ran, returning no_tests_score: %s", self.no_tests_score)
+            logger.info(
+                "No tests ran, returning no_tests_score: %s", self.no_tests_score
+            )
             return self.no_tests_score
 
         if not (m := self.PYTEST_REGEX.match(rating_line)):
             logger.error("Failed to parse pytest output: %s", rating_line)
-            raise ExitEarlyError(f"Can't calculate score for pytest on the following line: {rating_line}")
+            raise ExitEarlyError(
+                f"Can't calculate score for pytest on the following line: {rating_line}"
+            )
 
         dct = m.groupdict()
         failed = int(dct["failed"] or "0")
@@ -109,9 +124,17 @@ class PytestRunner(QualityAssuranceRunner):
         assert passed >= 0
 
         if failed + passed == 0:
-            logger.info("No test results found, returning no_tests_score: %s", self.no_tests_score)
+            logger.info(
+                "No test results found, returning no_tests_score: %s",
+                self.no_tests_score,
+            )
             return self.no_tests_score
 
         score = passed / (passed + failed)
-        logger.info("Pytest score calculated: %.3f (passed: %d, failed: %d)", score, passed, failed)
+        logger.info(
+            "Pytest score calculated: %.3f (passed: %d, failed: %d)",
+            score,
+            passed,
+            failed,
+        )
         return score

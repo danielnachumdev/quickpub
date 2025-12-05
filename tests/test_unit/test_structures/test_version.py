@@ -7,8 +7,15 @@ from quickpub import Version
 class TestVersion(unittest.TestCase):
     def test_from_string__equality(self):
         for _ in range(10000):
-            major, minor, patch = random.randint(1, 100000), random.randint(1, 100000), random.randint(1, 100000)
-            self.assertEqual(Version(major, minor, patch), Version.from_str(f"{major}.{minor}.{patch}"))
+            major, minor, patch = (
+                random.randint(1, 100000),
+                random.randint(1, 100000),
+                random.randint(1, 100000),
+            )
+            self.assertEqual(
+                Version(major, minor, patch),
+                Version.from_str(f"{major}.{minor}.{patch}"),
+            )
 
     def test_valid_values(self):
         Version(0, 0, 0)

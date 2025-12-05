@@ -25,7 +25,8 @@ class TestPypircEnforcer(AutoCWDTestCase):
 
     def test_file_exists_and_check_format_should_pass(self) -> None:
         with open(TMP_PYPIRC_PATH, "w") as f:
-            f.write("""[distutils]
+            f.write(
+                """[distutils]
 index-servers =
     pypi
     testpypi
@@ -37,5 +38,6 @@ index-servers =
 [testpypi]
     username = __token__
     password = aaaaaaaaaaaaaaaaa
-""")
+"""
+            )
         PypircEnforcer(TMP_PYPIRC_PATH).enforce()

@@ -3,8 +3,14 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from danielutils import AutoCWDTestCase, delete_directory, create_file, AlwaysTeardownTestCase, AsyncAutoCWDTestCase, \
-    AsyncAlwaysTeardownTestCase
+from danielutils import (
+    AutoCWDTestCase,
+    delete_directory,
+    create_file,
+    AlwaysTeardownTestCase,
+    AsyncAutoCWDTestCase,
+    AsyncAlwaysTeardownTestCase,
+)
 
 from quickpub import MypyRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
@@ -47,15 +53,15 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             self.env_name, self.base = name, base
             break
 
-        self.runner = MypyRunner(
-            bound=f"<{NUM_ERRORS + 1}"
-        )
+        self.runner = MypyRunner(bound=f"<{NUM_ERRORS + 1}")
 
     async def asyncTearDown(self):
         delete_directory(TEMP_VENV_NAME)
 
-    @patch("quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
-           return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\")
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
+        return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\",
+    )
     async def test_no_mypy(self, *args):
         with self.base:
             await self.base(f"{sys.executable} -m venv {TEMP_VENV_NAME}")
@@ -65,27 +71,21 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             )
             with self.assertRaises(RuntimeError) as e:
                 await self.runner.run(
-                    target="./",
-                    executor=self.base,
-                    env_name=self.env_name
+                    target="./", executor=self.base, env_name=self.env_name
                 )
             self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self):
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_empty_package(self):
         create_file("__init__.py")
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_bound_should_fail(self):
@@ -97,9 +97,7 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         with self.base:
             try:
                 await self.runner.run(
-                    target="./",
-                    executor=self.base,
-                    env_name=self.env_name
+                    target="./", executor=self.base, env_name=self.env_name
                 )
             except Exception as e:
                 self.assertIsInstance(e.__cause__, ExitEarlyError)
@@ -111,9 +109,7 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         self.runner.bound = Bound("<", float("inf"))
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_with_config(self):
@@ -122,12 +118,12 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
-        self.runner = MypyRunner(configuration_path="./mypy.ini", bound=f"<={NUM_ERRORS}")
+        self.runner = MypyRunner(
+            configuration_path="./mypy.ini", bound=f"<={NUM_ERRORS}"
+        )
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
 
     async def test_with_explicit_executable(self):
@@ -142,10 +138,9 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         self.runner = MypyRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")
         with self.base:
             await self.runner.run(
-                target="./",
-                executor=self.base,
-                env_name=self.env_name
+                target="./", executor=self.base, env_name=self.env_name
             )
+
 
 #
 # import os.path

@@ -16,17 +16,17 @@ class CondaPythonProvider(PythonProvider):
 
     def __init__(self, env_names: List[str]) -> None:
         PythonProvider.__init__(
-            self, requested_envs=env_names, explicit_versions=[], exit_on_fail=True)
+            self, requested_envs=env_names, explicit_versions=[], exit_on_fail=True
+        )
         self._cached_available_envs: Optional[Set[str]] = None
-        logger.info(
-            "Initialized CondaPythonProvider with environments: %s", env_names)
+        logger.info("Initialized CondaPythonProvider with environments: %s", env_names)
 
     @classmethod
     async def _get_available_envs_impl(cls) -> Set[str]:
         logger.info("Fetching available conda environments")
         with AsyncLayeredCommand() as base:
             code, out, err = await base("conda env list")
-        return set([line.split(' ')[0] for line in out[2:] if len(line.split(' ')) > 1])
+        return set([line.split(" ")[0] for line in out[2:] if len(line.split(" ")) > 1])
 
     async def __anext__(self) -> Tuple[str, AsyncLayeredCommand]:
         if self.aiter_index >= len(self.requested_envs):
@@ -40,14 +40,16 @@ class CondaPythonProvider(PythonProvider):
 
         if name not in available_envs:
             logger.error(
-                "Environment '%s' not found in available conda environments", name)
+                "Environment '%s' not found in available conda environments", name
+            )
             raise ExitEarlyError(
-                f"Can't find env '{name}' in list of conda environments, try 'conda env list'")
+                f"Can't find env '{name}' in list of conda environments, try 'conda env list'"
+            )
 
         logger.debug("Successfully activated conda environment: %s", name)
         return name, AsyncLayeredCommand(f"conda activate {name}")
 
 
 __all__ = [
-    'CondaPythonProvider',
+    "CondaPythonProvider",
 ]

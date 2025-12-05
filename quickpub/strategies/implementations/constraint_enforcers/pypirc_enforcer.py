@@ -10,10 +10,14 @@ logger = logging.getLogger(__name__)
 
 class PypircEnforcer(ConstraintEnforcer):
     """Enforces the presence and validity of a .pypirc file."""
-    PYPIRC_REGEX: re.Pattern = re.compile(
-        r"\[distutils\]\nindex-servers =\n\s*pypi\n\s*testpypi\n\n\[pypi\]\n\s*username = __token__\n\s*password = .+\n\n\[testpypi\]\n\s*username = __token__\n\s*password = .+\n?")  # pylint: disable=line-too-long
 
-    def __init__(self, path: str = "./.pypirc", should_enforce_expected_format: bool = True) -> None:
+    PYPIRC_REGEX: re.Pattern = re.compile(
+        r"\[distutils\]\nindex-servers =\n\s*pypi\n\s*testpypi\n\n\[pypi\]\n\s*username = __token__\n\s*password = .+\n\n\[testpypi\]\n\s*username = __token__\n\s*password = .+\n?"
+    )  # pylint: disable=line-too-long
+
+    def __init__(
+        self, path: str = "./.pypirc", should_enforce_expected_format: bool = True
+    ) -> None:
         self.path = path
         self.should_enforce_expected_format = should_enforce_expected_format
 

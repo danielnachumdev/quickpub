@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 class Dependency:
     """Represents a package dependency with version constraints."""
+
     def _build_func_map(self) -> Dict[str, Callable[[Version], bool]]:
         return {
             "==": lambda v: v == self.ver,
@@ -17,8 +18,12 @@ class Dependency:
             "<": lambda v: v < self.ver,
         }
 
-    def __init__(self, name: str, operator: Literal["<", "<=", "==", ">", ">="] = ">=",
-                 ver: Version = Version(0, 0, 0)) -> None:
+    def __init__(
+        self,
+        name: str,
+        operator: Literal["<", "<=", "==", ">", ">="] = ">=",
+        ver: Version = Version(0, 0, 0),
+    ) -> None:
         self.name: str = name
         self.operator: Literal["<", "<=", "==", ">", ">="] = operator
         self.ver: Version = ver or Version(0, 0, 0)
@@ -27,16 +32,20 @@ class Dependency:
     def __eq__(self, other: Any) -> bool:
         if not isinstance(other, Dependency):
             return False
-        return self.name == other.name and self.operator == other.operator and self.ver == other.ver
+        return (
+            self.name == other.name
+            and self.operator == other.operator
+            and self.ver == other.ver
+        )
 
     def __hash__(self) -> int:
         return hash((self.name, self.operator, self.ver))
 
     @staticmethod
-    def from_string(s: str) -> 'Dependency':
+    def from_string(s: str) -> "Dependency":
         """
         Create a Dependency from a string representation.
-        
+
         :param s: String representation of the dependency
         :return: Dependency object
         """
@@ -45,7 +54,9 @@ class Dependency:
         for op in [">=", "<=", ">", "<", "=="]:
             splits = s.split(op)
             if len(splits) == 2:
-                dep = Dependency(splits[0], op, Version.from_str(splits[-1]))  # type:ignore
+                dep = Dependency(
+                    splits[0], op, Version.from_str(splits[-1])
+                )  # type:ignore
                 logger.debug("Parsed dependency: %s", dep)
                 return dep
         dep = Dependency(s, ">=", Version(0, 0, 0))
@@ -63,7 +74,7 @@ class Dependency:
     def is_satisfied_by(self, ver: Version) -> bool:
         """
         Check if a version satisfies this dependency.
-        
+
         :param ver: Version to check
         :return: True if version satisfies the dependency
         """
@@ -72,6 +83,4 @@ class Dependency:
         return result
 
 
-__all__ = [
-    "Dependency"
-]
+__all__ = ["Dependency"]

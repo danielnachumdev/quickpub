@@ -11,13 +11,14 @@ logger = logging.getLogger(__name__)
 
 class PythonProvider(AsyncIterator, QuickpubStrategy):
     """Base class for Python environment providers."""
+
     def __init__(
-            self,
-            auto_install_dependencies: bool = True,
-            *,
-            requested_envs: List[str],
-            explicit_versions: List[str],
-            exit_on_fail: bool = False
+        self,
+        auto_install_dependencies: bool = True,
+        *,
+        requested_envs: List[str],
+        explicit_versions: List[str],
+        exit_on_fail: bool = False,
     ) -> None:
         self.auto_install_dependencies = auto_install_dependencies
         self.requested_envs = requested_envs
@@ -36,7 +37,7 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
     async def get_available_envs(cls) -> Set[str]:
         """
         Get available Python environments.
-        
+
         :return: Set of available environment names
         """
         KEY = "__available_envs__"
@@ -51,8 +52,7 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
 
     @classmethod
     @abstractmethod
-    async def _get_available_envs_impl(cls) -> Set[str]:
-        ...
+    async def _get_available_envs_impl(cls) -> Set[str]: ...
 
     def __len__(self) -> int:
         return len(self.requested_envs)
@@ -61,12 +61,10 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
     def get_python_executable_name(self) -> str:
         """
         Get the Python executable name.
-        
+
         :return: Name of the Python executable
         """
         ...
 
 
-__all__ = [
-    'PythonProvider'
-]
+__all__ = ["PythonProvider"]

@@ -12,10 +12,10 @@ HIGHER_VERSION: Version = Version.from_str("1.0.0")
 
 
 def create_response(
-        include_content: bool = False,
-        status_code: int = 200,
-        target_package_name: str = PACKAGE_NAME,
-        target_package_version: Version = LOWEST_VERSION
+    include_content: bool = False,
+    status_code: int = 200,
+    target_package_name: str = PACKAGE_NAME,
+    target_package_version: Version = LOWEST_VERSION,
 ) -> Response:
     response = Mock(status_code=status_code)
 
@@ -40,21 +40,32 @@ def create_response(
 
 
 class TestPypiRemoteVersionProvider(unittest.TestCase):
-    @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
-           return_value=None)
+    @patch(
+        "quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
+        return_value=None,
+    )
     def test_request_failed(self, *args):
         with self.assertRaises(ExitEarlyError) as e:
             PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, HIGHER_VERSION)
-        self.assertEqual(str(e.exception),
-                         PypiRemoteVersionEnforcer._HTTP_FAILED_MESSAGE)
+        self.assertEqual(
+            str(e.exception), PypiRemoteVersionEnforcer._HTTP_FAILED_MESSAGE
+        )
 
-    @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
-           return_value=create_response(include_content=True, target_package_version=HIGHER_VERSION))
+    @patch(
+        "quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
+        return_value=create_response(
+            include_content=True, target_package_version=HIGHER_VERSION
+        ),
+    )
     def test_should_fail(self, *args):
         with self.assertRaises(ExitEarlyError) as e:
             PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, LOWEST_VERSION)
 
-    @patch("quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
-           return_value=create_response(include_content=True, target_package_version=LOWEST_VERSION))
+    @patch(
+        "quickpub.strategies.implementations.constraint_enforcers.pypi_remote_version_enforcer.get",
+        return_value=create_response(
+            include_content=True, target_package_version=LOWEST_VERSION
+        ),
+    )
     def test_should_pass(self, *args):
         PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, HIGHER_VERSION)

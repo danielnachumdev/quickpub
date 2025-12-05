@@ -30,17 +30,22 @@ def _remove_prefix(s: str, prefix: str) -> str:
         return s.removeprefix(prefix)  # type:ignore
 
     if s.startswith(prefix):
-        return s[len(prefix):]
+        return s[len(prefix) :]
     return s
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
     """Enforces that the new version is greater than the local version."""
+
     def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
         if demo:
             return
 
-        logger.info("Checking local version for package '%s' against version '%s'", name, version)
+        logger.info(
+            "Checking local version for package '%s' against version '%s'",
+            name,
+            version,
+        )
 
         if not directory_exists("./dist"):
             logger.info("No dist directory found, skipping local version check")
@@ -58,13 +63,18 @@ class LocalVersionEnforcer(ConstraintEnforcer):
             max_local_version = max(max_local_version, v)
 
         if version <= max_local_version:
-            logger.error("Version conflict: specified '%s' is not greater than local '%s'", version, max_local_version)
+            logger.error(
+                "Version conflict: specified '%s' is not greater than local '%s'",
+                version,
+                max_local_version,
+            )
             raise self.EXCEPTION_TYPE(
-                f"Specified version is '{version}' but (locally available) latest existing is '{max_local_version}'")
+                f"Specified version is '{version}' but (locally available) latest existing is '{max_local_version}'"
+            )
 
-        logger.info("Local version check passed: '%s' > '%s'", version, max_local_version)
+        logger.info(
+            "Local version check passed: '%s' > '%s'", version, max_local_version
+        )
 
 
-__all__ = [
-    'LocalVersionEnforcer'
-]
+__all__ = ["LocalVersionEnforcer"]

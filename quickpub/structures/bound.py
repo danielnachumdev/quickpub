@@ -8,13 +8,14 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Bound:
     """Represents a bound constraint for quality assurance scoring."""
+
     operator: Literal["<", "<=", "==", ">", ">="]
     value: float
 
     def compare_against(self, score: float) -> bool:
         """
         Compare a score against this bound.
-        
+
         :param score: Score to compare
         :return: True if score satisfies the bound
         """
@@ -25,14 +26,16 @@ class Bound:
             "<=": score <= self.value,
             "==": score == self.value,
         }[self.operator]
-        logger.debug("Bound comparison: %s %s %s = %s", score, self.operator, self.value, result)
+        logger.debug(
+            "Bound comparison: %s %s %s = %s", score, self.operator, self.value, result
+        )
         return result
 
     @staticmethod
-    def from_string(s: str) -> 'Bound':
+    def from_string(s: str) -> "Bound":
         """
         Create a Bound from a string representation.
-        
+
         :param s: String representation of the bound
         :return: Bound object
         :raises ValueError: If string format is invalid
@@ -55,6 +58,4 @@ class Bound:
         return f"{self.__class__.__name__}(operator='{self.operator}', value='{self.value}')"
 
 
-__all__ = [
-    'Bound'
-]
+__all__ = ["Bound"]

@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 class LicenseEnforcer(ConstraintEnforcer):
     """Enforces the presence of a license file."""
+
     def __init__(self, path: str = "./LICENSE") -> None:
         self.path = path
 

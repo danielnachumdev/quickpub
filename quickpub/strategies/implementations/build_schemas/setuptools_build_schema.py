@@ -13,10 +13,13 @@ logger = logging.getLogger(__name__)
 
 class SetuptoolsBuildSchema(BuildSchema):
     """Build schema implementation using setuptools."""
-    def __init__(self, setup_file_path: str = "./setup.py", backend: Literal["toml"] = "toml") -> None:
+
+    def __init__(
+        self, setup_file_path: str = "./setup.py", backend: Literal["toml"] = "toml"
+    ) -> None:
         """
         Initialize setuptools build schema.
-        
+
         :param setup_file_path: Path to setup.py file
         :param backend: Build backend to use
         """
@@ -31,13 +34,19 @@ class SetuptoolsBuildSchema(BuildSchema):
         if verbose:
             logger.info("Creating new distribution...")
 
-        sources_file_path: str = str(os.path.join(
-            str(Path(self._setup_file_path).parent.resolve()), "quickpub.egg-info/SOURCES.txt"))
+        sources_file_path: str = str(
+            os.path.join(
+                str(Path(self._setup_file_path).parent.resolve()),
+                "quickpub.egg-info/SOURCES.txt",
+            )
+        )
 
         delete_file(sources_file_path)
 
         with LayeredCommand() as exc:
-            ret, stdout, stderr = exc(sys.executable + " " + self._setup_file_path + " sdist")
+            ret, stdout, stderr = exc(
+                sys.executable + " " + self._setup_file_path + " sdist"
+            )
 
         if ret != 0:
             logger.error("Build command failed with return code %d: %s", ret, stderr)

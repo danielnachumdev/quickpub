@@ -11,5 +11,5 @@ class WorkerPool(AsyncWorkerPool):
 
 
 __all__ = [
-    'WorkerPool',
+    "WorkerPool",
 ]

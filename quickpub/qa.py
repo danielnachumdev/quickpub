@@ -3,13 +3,27 @@ import re
 import sys
 from abc import abstractmethod
 from datetime import datetime
-from typing import ContextManager, List, Callable, Tuple, Dict, Union, Any, Literal, Optional, Protocol, \
-    runtime_checkable
+from typing import (
+    ContextManager,
+    List,
+    Callable,
+    Tuple,
+    Dict,
+    Union,
+    Any,
+    Literal,
+    Optional,
+    Protocol,
+    runtime_checkable,
+)
 from danielutils import TemporaryFile, AsyncWorkerPool, RandomDataGenerator
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from .enforcers import ExitEarlyError
-from .strategies import PythonProvider, QualityAssuranceRunner  # pylint: disable=relative-beyond-top-level
+from .strategies import (
+    PythonProvider,
+    QualityAssuranceRunner,
+)  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
 from .worker_pool import WorkerPool
@@ -19,6 +33,7 @@ logger = logging.getLogger(__name__)
 try:
     from danielutils import MultiContext  # type:ignore
 except ImportError:
+
     class MultiContext(ContextManager):  # type: ignore # pylint: disable=missing-class-docstring
         def __init__(self, *contexts: ContextManager):
             self.contexts = contexts
@@ -34,6 +49,7 @@ except ImportError:
 
         def __getitem__(self, index):
             return self.contexts[index]
+
 
 ASYNC_POOL_NAME: str = "Quickpub QA"
 
@@ -73,12 +89,12 @@ class SupportsProgress(Protocol):
 
 
 async def global_import_sanity_check(
-        package_name: str,
-        executor: AsyncLayeredCommand,
-        is_system_interpreter: bool,
-        env_name: str,
-        task_id: int,
-        pbar: Optional[SupportsProgress] = None
+    package_name: str,
+    executor: AsyncLayeredCommand,
+    is_system_interpreter: bool,
+    env_name: str,
+    task_id: int,
+    pbar: Optional[SupportsProgress] = None,
 ) -> None:
     """
     Will check that importing from the package works as a sanity check.
@@ -88,7 +104,11 @@ async def global_import_sanity_check(
     :param env_name: The name of the currently tested environment
     :return: None
     """
-    logger.info("Running global import sanity check for package '%s' on environment '%s'", package_name, env_name)
+    logger.info(
+        "Running global import sanity check for package '%s' on environment '%s'",
+        package_name,
+        env_name,
+    )
     try:
         p = sys.executable if is_system_interpreter else "python"
         file_name = f"./{RandomDataGenerator().name(15)}__sanity_check_main.py"
@@ -99,27 +119,37 @@ async def global_import_sanity_check(
             code, stdout, stderr = await executor(cmd)
 
             if code != 0:
-                logger.error("Sanity check failed for package '%s' on environment '%s' with return code %d",
-                             package_name, env_name, code)
+                logger.error(
+                    "Sanity check failed for package '%s' on environment '%s' with return code %d",
+                    package_name,
+                    env_name,
+                    code,
+                )
                 is_task_run_success[task_id] = False
             else:
-                logger.debug("Sanity check passed for package '%s' on environment '%s'", package_name, env_name)
+                logger.debug(
+                    "Sanity check passed for package '%s' on environment '%s'",
+                    package_name,
+                    env_name,
+                )
                 is_task_run_success[task_id] = True
 
             msg = f"Env '{env_name}' failed sanity check."
             if stderr:
-                if stderr[0] == 'Traceback (most recent call last):':
+                if stderr[0] == "Traceback (most recent call last):":
                     msg += f" Got error '{stderr[-1]}' when tried 'from {package_name} import *'"
             else:
                 msg += f" Try manually running the following script 'from {package_name} import *'"
             exit_if(
-                code != 0, msg,
-                verbose=True,
-                err_func=lambda msg: None  # TODO remove
+                code != 0, msg, verbose=True, err_func=lambda msg: None  # TODO remove
             )
     except Exception as e:
-        logger.error("Sanity check encountered unexpected error for package '%s' on environment '%s': %s", package_name,
-                     env_name, e)
+        logger.error(
+            "Sanity check encountered unexpected error for package '%s' on environment '%s': %s",
+            package_name,
+            env_name,
+            e,
+        )
         is_task_run_success[task_id] = False
         raise
     finally:
@@ -131,12 +161,12 @@ VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 async def validate_dependencies(
-        validation_exit_on_fail: bool,
-        required_dependencies: List[Dependency],
-        executor: AsyncLayeredCommand,
-        env_name: str,
-        task_id: int,
-        pbar: Optional[SupportsProgress] = None
+    validation_exit_on_fail: bool,
+    required_dependencies: List[Dependency],
+    executor: AsyncLayeredCommand,
+    env_name: str,
+    task_id: int,
+    pbar: Optional[SupportsProgress] = None,
 ) -> None:
     """
     will check if all the dependencies of the package are installed on current env.
@@ -151,16 +181,21 @@ async def validate_dependencies(
         if validation_exit_on_fail:
             logger.debug("Executing 'pip list' on environment '%s'", env_name)
             code, out, err = await executor("pip list")
-            exit_if(code != 0, f"Failed executing 'pip list' at env '{env_name}'",
-                    err_func=lambda msg: None  # TODO remove
-                    )
-            split_lines = (line.split(' ') for line in out[2:])
+            exit_if(
+                code != 0,
+                f"Failed executing 'pip list' at env '{env_name}'",
+                err_func=lambda msg: None,  # TODO remove
+            )
+            split_lines = (line.split(" ") for line in out[2:])
             version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
             filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
             currently_installed: Dict[str, Union[str, Dependency]] = {
                 s[0]: Dependency(s[0], "==", Version.from_str(s[-1]))
-                for s in filtered_tuples}
-            currently_installed.update(**{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])})
+                for s in filtered_tuples
+            }
+            currently_installed.update(
+                **{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])}
+            )
             logger.debug("Found %d installed packages", len(currently_installed))
 
             not_installed_properly: List[Tuple[Dependency, str]] = []
@@ -171,24 +206,41 @@ async def validate_dependencies(
                     v = currently_installed[req.name]
                     if isinstance(v, str):
                         not_installed_properly.append(
-                            (req, "Version format of dependency is not currently supported by quickpub"))
+                            (
+                                req,
+                                "Version format of dependency is not currently supported by quickpub",
+                            )
+                        )
                     elif isinstance(v, Dependency):
                         if not req.is_satisfied_by(v.ver):
-                            not_installed_properly.append((req, "Invalid version installed"))
+                            not_installed_properly.append(
+                                (req, "Invalid version installed")
+                            )
 
             if not_installed_properly:
-                logger.error("Dependency validation failed on environment '%s': %s", env_name, not_installed_properly)
+                logger.error(
+                    "Dependency validation failed on environment '%s': %s",
+                    env_name,
+                    not_installed_properly,
+                )
                 is_task_run_success[task_id] = False
             else:
-                logger.debug("Dependency validation passed on environment '%s'", env_name)
+                logger.debug(
+                    "Dependency validation passed on environment '%s'", env_name
+                )
                 is_task_run_success[task_id] = True
 
-            exit_if(bool(not_installed_properly),
-                    f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
-                    err_func=lambda msg: None  # TODO remove
-                    )
+            exit_if(
+                bool(not_installed_properly),
+                f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
+                err_func=lambda msg: None,  # TODO remove
+            )
     except Exception as e:
-        logger.error("Dependency validation encountered unexpected error on environment '%s': %s", env_name, e)
+        logger.error(
+            "Dependency validation encountered unexpected error on environment '%s': %s",
+            env_name,
+            e,
+        )
         is_task_run_success[task_id] = False
         raise
     finally:
@@ -201,16 +253,16 @@ is_task_run_success: List[bool] = []
 
 
 async def run_config(
-        env_name: str,
-        async_executor: AsyncLayeredCommand,
-        runner: QualityAssuranceRunner,
-        config_id: int,
-        task_id: int,
-        *,
-        is_system_interpreter: bool,
-        validation_exit_on_fail: bool,
-        src_folder_path: str,
-        pbar: Optional[SupportsProgress] = None
+    env_name: str,
+    async_executor: AsyncLayeredCommand,
+    runner: QualityAssuranceRunner,
+    config_id: int,
+    task_id: int,
+    *,
+    is_system_interpreter: bool,
+    validation_exit_on_fail: bool,
+    src_folder_path: str,
+    pbar: Optional[SupportsProgress] = None,
 ) -> None:
     """
     Run a QA configuration on a specific environment.
@@ -224,23 +276,38 @@ async def run_config(
     :param src_folder_path: Path to source folder
     :param pbar: Optional progress bar
     """
-    logger.info("Running QA config %d on environment '%s' with runner '%s'", config_id, env_name,
-                runner.__class__.__name__)
+    logger.info(
+        "Running QA config %d on environment '%s' with runner '%s'",
+        config_id,
+        env_name,
+        runner.__class__.__name__,
+    )
     try:
         await runner.run(
             src_folder_path,
             async_executor,
             use_system_interpreter=is_system_interpreter,
-            env_name=env_name
+            env_name=env_name,
         )
-        logger.debug("QA config %d completed successfully on environment '%s'", config_id, env_name)
+        logger.debug(
+            "QA config %d completed successfully on environment '%s'",
+            config_id,
+            env_name,
+        )
         is_task_run_success[task_id] = True
     except ExitEarlyError as e:
-        logger.error("QA config %d failed on environment '%s': %s", config_id, env_name, e)
+        logger.error(
+            "QA config %d failed on environment '%s': %s", config_id, env_name, e
+        )
         is_task_run_success[task_id] = False
         raise e
     except Exception as e:
-        logger.error("QA config %d encountered unexpected error on environment '%s': %s", config_id, env_name, e)
+        logger.error(
+            "QA config %d encountered unexpected error on environment '%s': %s",
+            config_id,
+            env_name,
+            e,
+        )
         is_task_run_success[task_id] = False
         if validation_exit_on_fail:
             raise RuntimeError(e) from e
@@ -251,12 +318,12 @@ async def run_config(
 
 
 async def qa(
-        python_provider: PythonProvider,
-        quality_assurance_strategies: List[QualityAssuranceRunner],
-        package_name: str,
-        src_folder_path: str,
-        dependencies: list,
-        pbar: Optional[SupportsProgress] = None
+    python_provider: PythonProvider,
+    quality_assurance_strategies: List[QualityAssuranceRunner],
+    package_name: str,
+    src_folder_path: str,
+    dependencies: list,
+    pbar: Optional[SupportsProgress] = None,
 ) -> bool:
     """
     Run quality assurance checks on the package.
@@ -269,10 +336,14 @@ async def qa(
     :param pbar: Optional progress bar
     :return: True if all QA checks passed, False otherwise
     """
-    logger.info("Starting QA process for package '%s' with %d QA strategies", package_name,
-                len(quality_assurance_strategies))
+    logger.info(
+        "Starting QA process for package '%s' with %d QA strategies",
+        package_name,
+        len(quality_assurance_strategies),
+    )
     is_task_run_success.clear()
     from .strategies import DefaultPythonProvider
+
     is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
 
     pool = WorkerPool(ASYNC_POOL_NAME, num_workers=5)
@@ -291,7 +362,7 @@ async def qa(
                         async_executor,
                         env_name,
                         task_id,
-                        pbar
+                        pbar,
                     ],
                     name=f"Validate dependencies for env '{env_name}'",
                 )
@@ -305,7 +376,7 @@ async def qa(
                         is_system_interpreter,
                         env_name,
                         task_id,
-                        pbar
+                        pbar,
                     ],
                     name=f"Global Import Sanity Check for env '{env_name}'",
                 )
@@ -314,12 +385,13 @@ async def qa(
                 for runner in quality_assurance_strategies:
                     await pool.submit(
                         run_config,
-                        args=[env_name, async_executor,
-                              runner, task_id, task_id],
-                        kwargs=dict(src_folder_path=src_folder_path,
-                                    is_system_interpreter=is_system_interpreter,
-                                    validation_exit_on_fail=python_provider.exit_on_fail,
-                                    pbar=pbar),
+                        args=[env_name, async_executor, runner, task_id, task_id],
+                        kwargs=dict(
+                            src_folder_path=src_folder_path,
+                            is_system_interpreter=is_system_interpreter,
+                            validation_exit_on_fail=python_provider.exit_on_fail,
+                            pbar=pbar,
+                        ),
                         name=f"Run config for '{env_name}' + '{runner.__class__.__qualname__}'",
                     )
                     total += 1
@@ -340,7 +412,4 @@ async def qa(
     return success
 
 
-__all__ = [
-    'qa',
-    "SupportsProgress"
-]
+__all__ = ["qa", "SupportsProgress"]

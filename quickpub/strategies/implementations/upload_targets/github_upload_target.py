@@ -19,19 +19,25 @@ class GithubUploadTarget(UploadTarget):
 
         ret, stdout, stderr = cm("git add .")
         if ret != 0:
-            logger.error("Git add failed with return code %d: %s",
-                         ret, stderr.decode(encoding='utf8'))
+            logger.error(
+                "Git add failed with return code %d: %s",
+                ret,
+                stderr.decode(encoding="utf8"),
+            )
             exit_if(ret != 0, stderr.decode(encoding="utf8"))
 
         if self.verbose:
             logger.debug(
-                "Committing changes with message 'updated to version %s'", version)
+                "Committing changes with message 'updated to version %s'", version
+            )
 
-        ret, stdout, stderr = cm(
-            f"git commit -m \"updated to version {version}\"")
+        ret, stdout, stderr = cm(f'git commit -m "updated to version {version}"')
         if ret != 0:
-            logger.error("Git commit failed with return code %d: %s",
-                         ret, stderr.decode(encoding='utf8'))
+            logger.error(
+                "Git commit failed with return code %d: %s",
+                ret,
+                stderr.decode(encoding="utf8"),
+            )
             exit_if(ret != 0, stderr.decode(encoding="utf8"))
 
         if self.verbose:
@@ -39,8 +45,11 @@ class GithubUploadTarget(UploadTarget):
 
         ret, stdout, stderr = cm("git push")
         if ret != 0:
-            logger.error("Git push failed with return code %d: %s",
-                         ret, stderr.decode(encoding='utf8'))
+            logger.error(
+                "Git push failed with return code %d: %s",
+                ret,
+                stderr.decode(encoding="utf8"),
+            )
             exit_if(ret != 0, stderr.decode(encoding="utf8"))
 
         logger.info("Successfully uploaded version '%s' to GitHub", version)

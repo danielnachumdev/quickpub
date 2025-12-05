@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
     """
     Validate and convert version to Version object.
-    
+
     :param version: Version string or Version object
     :return: Validated Version object
     :raises ExitEarlyError: If version is invalid or missing
@@ -32,7 +32,7 @@ def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
 def validate_python_version(min_python: Optional[Version]) -> Version:
     """
     Validate Python version requirement.
-    
+
     :param min_python: Minimum Python version
     :return: Validated Python version
     """
@@ -49,7 +49,7 @@ def validate_python_version(min_python: Optional[Version]) -> Version:
 def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
     """
     Validate package keywords.
-    
+
     :param keywords: List of keywords
     :return: Validated keywords list
     """
@@ -61,10 +61,12 @@ def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
     return keywords
 
 
-def validate_dependencies(dependencies: Optional[List[Union[str, Dependency]]]) -> List[Dependency]:
+def validate_dependencies(
+    dependencies: Optional[List[Union[str, Dependency]]],
+) -> List[Dependency]:
     """
     Validate and convert dependencies to Dependency objects.
-    
+
     :param dependencies: List of dependency strings or Dependency objects
     :return: List of validated Dependency objects
     """
@@ -89,7 +91,7 @@ def validate_dependencies(dependencies: Optional[List[Union[str, Dependency]]]) 
 def validate_source(name: str, src: Optional[str] = None) -> str:
     """
     Validate source folder path.
-    
+
     :param name: Package name
     :param src: Source folder path
     :return: Validated source path
@@ -109,5 +111,5 @@ __all__ = [
     "validate_python_version",
     "validate_keywords",
     "validate_dependencies",
-    "validate_source"
+    "validate_source",
 ]

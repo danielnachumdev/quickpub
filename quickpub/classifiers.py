@@ -15,7 +15,7 @@ class Classifier(Enum):
     @staticmethod
     def _split_name(name: str) -> str:
         words = []
-        current_word = ''
+        current_word = ""
 
         for char in name:
             # Check if the character is uppercase
@@ -47,6 +47,7 @@ class DevelopmentStatusClassifier(Classifier):
     """
     An enum class for specifying the development state of the package
     """
+
     # https://pypi.org/classifiers/
     Planning = 1
     PreAlpha = 2
@@ -65,6 +66,7 @@ class IntendedAudienceClassifier(Classifier):
     """
     An enum class for specifying the intended audience
     """
+
     CustomerService = "CustomerService"
     Developers = "Developers"
 
@@ -73,6 +75,7 @@ class ProgrammingLanguageClassifier(Classifier):
     """
     An enum class for specifying the target language level
     """
+
     Python3 = "Python :: 3"
 
 
@@ -80,6 +83,7 @@ class OperatingSystemClassifier(Classifier):
     """
     An enum class for specifying the target operating system
     """
+
     MicrosoftWindows = "Microsoft :: Windows"
 
 
@@ -88,5 +92,5 @@ __all__ = [
     "DevelopmentStatusClassifier",
     "IntendedAudienceClassifier",
     "ProgrammingLanguageClassifier",
-    "OperatingSystemClassifier"
+    "OperatingSystemClassifier",
 ]

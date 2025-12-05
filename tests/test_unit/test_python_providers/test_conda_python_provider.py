@@ -7,7 +7,9 @@ from quickpub import CondaPythonProvider
 T = TypeVar("T")
 
 
-async def async_enumerate(iterable: AsyncIterator[T], start: int = 0) -> AsyncIterator[Tuple[int, T]]:
+async def async_enumerate(
+    iterable: AsyncIterator[T], start: int = 0
+) -> AsyncIterator[Tuple[int, T]]:
     index = start
     async for item in iterable:
         yield index, item
@@ -27,11 +29,11 @@ class TestCondaPythonProvider(AsyncAutoCWDTestCase):
             self.assertEqual(0, code)
             self.assertTrue(len(stdout) > 0, "stdout should not be empty")
             self.assertTrue(len(stderr) == 0, "stderr should be empty")
-            if stdout[0] == '\x1b[0m\n':
+            if stdout[0] == "\x1b[0m\n":
                 expected_index: int = 1
 
             indicator_line = stdout[expected_index].strip()
-            current_env = indicator_line.split(' ')[-1]
+            current_env = indicator_line.split(" ")[-1]
             self.assertIn(current_env, envs)
 
         async for i, tup in async_enumerate(provider):
