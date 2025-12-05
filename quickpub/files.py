@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional, Dict, Callable
 from danielutils import get_files
 
 from .classifiers import Classifier
@@ -9,24 +9,25 @@ logger = logging.getLogger(__name__)
 
 
 def create_toml(
-        *,
-        name: str,
-        src_folder_path: str,
-        readme_file_path: str,
-        license_file_path: str,
-        version: Version,
-        author: str,
-        author_email: str,
-        description: str,
-        homepage: str,
-        keywords: List[str],
-        min_python: Version,
-        dependencies: List[Dependency],
-        classifiers: List[Classifier]
+    *,
+    name: str,
+    src_folder_path: str,
+    readme_file_path: str,
+    license_file_path: str,
+    version: Version,
+    author: str,
+    author_email: str,
+    description: str,
+    homepage: str,
+    keywords: List[str],
+    min_python: Version,
+    dependencies: List[Dependency],
+    classifiers: List[Classifier],
+    scripts: Optional[Dict[str, Callable]] = None,
 ) -> None:
     """
     Create a pyproject.toml file for the package.
-    
+
     :param name: Package name
     :param src_folder_path: Path to source folder
     :param readme_file_path: Path to README file
@@ -40,9 +41,10 @@ def create_toml(
     :param min_python: Minimum Python version required
     :param dependencies: List of package dependencies
     :param classifiers: List of package classifiers
+    :param scripts: Optional dictionary mapping script names to functions for [project.scripts] section
     """
     logger.info("Creating pyproject.toml for package '%s' version '%s'", name, version)
-    classifiers_string = ",\n\t".join([f"\"{str(c)}\"" for c in classifiers])
+    classifiers_string = ",\n\t".join([f'"{str(c)}"' for c in classifiers])
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
     py_typed = ""
@@ -52,6 +54,17 @@ def create_toml(
 "{name}" = ["py.typed"]"""
             logger.debug("Found py.typed file, adding package-data configuration")
             break
+
+    scripts_section = ""
+    if scripts:
+        logger.debug("Adding [project.scripts] section with %d entries", len(scripts))
+        scripts_entries = []
+        for script_name, func in scripts.items():
+            module = func.__module__
+            func_name = func.__name__
+            entry_point = f"{module}:{func_name}"
+            scripts_entries.append(f'    "{script_name}" = "{entry_point}"')
+        scripts_section = "\n[project.scripts]\n" + "\n".join(scripts_entries) + "\n"
 
     s = f"""[build-system]
 requires = ["setuptools>=61.0"]
@@ -69,8 +82,7 @@ license = {{ "file" = "{license_file_path}" }}
 description = "{description}"
 readme = {{file = "{readme_file_path}", content-type = "text/markdown"}}
 requires-python = ">={min_python}"
-classifiers = [{classifiers_string}]
-
+classifiers = [{classifiers_string}]{scripts_section}
 [tool.setuptools]
 packages = ["{name}"]
 {py_typed}
@@ -95,7 +107,7 @@ def create_setup() -> None:
 def create_manifest(*, name: str) -> None:
     """
     Create a MANIFEST.in file for the package.
-    
+
     :param name: Package name
     """
     logger.info("Creating MANIFEST.in for package '%s'", name)
@@ -104,7 +116,4 @@ def create_manifest(*, name: str) -> None:
     logger.info("Successfully created MANIFEST.in")
 
 
-__all__ = [
-    "create_setup",
-    "create_toml"
-]
+__all__ = ["create_setup", "create_toml"]

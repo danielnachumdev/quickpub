@@ -1,14 +1,25 @@
 import asyncio
-from typing import Optional, Union, List, Any
+from typing import Optional, Union, List, Any, Dict, Callable
 
 import fire
 from danielutils import warning, error
 
 from quickpub import ExitEarlyError
-from .strategies import BuildSchema, ConstraintEnforcer, UploadTarget, QualityAssuranceRunner, PythonProvider, \
-    DefaultPythonProvider
-from .validators import validate_version, validate_python_version, validate_keywords, validate_dependencies, \
-    validate_source
+from .strategies import (
+    BuildSchema,
+    ConstraintEnforcer,
+    UploadTarget,
+    QualityAssuranceRunner,
+    PythonProvider,
+    DefaultPythonProvider,
+)
+from .validators import (
+    validate_version,
+    validate_python_version,
+    validate_keywords,
+    validate_dependencies,
+    validate_source,
+)
 from .structures import Version, Dependency
 from .files import create_toml, create_setup, create_manifest
 from .classifiers import *
@@ -17,83 +28,88 @@ from .logging_ import setup_logging
 
 setup_logging()
 
+
 def publish(
-        *,
-        name: str,
-        author: str,
-        author_email: str,
-        description: str,
-        homepage: str,
-
-        build_schemas: List[BuildSchema],
-        upload_targets: List[UploadTarget],
-        enforcers: Optional[List[ConstraintEnforcer]] = None,
-        global_quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
-        python_interpreter_provider: PythonProvider = DefaultPythonProvider(),
-
-        readme_file_path: str = "./README.md",
-        license_file_path: str = "./LICENSE",
-        version: Optional[Union[Version, str]] = None,
-        min_python: Optional[Union[Version, str]] = None,
-        dependencies: Optional[List[Union[str, Dependency]]] = None,
-        keywords: Optional[List[str]] = None,
-        explicit_src_folder_path: Optional[str] = None,
-        # ========== QA Parameters ==========
-        pbar: Optional[SupportsProgress] = None,  # tqdm
-
-        demo: bool = False,
-        config: Optional[Any] = None,
+    *,
+    name: str,
+    author: str,
+    author_email: str,
+    description: str,
+    homepage: str,
+    build_schemas: List[BuildSchema],
+    upload_targets: List[UploadTarget],
+    enforcers: Optional[List[ConstraintEnforcer]] = None,
+    global_quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
+    python_interpreter_provider: PythonProvider = DefaultPythonProvider(),
+    readme_file_path: str = "./README.md",
+    license_file_path: str = "./LICENSE",
+    version: Optional[Union[Version, str]] = None,
+    min_python: Optional[Union[Version, str]] = None,
+    dependencies: Optional[List[Union[str, Dependency]]] = None,
+    keywords: Optional[List[str]] = None,
+    explicit_src_folder_path: Optional[str] = None,
+    scripts: Optional[Dict[str, Callable]] = None,
+    # ========== QA Parameters ==========
+    pbar: Optional[SupportsProgress] = None,  # tqdm
+    demo: bool = False,
+    config: Optional[Any] = None,
 ) -> None:
     """The main function for publishing a package. It performs all necessary steps to prepare and publish the package.
 
 
-     :param name: The name of the package.
-     :param author: The name of the author.
-     :param author_email: The email of the author.
-     :param description: A short description of the package.
-     :param homepage: The homepage URL for the package (e.g., GitHub repository).
-     :param global_quality_assurance_runners: Strategies for quality assurance. These will run on all Envs supplies by the supplier.
-     :param build_schemas: Strategies for building the package.
-     :param upload_targets: Strategies for uploading the package.
-     :param python_interpreter_provider: Strategy for managing Python versions. Defaults to SystemInterpreter().
-     :param explicit_src_folder_path: The path to the source code of the package. Defaults to <current working directory>/<name>.
-     :param version: The version for the new distribution. Defaults to "0.0.1".
-     :param readme_file_path: The path to the README file. Defaults to "./README.md".
-     :param license_file_path: The path to the license file. Defaults to "./LICENSE".
-     :param min_python: The minimum Python version required for the package. Defaults to the Python version running this script.
-     :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
-     :param dependencies: A list of dependencies for the package. Defaults to None.
-     :param log: A function to receive log statements about the process and print them (or do something else idk)
-     :param pbar: and object that can be notified about an update of progress like a tqdm progress bar.
-     :param demo: Whether to perform checks without making any changes. Defaults to False.
-     :param config: Reserved for future use. Defaults to None.
+    :param name: The name of the package.
+    :param author: The name of the author.
+    :param author_email: The email of the author.
+    :param description: A short description of the package.
+    :param homepage: The homepage URL for the package (e.g., GitHub repository).
+    :param global_quality_assurance_runners: Strategies for quality assurance. These will run on all Envs supplies by the supplier.
+    :param build_schemas: Strategies for building the package.
+    :param upload_targets: Strategies for uploading the package.
+    :param python_interpreter_provider: Strategy for managing Python versions. Defaults to SystemInterpreter().
+    :param explicit_src_folder_path: The path to the source code of the package. Defaults to <current working directory>/<name>.
+    :param version: The version for the new distribution. Defaults to "0.0.1".
+    :param readme_file_path: The path to the README file. Defaults to "./README.md".
+    :param license_file_path: The path to the license file. Defaults to "./LICENSE".
+    :param min_python: The minimum Python version required for the package. Defaults to the Python version running this script.
+    :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
+    :param dependencies: A list of dependencies for the package. Defaults to None.
+    :param scripts: Optional dictionary mapping script names to functions for [project.scripts] section. Each entry will create an executable entry point.
+    :param log: A function to receive log statements about the process and print them (or do something else idk)
+    :param pbar: and object that can be notified about an update of progress like a tqdm progress bar.
+    :param demo: Whether to perform checks without making any changes. Defaults to False.
+    :param config: Reserved for future use. Defaults to None.
 
-     Returns:
-         None
-     """
+    Returns:
+        None
+    """
     version = validate_version(version)
     explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
     if explicit_src_folder_path != f"./{name}":
         warning(
-            "The source folder's name is different from the package's name. this may not be currently supported correctly")
+            "The source folder's name is different from the package's name. this may not be currently supported correctly"
+        )
     min_python = validate_python_version(min_python)  # type:ignore
     keywords = validate_keywords(keywords)
     validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
     for enforcer in enforcers or []:
         enforcer.enforce(name=name, version=version, demo=demo)
     try:
-        res = asyncio.get_event_loop().run_until_complete(qa(
-            python_interpreter_provider,
-            global_quality_assurance_runners or [],
-            name,
-            explicit_src_folder_path,
-            validated_dependencies,
-            pbar
-        ))
+        res = asyncio.get_event_loop().run_until_complete(
+            qa(
+                python_interpreter_provider,
+                global_quality_assurance_runners or [],
+                name,
+                explicit_src_folder_path,
+                validated_dependencies,
+                pbar,
+            )
+        )
         if not res:
-            error(f"quickpub.publish exited early as '{name}' "
-                  "did not pass quality assurance step, see above "
-                  "logs to pass this step.")
+            error(
+                f"quickpub.publish exited early as '{name}' "
+                "did not pass quality assurance step, see above "
+                "logs to pass this step."
+            )
             raise ExitEarlyError("QA step Failed")
     except ExitEarlyError as e:
         raise e
@@ -117,9 +133,10 @@ def publish(
             DevelopmentStatusClassifier.Alpha,
             IntendedAudienceClassifier.Developers,
             ProgrammingLanguageClassifier.Python3,
-            OperatingSystemClassifier.MicrosoftWindows
+            OperatingSystemClassifier.MicrosoftWindows,
         ],
-        min_python=min_python
+        min_python=min_python,
+        scripts=scripts,
     )
     create_manifest(name=name)
     if not demo:
@@ -129,5 +146,5 @@ def publish(
             target.upload(name=name, version=version)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fire.Fire(publish)
