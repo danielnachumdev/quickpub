@@ -2,7 +2,6 @@ from tqdm import tqdm
 
 from quickpub import (
     main as entry_point,
-    CondaPythonProvider,
     publish,
     MypyRunner,
     PylintRunner,
