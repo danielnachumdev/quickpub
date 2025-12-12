@@ -1,6 +1,7 @@
 import logging
 import re
 import sys
+import time
 from abc import abstractmethod
 from datetime import datetime
 from typing import (
@@ -341,6 +342,7 @@ async def qa(
         package_name,
         len(quality_assurance_strategies),
     )
+    qa_start_time = time.perf_counter()
     is_task_run_success.clear()
     from .strategies import DefaultPythonProvider
 
@@ -407,7 +409,8 @@ async def qa(
 
     # Use unified task tracking for overall success
     success = all(is_task_run_success)
-    logger.info("QA process completed. Success: %s", success)
+    elapsed = time.perf_counter() - qa_start_time
+    logger.info("QA process completed in %.3fs. Success: %s", elapsed, success)
     logger.debug("Task success breakdown: %s", is_task_run_success)
     return success
 

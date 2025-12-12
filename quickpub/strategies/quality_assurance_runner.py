@@ -1,5 +1,6 @@
 import logging
 import sys
+import time
 from abc import abstractmethod
 from typing import Union, List, Optional, cast, Dict, Tuple
 from danielutils import LayeredCommand, get_os, OSType, file_exists
@@ -209,6 +210,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         logger.debug("Built command: %s", command)
 
         self._pre_command()
+        start_time = time.perf_counter()
         try:
             ret, out, err = await executor(command, command_raise_on_fail=False)
             if ret in SPEICLA_EXIT_CODES:
@@ -257,6 +259,12 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
                 e,
             ) from e
         finally:
+            elapsed = time.perf_counter() - start_time
+            logger.info(
+                "QA runner '%s' finished in %.3fs",
+                self.__class__.__name__,
+                elapsed,
+            )
             self._post_command()
 
     @abstractmethod

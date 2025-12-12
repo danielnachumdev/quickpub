@@ -15,7 +15,6 @@ from quickpub import (
     PypiRemoteVersionEnforcer,
     LocalVersionEnforcer,
     PytestRunner,
-    DefaultPythonProvider,
 )
 
 
@@ -36,7 +35,6 @@ def main() -> None:
         ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
-        # python_interpreter_provider=DefaultPythonProvider(),
         python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
         global_quality_assurance_runners=[
             MypyRunner(bound="<=20", configuration_path="./mypy.ini"),

@@ -1,4 +1,6 @@
 import asyncio
+import logging
+import time
 from typing import Optional, Union, List, Any, Dict, Callable
 
 import fire
@@ -27,6 +29,7 @@ from .qa import qa, SupportsProgress
 from .logging_ import setup_logging
 
 setup_logging()
+logger = logging.getLogger(__name__)
 
 
 def publish(
@@ -82,68 +85,75 @@ def publish(
     Returns:
         None
     """
-    version = validate_version(version)
-    explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
-    if explicit_src_folder_path != f"./{name}":
-        warning(
-            "The source folder's name is different from the package's name. this may not be currently supported correctly"
-        )
-    min_python = validate_python_version(min_python)  # type:ignore
-    keywords = validate_keywords(keywords)
-    validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
-    for enforcer in enforcers or []:
-        enforcer.enforce(name=name, version=version, demo=demo)
+    start_time = time.perf_counter()
+    success = False
     try:
-        res = asyncio.get_event_loop().run_until_complete(
-            qa(
-                python_interpreter_provider,
-                global_quality_assurance_runners or [],
-                name,
-                explicit_src_folder_path,
-                validated_dependencies,
-                pbar,
+        version = validate_version(version)
+        explicit_src_folder_path = validate_source(name, explicit_src_folder_path)
+        if explicit_src_folder_path != f"./{name}":
+            warning(
+                "The source folder's name is different from the package's name. this may not be currently supported correctly"
             )
-        )
-        if not res:
-            error(
-                f"quickpub.publish exited early as '{name}' "
-                "did not pass quality assurance step, see above "
-                "logs to pass this step."
+        min_python = validate_python_version(min_python)  # type:ignore
+        keywords = validate_keywords(keywords)
+        validated_dependencies: List[Dependency] = validate_dependencies(dependencies)
+        for enforcer in enforcers or []:
+            enforcer.enforce(name=name, version=version, demo=demo)
+        try:
+            res = asyncio.get_event_loop().run_until_complete(
+                qa(
+                    python_interpreter_provider,
+                    global_quality_assurance_runners or [],
+                    name,
+                    explicit_src_folder_path,
+                    validated_dependencies,
+                    pbar,
+                )
             )
-            raise ExitEarlyError("QA step Failed")
-    except ExitEarlyError as e:
-        raise e
-    except Exception as e:
-        raise RuntimeError("Quality assurance stage has failed", e) from e
+            if not res:
+                error(
+                    f"quickpub.publish exited early as '{name}' "
+                    "did not pass quality assurance step, see above "
+                    "logs to pass this step."
+                )
+                raise ExitEarlyError("QA step Failed")
+        except ExitEarlyError as e:
+            raise e
+        except Exception as e:
+            raise RuntimeError("Quality assurance stage has failed", e) from e
 
-    create_setup()
-    create_toml(
-        name=name,
-        src_folder_path=explicit_src_folder_path,
-        readme_file_path=readme_file_path,
-        license_file_path=license_file_path,
-        version=version,
-        author=author,
-        author_email=author_email,
-        description=description,
-        homepage=homepage,
-        keywords=keywords,
-        dependencies=validated_dependencies,
-        classifiers=[
-            DevelopmentStatusClassifier.Alpha,
-            IntendedAudienceClassifier.Developers,
-            ProgrammingLanguageClassifier.Python3,
-            OperatingSystemClassifier.MicrosoftWindows,
-        ],
-        min_python=min_python,
-        scripts=scripts,
-    )
-    create_manifest(name=name)
-    if not demo:
-        for schema in build_schemas:
-            schema.build()
-        for target in upload_targets:
-            target.upload(name=name, version=version)
+        create_setup()
+        create_toml(
+            name=name,
+            src_folder_path=explicit_src_folder_path,
+            readme_file_path=readme_file_path,
+            license_file_path=license_file_path,
+            version=version,
+            author=author,
+            author_email=author_email,
+            description=description,
+            homepage=homepage,
+            keywords=keywords,
+            dependencies=validated_dependencies,
+            classifiers=[
+                DevelopmentStatusClassifier.Alpha,
+                IntendedAudienceClassifier.Developers,
+                ProgrammingLanguageClassifier.Python3,
+                OperatingSystemClassifier.MicrosoftWindows,
+            ],
+            min_python=min_python,
+            scripts=scripts,
+        )
+        create_manifest(name=name)
+        if not demo:
+            for schema in build_schemas:
+                schema.build()
+            for target in upload_targets:
+                target.upload(name=name, version=version)
+        success = True
+    finally:
+        elapsed = time.perf_counter() - start_time
+        logger.info("Publish finished in %.3fs (success=%s)", elapsed, success)
 
 
 def main() -> None:
