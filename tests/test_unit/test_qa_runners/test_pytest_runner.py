@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock, patch
 
 from danielutils import create_file, AutoCWDTestCase, AsyncAutoCWDTestCase
 
@@ -151,3 +152,45 @@ def test_add2():
                 executor=self.base,  # type: ignore
                 env_name=self.env_name,  # type: ignore
             )
+
+
+class TestPytestRunnerBuildCommand(AutoCWDTestCase):
+    def setUp(self):
+        super().setUp()
+        create_file("./__init__.py")
+
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner.subprocess.run"
+    )
+    def test_build_command_uses_xdist_when_available(self, mock_run):
+        mock_run.return_value = Mock(returncode=0)
+        runner = PytestRunner()
+
+        command = runner._build_command(target="./tests")
+
+        self.assertIn("-n auto", command)
+        mock_run.assert_called_once()
+
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner.subprocess.run"
+    )
+    def test_build_command_skips_xdist_when_missing(self, mock_run):
+        mock_run.return_value = Mock(returncode=1)
+        runner = PytestRunner()
+
+        command = runner._build_command(target="./tests")
+
+        self.assertNotIn("-n auto", command)
+        mock_run.assert_called_once()
+
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner.subprocess.run"
+    )
+    def test_build_command_respects_configured_workers(self, mock_run):
+        mock_run.return_value = Mock(returncode=0)
+        runner = PytestRunner(xdist_workers=4)
+
+        command = runner._build_command(target="./tests")
+
+        self.assertIn("-n 4", command)
+        mock_run.assert_called_once()

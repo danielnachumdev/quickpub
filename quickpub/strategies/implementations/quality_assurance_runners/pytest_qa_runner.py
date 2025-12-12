@@ -1,5 +1,6 @@
 import logging
 import re
+import subprocess
 import sys
 from typing import List, Union
 
@@ -33,6 +34,7 @@ class PytestRunner(QualityAssuranceRunner):
         target: str = "./tests",
         no_output_score: float = 0.0,
         no_tests_score: float = 1.0,
+        xdist_workers: Union[int, str] = "auto",
     ):
         """
         Initializes the PytestRunner with a bound and target directory for tests.
@@ -40,6 +42,8 @@ class PytestRunner(QualityAssuranceRunner):
         :param bound: The bound representing acceptable limits, either as a string or a Bound object.
                       Default is ">=0.8".
         :param target: The target directory containing the tests. Default is "./tests".
+        :param xdist_workers: Number of workers for pytest-xdist. Accepts positive integers
+                              or "auto". Only used when pytest-xdist is installed. Default "auto".
         """
         super().__init__(name="pytest", bound=bound, target=target)
         if not (0.0 <= no_tests_score <= 1.0):
@@ -53,6 +57,11 @@ class PytestRunner(QualityAssuranceRunner):
                 "no_output_score should be between 0.0 and 1.0 (including both)."
             )
         self.no_output_score = no_output_score
+        if isinstance(xdist_workers, int) and xdist_workers <= 0:
+            raise RuntimeError("xdist_workers must be a positive integer or 'auto'.")
+        if isinstance(xdist_workers, str) and xdist_workers != "auto":
+            raise RuntimeError("xdist_workers must be a positive integer or 'auto'.")
+        self.xdist_workers = xdist_workers
 
         logger.info(
             "Initialized PytestRunner with bound='%s', target='%s', no_tests_score=%s, no_output_score=%s",
@@ -61,6 +70,31 @@ class PytestRunner(QualityAssuranceRunner):
             no_tests_score,
             no_output_score,
         )
+
+    @staticmethod
+    def _is_xdist_installed() -> bool:
+        """
+        Check if pytest-xdist is available in the current environment.
+
+        Uses subprocess.run to avoid importing pytest-xdist directly.
+        """
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", "pip", "show", "pytest-xdist"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            installed = result.returncode == 0
+            logger.debug(
+                "pytest-xdist availability check returned code %d (installed=%s)",
+                result.returncode,
+                installed,
+            )
+            return installed
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("pytest-xdist availability check failed: %s", exc)
+            return False
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         """
@@ -73,7 +107,12 @@ class PytestRunner(QualityAssuranceRunner):
         if self.has_config:
             # TODO
             assert False
-        return f"{sys.executable} -m pytest {self.target}"
+        base_command = f"{sys.executable} -m pytest"
+        if self._is_xdist_installed():
+            logger.debug("pytest-xdist detected; enabling distributed execution")
+            return f"{base_command} -n {self.xdist_workers} {self.target}"
+        logger.debug("pytest-xdist not detected; running without distribution")
+        return f"{base_command} {self.target}"
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
         """

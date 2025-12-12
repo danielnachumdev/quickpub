@@ -43,8 +43,7 @@ def create_toml(
     :param classifiers: List of package classifiers
     :param scripts: Optional dictionary mapping script names to functions for [project.scripts] section
     """
-    logger.info(
-        "Creating pyproject.toml for package '%s' version '%s'", name, version)
+    logger.info("Creating pyproject.toml for package '%s' version '%s'", name, version)
     classifiers_string = ",\n\t".join([f'"{str(c)}"' for c in classifiers])
     if len(classifiers_string) > 0:
         classifiers_string = f"\n\t{classifiers_string}\n"
@@ -53,14 +52,12 @@ def create_toml(
         if file == "py.typed":
             py_typed = f"""[tool.setuptools.package-data]
 "{name}" = ["py.typed"]"""
-            logger.debug(
-                "Found py.typed file, adding package-data configuration")
+            logger.debug("Found py.typed file, adding package-data configuration")
             break
 
     scripts_section = ""
     if scripts:
-        logger.debug(
-            "Adding [project.scripts] section with %d entries", len(scripts))
+        logger.debug("Adding [project.scripts] section with %d entries", len(scripts))
         scripts_entries = []
         for script_name, func in scripts.items():
             module = func.__module__
@@ -70,8 +67,7 @@ def create_toml(
                 module = f"{name}.__main__"
             entry_point = f"{module}:{func_name}"
             scripts_entries.append(f'    {script_name} = "{entry_point}"')
-        scripts_section = "\n[project.scripts]\n" + \
-            "\n".join(scripts_entries) + "\n"
+        scripts_section = "\n[project.scripts]\n" + "\n".join(scripts_entries) + "\n"
 
     s = f"""[build-system]
 requires = ["setuptools>=61.0"]
