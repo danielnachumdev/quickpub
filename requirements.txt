@@ -5,6 +5,7 @@ fire
 # ===== TESTING =====
 pytest
 pytest-xdist
+pytest-asyncio
 # ===== DEV =====
 tqdm
 twine
