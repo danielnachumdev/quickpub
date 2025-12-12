@@ -143,12 +143,27 @@ class PytestRunner(QualityAssuranceRunner):
             )
             return self.no_output_score
 
-        rating_line = command_output[-1]
-        if "no tests ran" in rating_line:
-            logger.info(
-                "No tests ran, returning no_tests_score: %s", self.no_tests_score
-            )
-            return self.no_tests_score
+        # Find the actual summary line by looking for the regex pattern
+        # (pytest output may have warnings or other lines after the summary)
+        rating_line = None
+        for line in reversed(command_output):
+            if "no tests ran" in line.lower():
+                logger.info(
+                    "No tests ran, returning no_tests_score: %s", self.no_tests_score
+                )
+                return self.no_tests_score
+            if self.PYTEST_REGEX.match(line):
+                rating_line = line
+                break
+
+        if rating_line is None:
+            # Fallback to last line if no match found
+            rating_line = command_output[-1]
+            if "no tests ran" in rating_line.lower():
+                logger.info(
+                    "No tests ran, returning no_tests_score: %s", self.no_tests_score
+                )
+                return self.no_tests_score
 
         if not (m := self.PYTEST_REGEX.match(rating_line)):
             logger.error("Failed to parse pytest output: %s", rating_line)

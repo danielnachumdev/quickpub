@@ -21,7 +21,7 @@ from quickpub import (
 def main() -> None:
     publish(
         name="quickpub",
-        version="3.1.0",
+        version="3.2.0",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A local CI/CD simulation tool that runs quality checks, tests, and validations locally before publishing Python packages, ensuring higher build pass rates and faster feedback loops",
@@ -45,7 +45,6 @@ def main() -> None:
         min_python="3.8.0",
         scripts={"quickpub": entry_point},
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
-        demo=True,
     )
 
 

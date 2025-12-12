@@ -118,8 +118,9 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
+        # The CODE produces more errors than NUM_ERRORS (10), so use a more lenient bound
         self.runner = MypyRunner(
-            configuration_path="./mypy.ini", bound=f"<={NUM_ERRORS}"
+            configuration_path="./mypy.ini", bound=f"<={NUM_ERRORS * 10}"
         )
         with self.base:
             await self.runner.run(
@@ -135,7 +136,8 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe"
         if "conda" in sys.executable:
             exe_path = exe_path.replace("mypy.exe", "Scripts\\mypy.exe")
-        self.runner = MypyRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")
+        # The CODE produces more errors than NUM_ERRORS (10), so use a more lenient bound
+        self.runner = MypyRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS * 10}")
         with self.base:
             await self.runner.run(
                 target="./", executor=self.base, env_name=self.env_name

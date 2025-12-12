@@ -111,13 +111,20 @@ class TestPylintRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
             )
 
     async def test_with_config(self):
+        import os
+        from pathlib import Path
+
         create_file("__init__.py")
         with open("mypy.ini", "w") as f:
             f.write(CONFIG)
         with open("main.py", "w") as f:
             f.write(CODE)
+
+        # Use absolute path to the .pylintrc file
+        test_dir = Path(__file__).parent
+        pylintrc_path = test_dir / ".pylintrc"
         self.runner = PylintRunner(
-            configuration_path="../test_unit/test_qa_runners/.pylintrc",
+            configuration_path=str(pylintrc_path),
             bound=f"<={NUM_ERRORS}",
         )
         with self.base:

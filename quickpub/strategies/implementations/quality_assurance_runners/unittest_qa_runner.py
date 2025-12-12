@@ -77,14 +77,14 @@ class UnittestRunner(QualityAssuranceRunner):
     def _calculate_score(
         self, ret: int, lines: List[str], *, verbose: bool = False
     ) -> float:
-        logger.debug("Calculating unittest score from test results")
+        logger.info("Calculating unittest score from test results")
 
         try:
             num_tests_ran_line = lines[-3]
             num_tests_failed_line = lines[-1]
             num_tests = int(self.NUM_TESTS_PATTERN.match(num_tests_ran_line).group(1))
             if num_tests == 0:
-                logger.debug(
+                logger.info(
                     "No tests found, returning no_tests_score: %s", self.no_tests_score
                 )
                 return self.no_tests_score
@@ -120,7 +120,7 @@ class UnittestRunner(QualityAssuranceRunner):
                     pass
 
             score = 1 - ((num_failed + num_errors) / num_tests)
-            logger.debug(
+            logger.info(
                 "Unittest score calculated: %.3f (tests: %d, failed: %d, errors: %d)",
                 score,
                 num_tests,
