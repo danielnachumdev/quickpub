@@ -62,9 +62,8 @@ def setup_logging(level: int = None):
     logger.handlers.clear()
 
     # Common formatter for both handlers
-    # Example output: 2024-01-15 10:30:45,123 - INFO - [quickpub.some_module - some_module.py:42] - This is a log message
     formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - [%(name)s - %(filename)s:%(lineno)d] - %(message)s"
+        "[quickpub] %(levelname)-5s %(asctime)s %(filename)s:%(lineno)d | %(message)s"
     )
 
     try:

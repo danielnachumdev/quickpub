@@ -35,7 +35,7 @@ try:
     from danielutils import MultiContext  # type:ignore
 except ImportError:
 
-    class MultiContext(ContextManager):  # type: ignore # pylint: disable=missing-class-docstring
+    class MultiContext(ContextManager):
         def __init__(self, *contexts: ContextManager):
             self.contexts = contexts
 

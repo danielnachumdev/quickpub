@@ -37,7 +37,7 @@ def setup_test_logging():
 
     # Create a formatter for the logs
     formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+        "[quickpub] %(levelname)-5s %(asctime)s %(filename)s:%(lineno)d | %(message)s"
     )
     stream_handler.setFormatter(formatter)
 
