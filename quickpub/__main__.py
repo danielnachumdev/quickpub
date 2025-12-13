@@ -145,9 +145,7 @@ def _create_package_files(
         scripts=scripts,
     )
     create_manifest(name=name)
-    add_version_to_init(
-        name=name, src_folder_path=explicit_src_folder_path, version=version
-    )
+    add_version_to_init(src_folder_path=explicit_src_folder_path, version=version)
 
 
 def _build_and_upload_packages(

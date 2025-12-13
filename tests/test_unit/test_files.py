@@ -363,7 +363,6 @@ class TestAddVersionToInit(BaseTestClass):
             )
 
             add_version_to_init(
-                name="testpackage",
                 src_folder_path=str(package_dir),
                 version=Version(1, 2, 3),
             )
@@ -383,7 +382,6 @@ class TestAddVersionToInit(BaseTestClass):
             )
 
             add_version_to_init(
-                name="testpackage",
                 src_folder_path=str(package_dir),
                 version=Version(2, 0, 0),
             )
@@ -408,7 +406,6 @@ from .__main__ import publish, main
             init_file.write_text(original_content, encoding="utf8")
 
             add_version_to_init(
-                name="testpackage",
                 src_folder_path=str(package_dir),
                 version=Version(3, 1, 0),
             )
@@ -427,7 +424,6 @@ from .__main__ import publish, main
 
             self.assertFalse(init_file.exists())
             add_version_to_init(
-                name="testpackage",
                 src_folder_path=str(package_dir),
                 version=Version(1, 0, 0),
             )
@@ -444,7 +440,6 @@ from .__main__ import publish, main
             init_file.write_text("", encoding="utf8")
 
             add_version_to_init(
-                name="testpackage",
                 src_folder_path=str(package_dir),
                 version=Version(1, 0, 0),
             )

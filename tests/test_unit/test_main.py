@@ -249,11 +249,16 @@ class TestRunQualityAssurance(BaseTestClass):
 
 
 class TestCreatePackageFiles(BaseTestClass):
+    @patch("quickpub.__main__.add_version_to_init")
     @patch("quickpub.__main__.create_manifest")
     @patch("quickpub.__main__.create_toml")
     @patch("quickpub.__main__.create_setup")
     def test_all_files_created(
-        self, mock_create_setup, mock_create_toml, mock_create_manifest
+        self,
+        mock_create_setup,
+        mock_create_toml,
+        mock_create_manifest,
+        mock_add_version_to_init,
     ) -> None:
         _create_package_files(
             name="testpackage",
@@ -274,12 +279,18 @@ class TestCreatePackageFiles(BaseTestClass):
         mock_create_setup.assert_called_once()
         mock_create_toml.assert_called_once()
         mock_create_manifest.assert_called_once_with(name="testpackage")
+        mock_add_version_to_init.assert_called_once()
 
+    @patch("quickpub.__main__.add_version_to_init")
     @patch("quickpub.__main__.create_manifest")
     @patch("quickpub.__main__.create_toml")
     @patch("quickpub.__main__.create_setup")
     def test_with_scripts(
-        self, mock_create_setup, mock_create_toml, mock_create_manifest
+        self,
+        mock_create_setup,
+        mock_create_toml,
+        mock_create_manifest,
+        mock_add_version_to_init,
     ) -> None:
         from typing import Callable, Dict, Any
 

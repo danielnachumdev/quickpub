@@ -143,10 +143,11 @@ def create_manifest(*, name: str) -> None:
     logger.info("Successfully created MANIFEST.in")
 
 
-def add_version_to_init(name: str, src_folder_path: str, version: Version) -> None:
-    init_file_path = Path(src_folder_path) / "__init__.py"
+def add_version_to_init(src_folder_path: str, version: Version) -> None:
+    src_path = Path(src_folder_path).resolve()
+    init_file_path = src_path / "__init__.py"
 
-    if not file_exists(str(init_file_path)):
+    if not init_file_path.exists():
         logger.warning("__init__.py not found at '%s', creating it", init_file_path)
         init_file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(init_file_path, "w", encoding="utf8") as f:
