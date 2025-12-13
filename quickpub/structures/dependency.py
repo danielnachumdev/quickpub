@@ -44,14 +44,13 @@ class Dependency:
     @staticmethod
     def from_string(s: str) -> "Dependency":
         logger.debug("Parsing dependency from string: '%s'", s)
-        # the order of iteration matters, weak inequality operators should be first.
         for op in [">=", "<=", ">", "<", "=="]:
             splits = s.split(op)
             if len(splits) == 2:
                 dep = Dependency(
                     splits[0],
                     op,
-                    Version.from_str(splits[-1]),  # type: ignore[arg-type]
+                    Version.from_str(splits[-1]),
                 )
                 logger.debug("Parsed dependency: %s", dep)
                 return dep

@@ -15,18 +15,13 @@ class Classifier(Enum):
         current_word = ""
 
         for char in name:
-            # Check if the character is uppercase
             if char.isupper():
-                # If current_word is not empty, add it to words list
                 if current_word:
                     words.append(current_word)
-                # Start a new word with the uppercase character
                 current_word = char
             else:
-                # Add lowercase character to current_word
                 current_word += char
 
-        # Add the last word to the list
         if current_word:
             words.append(current_word)
 
@@ -43,7 +38,6 @@ class Classifier(Enum):
 class DevelopmentStatusClassifier(Classifier):
     """Classifier for package development status. Use values like Alpha, Beta, Production, etc."""
 
-    # https://pypi.org/classifiers/
     Planning = 1
     PreAlpha = 2
     Alpha = 3

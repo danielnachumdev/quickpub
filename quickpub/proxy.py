@@ -7,7 +7,6 @@ import danielutils
 logger = logging.getLogger(__name__)
 
 
-# need it like this for the testing
 def cm(*args: Any, **kwargs: Any) -> Tuple[int, bytes, bytes]:
     logger.debug("Executing command: %s", " ".join(args))
     result = danielutils.cm(*args, **kwargs)

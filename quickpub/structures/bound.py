@@ -26,11 +26,10 @@ class Bound:
     @staticmethod
     def from_string(s: str) -> "Bound":
         logger.debug("Parsing bound from string: '%s'", s)
-        # the order of iteration matters, weak inequality operators should be first.
         for op in [">=", "<=", "==", ">", "<"]:
             splits = s.split(op)
             if len(splits) == 2:
-                bound = Bound(op, float(splits[-1]))  # type:ignore
+                bound = Bound(op, float(splits[-1]))
                 logger.debug("Parsed bound: %s", bound)
                 return bound
         logger.error("Failed to parse bound from string: '%s'", s)
