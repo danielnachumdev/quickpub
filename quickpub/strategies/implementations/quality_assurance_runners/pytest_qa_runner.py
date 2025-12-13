@@ -2,7 +2,7 @@ import logging
 import re
 import subprocess
 import sys
-from typing import List, Union
+from typing import List, Union, Literal
 
 from danielutils import LayeredCommand
 
@@ -30,7 +30,7 @@ class PytestRunner(QualityAssuranceRunner):
         target: str = "./tests",
         no_output_score: float = 0.0,
         no_tests_score: float = 1.0,
-        xdist_workers: Union[int, str] = "auto",
+        xdist_workers: Union[int, Literal["auto"]] = "auto",
     ) -> None:
         super().__init__(name="pytest", bound=bound, target=target)
         if not (0.0 <= no_tests_score <= 1.0):
