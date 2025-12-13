@@ -165,12 +165,9 @@ class TestRunConstraintEnforcers(BaseTestClass):
 
 
 class TestRunQualityAssurance(BaseTestClass):
-    @patch("quickpub.__main__.qa")
+    @patch("quickpub.__main__.qa", new_callable=AsyncMock)
     def test_qa_success(self, mock_qa) -> None:
-        async def mock_qa_coro():
-            return True
-
-        mock_qa.return_value = mock_qa_coro()
+        mock_qa.return_value = True
         mock_provider = MagicMock()
         mock_pbar = MagicMock()
 
@@ -183,13 +180,12 @@ class TestRunQualityAssurance(BaseTestClass):
             pbar=mock_pbar,
         )
 
-    @patch("quickpub.__main__.error")
-    @patch("quickpub.__main__.qa")
-    def test_qa_failure(self, mock_qa, mock_error) -> None:
-        async def mock_qa_coro():
-            return False
+        mock_qa.assert_called_once()
 
-        mock_qa.return_value = mock_qa_coro()
+    @patch("quickpub.__main__.error")
+    @patch("quickpub.__main__.qa", new_callable=AsyncMock)
+    def test_qa_failure(self, mock_qa, mock_error) -> None:
+        mock_qa.return_value = False
         mock_provider = MagicMock()
         mock_pbar = MagicMock()
 
@@ -203,14 +199,12 @@ class TestRunQualityAssurance(BaseTestClass):
                 pbar=mock_pbar,
             )
 
+        mock_qa.assert_called_once()
         mock_error.assert_called_once()
 
-    @patch("quickpub.__main__.qa")
+    @patch("quickpub.__main__.qa", new_callable=AsyncMock)
     def test_qa_exit_early_error_propagated(self, mock_qa) -> None:
-        async def mock_qa_coro():
-            raise ExitEarlyError("QA failed")
-
-        mock_qa.return_value = mock_qa_coro()
+        mock_qa.side_effect = ExitEarlyError("QA failed")
         mock_provider = MagicMock()
         mock_pbar = MagicMock()
 
@@ -224,12 +218,11 @@ class TestRunQualityAssurance(BaseTestClass):
                 pbar=mock_pbar,
             )
 
-    @patch("quickpub.__main__.qa")
-    def test_qa_other_exception_wrapped(self, mock_qa) -> None:
-        async def mock_qa_coro():
-            raise ValueError("Unexpected error")
+        mock_qa.assert_called_once()
 
-        mock_qa.return_value = mock_qa_coro()
+    @patch("quickpub.__main__.qa", new_callable=AsyncMock)
+    def test_qa_other_exception_wrapped(self, mock_qa) -> None:
+        mock_qa.side_effect = ValueError("Unexpected error")
         mock_provider = MagicMock()
         mock_pbar = MagicMock()
 
@@ -243,6 +236,7 @@ class TestRunQualityAssurance(BaseTestClass):
                 pbar=mock_pbar,
             )
 
+        mock_qa.assert_called_once()
         self.assertIn("Quality assurance stage has failed", str(context.exception))
 
 
@@ -466,7 +460,7 @@ class TestPublish(BaseTestClass):
         )
 
         call_args = mock_build_upload.call_args
-        self.assertTrue(call_args.kwargs["demo"])
+        self.assertEqual(call_args.args[4], True)
 
 
 class TestMain(BaseTestClass):

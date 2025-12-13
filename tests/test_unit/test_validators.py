@@ -45,7 +45,7 @@ class TestValidateVersion(BaseTestClass):
         )
 
     def test_invalid_string_format_raises_error(self) -> None:
-        with self.assertRaises(ExitEarlyError):
+        with self.assertRaises(ValueError):
             validate_version("invalid.version.format.here")
 
 

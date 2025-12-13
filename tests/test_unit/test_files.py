@@ -42,9 +42,9 @@ class TestFormatClassifiersString(BaseTestClass):
             ProgrammingLanguageClassifier.Python3,
         ]
         result = _format_classifiers_string(classifiers)
-        self.assertIn('"Development Status Classifier :: 3 - Alpha"', result)
-        self.assertIn('"Intended Audience Classifier :: Developers"', result)
-        self.assertIn('"Programming Language Classifier :: Python :: 3"', result)
+        self.assertIn('"Development Status :: 3 - Alpha"', result)
+        self.assertIn('"Intended Audience :: Developers"', result)
+        self.assertIn('"Programming Language :: Python :: 3"', result)
         self.assertTrue(result.startswith("\n\t"))
         self.assertTrue(result.endswith("\n"))
 

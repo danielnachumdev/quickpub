@@ -371,7 +371,7 @@ class TestSetupQaEnvironment(unittest.TestCase):
     def test_default_python_provider(self) -> None:
         from quickpub.strategies import DefaultPythonProvider
 
-        provider = DefaultPythonProvider(requested_envs=[], explicit_versions=[])
+        provider = DefaultPythonProvider()
         result = _setup_qa_environment(provider)
         self.assertTrue(result)
 
@@ -385,20 +385,16 @@ class TestSubmitQaTasks(AsyncBaseTestClass):
     async def test_submit_tasks(self) -> None:
         is_task_run_success.clear()
 
-        provider = MagicMock()
-        provider.exit_on_fail = True
-
-        async def mock_anext():
+        async def mock_provider_iter():
             executor = AsyncMock()
             executor.__enter__ = AsyncMock(return_value=executor)
             executor.__exit__ = AsyncMock(return_value=None)
             executor.prev = None
             yield ("env1", executor)
 
-        provider.__aiter__ = lambda: mock_anext()
-        provider.__anext__ = AsyncMock(
-            side_effect=[("env1", MagicMock())], return_value=("env1", MagicMock())
-        )
+        provider = MagicMock()
+        provider.exit_on_fail = True
+        provider.__aiter__ = lambda self: mock_provider_iter()
 
         pool = MagicMock()
         pool.submit = AsyncMock()
