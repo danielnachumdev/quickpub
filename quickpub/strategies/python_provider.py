@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class PythonProvider(AsyncIterator, QuickpubStrategy):
-    """Base class for Python environment providers."""
+    """Base class for Python environment providers. Subclass this to define custom Python environment management strategies."""
 
     def __init__(
         self,
@@ -35,11 +35,6 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
 
     @classmethod
     async def get_available_envs(cls) -> Set[str]:
-        """
-        Get available Python environments.
-
-        :return: Set of available environment names
-        """
         KEY = "__available_envs__"
         if (res := getattr(cls, KEY, None)) is not None:
             logger.debug("Using cached available environments for %s", cls.__name__)
@@ -58,13 +53,7 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
         return len(self.requested_envs)
 
     @abstractmethod
-    def get_python_executable_name(self) -> str:
-        """
-        Get the Python executable name.
-
-        :return: Name of the Python executable
-        """
-        ...
+    def get_python_executable_name(self) -> str: ...
 
 
 __all__ = ["PythonProvider"]

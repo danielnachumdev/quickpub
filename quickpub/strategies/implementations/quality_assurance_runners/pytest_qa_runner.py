@@ -14,14 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class PytestRunner(QualityAssuranceRunner):
-    """
-    PytestRunner is a concrete implementation of QualityAssuranceRunner specifically for running
-    pytest-based tests. It includes methods to build the pytest command, install pytest dependencies,
-    and calculate the test score based on pytest results.
-
-    Attributes:
-        PYTEST_REGEX (re.Pattern): A regex pattern to parse pytest results for passed and failed tests.
-    """
+    """Quality assurance runner for pytest testing. Scores based on the ratio of passed tests to total tests."""
 
     PYTEST_REGEX: re.Pattern = re.compile(
         r"=+ (?:(?P<failed>\d+) failed,? )?(?:(?P<passed>\d+) passed )?in [\d\.]+s =+"
@@ -36,15 +29,6 @@ class PytestRunner(QualityAssuranceRunner):
         no_tests_score: float = 1.0,
         xdist_workers: Union[int, str] = "auto",
     ):
-        """
-        Initializes the PytestRunner with a bound and target directory for tests.
-
-        :param bound: The bound representing acceptable limits, either as a string or a Bound object.
-                      Default is ">=0.8".
-        :param target: The target directory containing the tests. Default is "./tests".
-        :param xdist_workers: Number of workers for pytest-xdist. Accepts positive integers
-                              or "auto". Only used when pytest-xdist is installed. Default "auto".
-        """
         super().__init__(name="pytest", bound=bound, target=target)
         if not (0.0 <= no_tests_score <= 1.0):
             raise RuntimeError(
@@ -73,11 +57,6 @@ class PytestRunner(QualityAssuranceRunner):
 
     @staticmethod
     def _is_xdist_installed() -> bool:
-        """
-        Check if pytest-xdist is available in the current environment.
-
-        Uses subprocess.run to avoid importing pytest-xdist directly.
-        """
         try:
             result = subprocess.run(
                 [sys.executable, "-m", "pip", "show", "pytest-xdist"],
@@ -97,13 +76,6 @@ class PytestRunner(QualityAssuranceRunner):
             return False
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
-        """
-        Builds the command to run pytest on the specified target.
-
-        :param target: The target directory containing the tests.
-        :param use_system_interpreter: Whether to use the system interpreter. Default is False.
-        :return: The command to run pytest as a string.
-        """
         if self.has_config:
             # TODO
             assert False
@@ -115,11 +87,6 @@ class PytestRunner(QualityAssuranceRunner):
         return f"{base_command} {self.target}"
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
-        """
-        Installs pytest and its dependencies.
-
-        :param base: The base LayeredCommand object for executing commands.
-        """
         logger.info("Installing pytest dependencies")
         with base:
             base(f"{sys.executable} -m pip install pytest")
@@ -127,14 +94,6 @@ class PytestRunner(QualityAssuranceRunner):
     def _calculate_score(
         self, ret: int, command_output: List[str], *, verbose: bool = False
     ) -> float:
-        """
-        Calculates the test score based on the pytest command output.
-
-        :param ret: The return code of the pytest command.
-        :param command_output: The output of the pytest command as a list of strings.
-        :param verbose: Whether to output verbose logs. Default is False.
-        :return: The calculated test score as a float.
-        """
         logger.info("Calculating pytest score from test results")
 
         if len(command_output) == 0:

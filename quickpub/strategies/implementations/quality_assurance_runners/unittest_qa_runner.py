@@ -17,18 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 def _removesuffix(string: str, suffix: str) -> str:
-    """Remove a suffix from a string.
-
-    Replace this with str.removesuffix() from stdlib when minimum Python
-    version is 3.9.
-    """
     if suffix and string.endswith(suffix):
         return string[: -len(suffix)]
     return string
 
 
 class UnittestRunner(QualityAssuranceRunner):
-    """Quality assurance runner for unittest testing."""
+    """Quality assurance runner for unittest testing. Scores based on the ratio of passed tests to total tests."""
 
     NUM_TESTS_PATTERN: re.Pattern = re.compile(r"Ran (\d+) tests? in \d+\.\d+s")
     NUM_FAILED_PATTERN: re.Pattern = re.compile(

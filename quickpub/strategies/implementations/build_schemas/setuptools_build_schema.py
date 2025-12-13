@@ -12,17 +12,11 @@ logger = logging.getLogger(__name__)
 
 
 class SetuptoolsBuildSchema(BuildSchema):
-    """Build schema implementation using setuptools."""
+    """Build schema implementation using setuptools. Creates source distributions via setup.py."""
 
     def __init__(
         self, setup_file_path: str = "./setup.py", backend: Literal["toml"] = "toml"
     ) -> None:
-        """
-        Initialize setuptools build schema.
-
-        :param setup_file_path: Path to setup.py file
-        :param backend: Build backend to use
-        """
         self._backend = backend
         self._setup_file_path = setup_file_path
 

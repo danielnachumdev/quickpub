@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class CondaPythonProvider(PythonProvider):
-    """Python provider implementation using conda environments."""
+    """Python provider implementation using conda environments. Iterates over specified conda environment names."""
 
     def get_python_executable_name(self) -> str:
         return "python"

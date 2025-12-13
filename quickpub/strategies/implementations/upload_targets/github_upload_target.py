@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class GithubUploadTarget(UploadTarget):
-    """Upload target implementation for GitHub releases."""
+    """Upload target implementation for GitHub releases. Commits and pushes changes to the git repository."""
 
     def upload(self, version: str, **kwargs) -> None:  # type: ignore
         from quickpub.proxy import cm

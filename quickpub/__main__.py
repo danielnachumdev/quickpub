@@ -57,30 +57,42 @@ def publish(
     demo: bool = False,
     config: Optional[Any] = None,
 ) -> None:
-    """The main function for publishing a package. It performs all necessary steps to prepare and publish the package.
+    """Publish a Python package by validating inputs, running quality assurance checks, creating package files, and building/uploading distributions.
 
+    This function orchestrates the complete package publishing workflow:
+    1. Validates package metadata (version, Python version, dependencies, keywords, source path)
+    2. Runs constraint enforcers to ensure publishing requirements are met
+    3. Executes quality assurance checks across specified Python environments
+    4. Creates package configuration files (pyproject.toml, setup.py, MANIFEST.in)
+    5. Builds distributions using provided build schemas
+    6. Uploads distributions to specified targets
 
-    :param name: The name of the package.
-    :param author: The name of the author.
-    :param author_email: The email of the author.
-    :param description: A short description of the package.
-    :param homepage: The homepage URL for the package (e.g., GitHub repository).
-    :param global_quality_assurance_runners: Strategies for quality assurance. These will run on all Envs supplies by the supplier.
-    :param build_schemas: Strategies for building the package.
-    :param upload_targets: Strategies for uploading the package.
-    :param python_interpreter_provider: Strategy for managing Python versions. Defaults to SystemInterpreter().
-    :param explicit_src_folder_path: The path to the source code of the package. Defaults to <current working directory>/<name>.
-    :param version: The version for the new distribution. Defaults to "0.0.1".
-    :param readme_file_path: The path to the README file. Defaults to "./README.md".
-    :param license_file_path: The path to the license file. Defaults to "./LICENSE".
-    :param min_python: The minimum Python version required for the package. Defaults to the Python version running this script.
-    :param keywords: A list of keywords describing areas of interest for the package. Defaults to None.
-    :param dependencies: A list of dependencies for the package. Defaults to None.
-    :param scripts: Optional dictionary mapping script names to functions for [project.scripts] section. Each entry will create an executable entry point.
-    :param log: A function to receive log statements about the process and print them (or do something else idk)
-    :param pbar: and object that can be notified about an update of progress like a tqdm progress bar.
-    :param demo: Whether to perform checks without making any changes. Defaults to False.
-    :param config: Reserved for future use. Defaults to None.
+    Args:
+        name: Package name (must match source folder name if using default path)
+        author: Author name for package metadata
+        author_email: Author email for package metadata
+        description: Short description of the package
+        homepage: Homepage URL (typically GitHub repository URL)
+        build_schemas: List of build strategies to create package distributions
+        upload_targets: List of upload strategies to publish distributions
+        enforcers: Optional list of constraint enforcers to validate publishing requirements
+        global_quality_assurance_runners: Optional list of QA runners to execute on all Python environments
+        python_interpreter_provider: Strategy for managing Python versions (defaults to system Python)
+        readme_file_path: Path to README file (defaults to "./README.md")
+        license_file_path: Path to LICENSE file (defaults to "./LICENSE")
+        version: Package version as Version object or string (defaults to "0.0.1" if not provided)
+        min_python: Minimum required Python version (defaults to current Python version)
+        dependencies: Optional list of dependencies as strings or Dependency objects
+        keywords: Optional list of keywords describing the package
+        explicit_src_folder_path: Optional explicit path to source code (defaults to "./{name}")
+        scripts: Optional dictionary mapping script names to callable functions for entry points
+        pbar: Optional progress bar object (e.g., tqdm instance) for tracking QA progress
+        demo: If True, performs validation and file creation without building or uploading
+        config: Reserved for future configuration options
+
+    Raises:
+        ExitEarlyError: If validation fails, constraint enforcement fails, or QA checks fail
+        RuntimeError: If quality assurance stage encounters an unexpected error
 
     Returns:
         None

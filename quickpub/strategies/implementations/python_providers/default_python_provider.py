@@ -11,18 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 async def cast_aiter(itr: Iterable[Any]) -> AsyncIterator[Any]:
-    """
-    Cast an iterable to an async iterator.
-
-    :param itr: Iterable to cast
-    :return: Async iterator
-    """
     for x in itr:
         yield x
 
 
 class DefaultPythonProvider(PythonProvider):
-    """Default Python provider using the system Python interpreter."""
+    """Default Python provider using the system Python interpreter. Provides a single 'system' environment."""
 
     def get_python_executable_name(self) -> str:
         return sys.executable

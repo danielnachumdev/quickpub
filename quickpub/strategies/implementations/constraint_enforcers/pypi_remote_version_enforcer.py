@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class PypiRemoteVersionEnforcer(ConstraintEnforcer):
-    """Enforces that the new version is greater than the remote PyPI version."""
+    """Enforces that the new version is greater than the latest version published on PyPI."""
 
     _HTTP_FAILED_MESSAGE: str = "Failed to send http request"
 

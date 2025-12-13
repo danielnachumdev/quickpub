@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class PylintRunner(QualityAssuranceRunner):
-    """Quality assurance runner for pylint code analysis."""
+    """Quality assurance runner for pylint code analysis. Scores based on pylint rating (0.0 to 10.0)."""
 
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pylint dependencies")

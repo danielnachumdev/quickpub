@@ -9,13 +9,6 @@ logger = logging.getLogger(__name__)
 
 # need it like this for the testing
 def cm(*args: Any, **kwargs: Any) -> Tuple[int, bytes, bytes]:
-    """
-    Execute a command and return the result.
-
-    :param args: Command arguments
-    :param kwargs: Additional keyword arguments
-    :return: Tuple of (return_code, stdout, stderr)
-    """
     logger.debug("Executing command: %s", " ".join(args))
     result = danielutils.cm(*args, **kwargs)
     logger.debug("Command completed with return code: %d", result[0])
@@ -23,12 +16,6 @@ def cm(*args: Any, **kwargs: Any) -> Tuple[int, bytes, bytes]:
 
 
 def os_system(command: str) -> int:
-    """
-    Execute a system command.
-
-    :param command: Command to execute
-    :return: Return code of the command
-    """
     logger.debug("Executing system command: %s", command)
     result = os.system(command)
     logger.debug("System command completed with return code: %d", result)
@@ -36,13 +23,6 @@ def os_system(command: str) -> int:
 
 
 def get(*args: Any, **kwargs: Any) -> requests.models.Response:
-    """
-    Make an HTTP GET request.
-
-    :param args: Request arguments
-    :param kwargs: Additional keyword arguments
-    :return: Response object
-    """
     logger.debug(
         "Making HTTP GET request to: %s", args[0] if args else "URL not provided"
     )

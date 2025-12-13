@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class PypircUploadTarget(UploadTarget):
-    """Upload target implementation using .pypirc configuration."""
+    """Upload target implementation using .pypirc configuration. Uploads packages to PyPI using twine."""
 
     REGEX_PATTERN: re.Pattern = PypircEnforcer.PYPIRC_REGEX
 

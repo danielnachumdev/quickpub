@@ -5,9 +5,6 @@ logger = logging.getLogger(__name__)
 
 
 class Classifier(Enum):
-    """
-    A base enum class for all classifiers.
-    """
 
     def _str(self) -> str:
         return str(self.value)
@@ -44,9 +41,7 @@ class Classifier(Enum):
 
 
 class DevelopmentStatusClassifier(Classifier):
-    """
-    An enum class for specifying the development state of the package
-    """
+    """Classifier for package development status. Use values like Alpha, Beta, Production, etc."""
 
     # https://pypi.org/classifiers/
     Planning = 1
@@ -63,26 +58,20 @@ class DevelopmentStatusClassifier(Classifier):
 
 
 class IntendedAudienceClassifier(Classifier):
-    """
-    An enum class for specifying the intended audience
-    """
+    """Classifier for intended audience of the package."""
 
     CustomerService = "CustomerService"
     Developers = "Developers"
 
 
 class ProgrammingLanguageClassifier(Classifier):
-    """
-    An enum class for specifying the target language level
-    """
+    """Classifier for programming languages supported by the package."""
 
     Python3 = "Python :: 3"
 
 
 class OperatingSystemClassifier(Classifier):
-    """
-    An enum class for specifying the target operating system
-    """
+    """Classifier for operating systems supported by the package."""
 
     MicrosoftWindows = "Microsoft :: Windows"
 

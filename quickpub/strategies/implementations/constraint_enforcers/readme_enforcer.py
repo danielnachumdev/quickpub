@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class ReadmeEnforcer(ConstraintEnforcer):
-    """Enforces the presence of a README file."""
+    """Enforces the presence of a README file at the specified path."""
 
     def __init__(self, path: str = "./README.md") -> None:
         self.path = path

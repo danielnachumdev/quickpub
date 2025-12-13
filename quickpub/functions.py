@@ -9,11 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 def build(*, verbose: bool = True) -> None:
-    """
-    Build the package distribution.
-
-    :param verbose: Whether to display verbose output
-    """
     logger.info("Starting build process")
     if verbose:
         info("Creating new distribution...")
@@ -31,13 +26,6 @@ def build(*, verbose: bool = True) -> None:
 
 
 def upload(*, name: str, version: Version, verbose: bool = True) -> None:
-    """
-    Upload the package to PyPI.
-
-    :param name: Package name
-    :param version: Package version
-    :param verbose: Whether to display verbose output
-    """
     logger.info("Starting upload process for package '%s' version '%s'", name, version)
     if verbose:
         info("Uploading")
@@ -60,12 +48,6 @@ def upload(*, name: str, version: Version, verbose: bool = True) -> None:
 
 
 def commit(*, version: Version, verbose: bool = True) -> None:
-    """
-    Commit and push changes to Git repository.
-
-    :param version: Package version
-    :param verbose: Whether to display verbose output
-    """
     logger.info("Starting Git commit process for version '%s'", version)
 
     if verbose:

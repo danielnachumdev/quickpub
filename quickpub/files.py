@@ -25,24 +25,6 @@ def create_toml(
     classifiers: List[Classifier],
     scripts: Optional[Dict[str, Callable]] = None,
 ) -> None:
-    """
-    Create a pyproject.toml file for the package.
-
-    :param name: Package name
-    :param src_folder_path: Path to source folder
-    :param readme_file_path: Path to README file
-    :param license_file_path: Path to LICENSE file
-    :param version: Package version
-    :param author: Author name
-    :param author_email: Author email
-    :param description: Package description
-    :param homepage: Package homepage URL
-    :param keywords: List of package keywords
-    :param min_python: Minimum Python version required
-    :param dependencies: List of package dependencies
-    :param classifiers: List of package classifiers
-    :param scripts: Optional dictionary mapping script names to functions for [project.scripts] section
-    """
     logger.info("Creating pyproject.toml for package '%s' version '%s'", name, version)
     classifiers_string = ",\n\t".join([f'"{str(c)}"' for c in classifiers])
     if len(classifiers_string) > 0:
@@ -101,7 +83,6 @@ packages = ["{name}"]
 
 
 def create_setup() -> None:
-    """Create a basic setup.py file for the package."""
     logger.info("Creating setup.py file")
     with open("./setup.py", "w", encoding="utf8") as f:
         f.write("from setuptools import setup\n\nsetup()\n")
@@ -109,11 +90,6 @@ def create_setup() -> None:
 
 
 def create_manifest(*, name: str) -> None:
-    """
-    Create a MANIFEST.in file for the package.
-
-    :param name: Package name
-    """
     logger.info("Creating MANIFEST.in for package '%s'", name)
     with open("./MANIFEST.in", "w", encoding="utf8") as f:
         f.write(f"recursive-include {name} *.py")

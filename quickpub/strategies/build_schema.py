@@ -7,21 +7,14 @@ logger = logging.getLogger(__name__)
 
 
 class BuildSchema(QuickpubStrategy):
-    """Base class for build schema implementations."""
+    """Base class for build schema implementations. Subclass this to define custom build strategies."""
 
     def __init__(self, verbose: bool = True) -> None:
         self.verbose = verbose
         logger.debug("BuildSchema initialized with verbose=%s", verbose)
 
     @abstractmethod
-    def build(self, *args, **kwargs) -> None:
-        """
-        Build the package.
-
-        :param args: Positional arguments
-        :param kwargs: Keyword arguments
-        """
-        ...
+    def build(self, *args, **kwargs) -> None: ...
 
 
 __all__ = ["BuildSchema"]

@@ -6,18 +6,12 @@ from .quickpub_strategy import QuickpubStrategy
 
 
 class ConstraintEnforcer(QuickpubStrategy):
-    """Base class for constraint enforcer implementations."""
+    """Base class for constraint enforcer implementations. Subclass this to define custom constraint validation logic."""
 
     EXCEPTION_TYPE: Type[Exception] = ExitEarlyError
 
     @abstractmethod
-    def enforce(self, **kwargs) -> None:
-        """
-        Enforce the constraint.
-
-        :param kwargs: Keyword arguments
-        """
-        ...
+    def enforce(self, **kwargs) -> None: ...
 
 
 __all__ = ["ConstraintEnforcer"]

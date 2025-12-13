@@ -8,24 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 def _remove_suffix(s: str, suffix: str) -> str:
-    """
-    This function is needed because str.removesuffix is not implemented in python == 3.8.0
-    :param s: string to remove from
-    :param suffix: substring to remove
-    :return: modified string
-    """
     if get_python_version() >= (3, 9):
         return s.removesuffix(suffix)  # type:ignore
     return _remove_prefix(s[::-1], suffix[::-1])[::-1]
 
 
 def _remove_prefix(s: str, prefix: str) -> str:
-    """
-
-    :param s:
-    :param prefix:
-    :return:
-    """
     if get_python_version() >= (3, 9):
         return s.removeprefix(prefix)  # type:ignore
 
@@ -35,7 +23,7 @@ def _remove_prefix(s: str, prefix: str) -> str:
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
-    """Enforces that the new version is greater than the local version."""
+    """Enforces that the new version is greater than the highest version found in the local dist directory."""
 
     def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
         if demo:

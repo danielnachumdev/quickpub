@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 class MypyRunner(QualityAssuranceRunner):
-    """Quality assurance runner for mypy type checking."""
+    """Quality assurance runner for mypy type checking. Scores based on the number of type errors found."""
 
     NO_TESTS_PATTERN: re.Pattern = re.compile(
         r"There are no \.py\[i\] files in directory '[\w\.\\\/]+'"

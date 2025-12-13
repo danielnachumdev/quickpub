@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Dependency:
-    """Represents a package dependency with version constraints."""
+    """Represents a package dependency with version constraints. Use from_string() to parse dependency strings."""
 
     def _build_func_map(self) -> Dict[str, Callable[[Version], bool]]:
         return {
@@ -43,12 +43,6 @@ class Dependency:
 
     @staticmethod
     def from_string(s: str) -> "Dependency":
-        """
-        Create a Dependency from a string representation.
-
-        :param s: String representation of the dependency
-        :return: Dependency object
-        """
         logger.debug("Parsing dependency from string: '%s'", s)
         # the order of iteration matters, weak inequality operators should be first.
         for op in [">=", "<=", ">", "<", "=="]:
@@ -74,12 +68,6 @@ class Dependency:
         return f"{self.__class__.__name__}(name='{self.name}', operator='{self.operator}', version='{self.ver}')"
 
     def is_satisfied_by(self, ver: Version) -> bool:
-        """
-        Check if a version satisfies this dependency.
-
-        :param ver: Version to check
-        :return: True if version satisfies the dependency
-        """
         result = self._build_func_map()[self.operator](ver)
         logger.debug("Dependency '%s' satisfied by version '%s': %s", self, ver, result)
         return result

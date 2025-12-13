@@ -6,17 +6,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(order=True)
 class Version:
-    """Represents a semantic version with major, minor, and patch components."""
-
     @staticmethod
     def from_str(version_str: str) -> "Version":
-        """
-        Create a Version from a string representation.
-
-        :param version_str: String representation of the version
-        :return: Version object
-        :raises ValueError: If string format is invalid
-        """
         try:
             version = Version(*list(map(int, version_str.split("."))))
             return version

@@ -63,36 +63,21 @@ ASYNC_POOL_NAME: str = "Quickpub QA"
 
 @runtime_checkable
 class SupportsProgress(Protocol):
-    """Protocol for objects that support progress tracking."""
+    """Protocol for progress bar objects. Compatible with tqdm and similar progress tracking libraries."""
 
     @abstractmethod
     def update(self, amount: int) -> None:
-        """
-        Update progress by the given amount.
-
-        :param amount: Amount to update progress by
-        """
-        ...
+        """Update the progress bar by the specified amount."""
 
     @property
     @abstractmethod
     def total(self) -> int:
-        """
-        Get the total progress amount.
-
-        :return: Total progress amount
-        """
-        ...
+        """Get the total number of items to process."""
 
     @total.setter
     @abstractmethod
     def total(self, amount: int) -> None:
-        """
-        Set the total progress amount.
-
-        :param amount: Total progress amount
-        """
-        ...
+        """Set the total number of items to process."""
 
 
 async def global_import_sanity_check(
@@ -103,14 +88,6 @@ async def global_import_sanity_check(
     task_id: int,
     pbar: Optional[SupportsProgress] = None,
 ) -> None:
-    """
-    Will check that importing from the package works as a sanity check.
-    :param package_name: Name of the package
-    :param executor: the previously ued AsyncLayeredCommand executor
-    :param is_system_interpreter: whether or not the system interpreter is used
-    :param env_name: The name of the currently tested environment
-    :return: None
-    """
     logger.info(
         "Running global import sanity check for package '%s' on environment '%s'",
         package_name,
@@ -175,14 +152,6 @@ async def validate_dependencies(
     task_id: int,
     pbar: Optional[SupportsProgress] = None,
 ) -> None:
-    """
-    will check if all the dependencies of the package are installed on current env.
-    :param validation_exit_on_fail:
-    :param required_dependencies: the dependencies to check
-    :param executor: the current AsyncLayeredCommand executor
-    :param env_name: name of the currently checked environment
-    :return: None
-    """
     logger.info("Validating dependencies on environment '%s'", env_name)
     try:
         if validation_exit_on_fail:
@@ -271,18 +240,6 @@ async def run_config(
     src_folder_path: str,
     pbar: Optional[SupportsProgress] = None,
 ) -> None:
-    """
-    Run a QA configuration on a specific environment.
-
-    :param env_name: Name of the environment
-    :param async_executor: Async command executor
-    :param runner: QA runner instance
-    :param config_id: Configuration ID
-    :param is_system_interpreter: Whether to use system interpreter
-    :param validation_exit_on_fail: Whether to exit on validation failure
-    :param src_folder_path: Path to source folder
-    :param pbar: Optional progress bar
-    """
     logger.info(
         "Running QA config %d on environment '%s' with runner '%s'",
         config_id,
@@ -332,17 +289,6 @@ async def qa(
     dependencies: List[Dependency],
     pbar: Optional[SupportsProgress] = None,
 ) -> bool:
-    """
-    Run quality assurance checks on the package.
-
-    :param python_provider: Python environment provider
-    :param quality_assurance_strategies: List of QA runners
-    :param package_name: Name of the package
-    :param src_folder_path: Path to source folder
-    :param dependencies: List of dependencies
-    :param pbar: Optional progress bar
-    :return: True if all QA checks passed, False otherwise
-    """
     logger.info(
         "Starting QA process for package '%s' with %d QA strategies",
         package_name,

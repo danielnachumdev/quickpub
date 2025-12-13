@@ -10,13 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
-    """
-    Validate and convert version to Version object.
-
-    :param version: Version string or Version object
-    :return: Validated Version object
-    :raises ExitEarlyError: If version is invalid or missing
-    """
     logger.debug("Validating version: %s", version)
     if not bool(version):
         logger.error("Version validation failed: no version provided")
@@ -30,12 +23,6 @@ def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
 
 
 def validate_python_version(min_python: Optional[Version]) -> Version:
-    """
-    Validate Python version requirement.
-
-    :param min_python: Minimum Python version
-    :return: Validated Python version
-    """
     logger.debug("Validating Python version. min_python: %s", min_python)
     if min_python is not None:
         logger.debug("Using provided minimum Python version: %s", min_python)
@@ -47,12 +34,6 @@ def validate_python_version(min_python: Optional[Version]) -> Version:
 
 
 def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
-    """
-    Validate package keywords.
-
-    :param keywords: List of keywords
-    :return: Validated keywords list
-    """
     logger.debug("Validating keywords: %s", keywords)
     if keywords is None:
         logger.debug("No keywords provided, returning empty list")
@@ -64,12 +45,6 @@ def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
 def validate_dependencies(
     dependencies: Optional[List[Union[str, Dependency]]],
 ) -> List[Dependency]:
-    """
-    Validate and convert dependencies to Dependency objects.
-
-    :param dependencies: List of dependency strings or Dependency objects
-    :return: List of validated Dependency objects
-    """
     logger.debug("Validating dependencies: %s", dependencies)
     if dependencies is None:
         logger.debug("No dependencies provided, returning empty list")
@@ -89,13 +64,6 @@ def validate_dependencies(
 
 
 def validate_source(name: str, src: Optional[str] = None) -> str:
-    """
-    Validate source folder path.
-
-    :param name: Package name
-    :param src: Source folder path
-    :return: Validated source path
-    """
     logger.debug("Validating source for package '%s'. src: %s", name, src)
     if src is not None:
         logger.debug("Using provided source path: %s", src)
