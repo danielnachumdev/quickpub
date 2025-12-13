@@ -1,14 +1,20 @@
-from danielutils import create_file, AutoCWDTestCase
 from quickpub import LicenseEnforcer
 
-TMP_LICENSE_PATH: str = "./TMP_LICENSE"
+from tests.base_test_classes import BaseTestClass
+from tests.test_helpers import temporary_test_directory
+
+TMP_LICENSE_PATH: str = "TMP_LICENSE"
 
 
-class TestLicenseEnforcer(AutoCWDTestCase):
+class TestLicenseEnforcer(BaseTestClass):
     def test_license_exists_should_not_fail(self) -> None:
-        create_file(TMP_LICENSE_PATH)
-        LicenseEnforcer(TMP_LICENSE_PATH).enforce()
+        with temporary_test_directory() as tmp_dir:
+            license_path = tmp_dir / TMP_LICENSE_PATH
+            license_path.touch()
+            LicenseEnforcer(str(license_path)).enforce()
 
     def test_license_doesnt_exists_should_fail(self) -> None:
-        with self.assertRaises(LicenseEnforcer.EXCEPTION_TYPE):
-            LicenseEnforcer(TMP_LICENSE_PATH).enforce()
+        with temporary_test_directory() as tmp_dir:
+            license_path = tmp_dir / TMP_LICENSE_PATH
+            with self.assertRaises(LicenseEnforcer.EXCEPTION_TYPE):
+                LicenseEnforcer(str(license_path)).enforce()
