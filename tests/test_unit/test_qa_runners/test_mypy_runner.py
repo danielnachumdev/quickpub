@@ -1,6 +1,7 @@
 import os.path
 import sys
 import unittest
+from typing import Any
 from unittest.mock import patch
 
 from quickpub import MypyRunner, DefaultPythonProvider, Bound, ExitEarlyError
@@ -41,7 +42,7 @@ strict = True
 
 
 class TestMypyRunner(AsyncBaseTestClass):
-    async def _setup_provider(self):
+    async def _setup_provider(self) -> tuple:
         """Helper method to set up the Python provider."""
         async for name, base in DefaultPythonProvider():
             base.prev = None
@@ -52,7 +53,7 @@ class TestMypyRunner(AsyncBaseTestClass):
         "quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
         return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\",
     )
-    async def test_no_mypy(self, *args):
+    async def test_no_mypy(self, *args: Any) -> None:
         with temporary_test_directory() as tmp_dir:
             env_name, base = await self._setup_provider()
             with base:
@@ -68,7 +69,7 @@ class TestMypyRunner(AsyncBaseTestClass):
                     )
                 self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
-    async def test_no_package(self):
+    async def test_no_package(self) -> None:
         with temporary_test_directory() as tmp_dir:
             # Create an empty __init__.py so mypy has something to check
             (tmp_dir / "__init__.py").touch()
@@ -77,7 +78,7 @@ class TestMypyRunner(AsyncBaseTestClass):
             with base:
                 await runner.run(target=str(tmp_dir), executor=base, env_name=env_name)
 
-    async def test_empty_package(self):
+    async def test_empty_package(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             env_name, base = await self._setup_provider()
@@ -85,7 +86,7 @@ class TestMypyRunner(AsyncBaseTestClass):
             with base:
                 await runner.run(target=str(tmp_dir), executor=base, env_name=env_name)
 
-    async def test_bound_should_fail(self):
+    async def test_bound_should_fail(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             (tmp_dir / "main.py").write_text(CODE)
@@ -100,7 +101,7 @@ class TestMypyRunner(AsyncBaseTestClass):
                 except Exception as e:
                     self.assertIsInstance(e.__cause__, ExitEarlyError)
 
-    async def test_bound_should_succeed(self):
+    async def test_bound_should_succeed(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             (tmp_dir / "main.py").write_text(CODE)
@@ -110,7 +111,7 @@ class TestMypyRunner(AsyncBaseTestClass):
             with base:
                 await runner.run(target=str(tmp_dir), executor=base, env_name=env_name)
 
-    async def test_with_config(self):
+    async def test_with_config(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             (tmp_dir / "mypy.ini").write_text(CONFIG)
@@ -125,7 +126,7 @@ class TestMypyRunner(AsyncBaseTestClass):
                 await runner.run(target=str(tmp_dir), executor=base, env_name=env_name)
 
     @patch("quickpub.strategies.quality_assurance_runner.file_exists")
-    async def test_with_explicit_executable(self, mock_file_exists):
+    async def test_with_explicit_executable(self, mock_file_exists: Any) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             (tmp_dir / "mypy.ini").write_text(CONFIG)

@@ -1,5 +1,6 @@
 import logging
 import sys
+from typing import Optional
 
 # Global log level that can be modified by users
 _LOG_LEVEL = logging.INFO
@@ -10,7 +11,7 @@ class QuickpubLogFilter(logging.Filter):
     Filter that only allows logs from the quickpub package.
     """
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         return record.name.startswith("quickpub")
 
 
@@ -23,7 +24,7 @@ class TqdmLoggingHandler(logging.Handler):
         super().__init__(level)
         self._tqdm = None
 
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         try:
             import tqdm
 
@@ -36,7 +37,7 @@ class TqdmLoggingHandler(logging.Handler):
             self.handleError(record)
 
 
-def setup_logging(level: int = None):
+def setup_logging(level: Optional[int] = None) -> None:
     """
     Set up logging with appropriate handler based on tqdm availability.
 
@@ -70,7 +71,7 @@ def setup_logging(level: int = None):
         import tqdm
 
         # Use tqdm.write if tqdm is available
-        handler = TqdmLoggingHandler()
+        handler: logging.Handler = TqdmLoggingHandler()
     except ImportError:
         handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(_LOG_LEVEL)

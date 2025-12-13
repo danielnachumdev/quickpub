@@ -1,5 +1,5 @@
 import unittest
-from typing import Optional
+from typing import Optional, Any
 from unittest.mock import patch, MagicMock, Mock
 
 from requests import Response
@@ -57,7 +57,7 @@ class TestPypiRemoteVersionProvider(unittest.TestCase):
             include_content=True, target_package_version=HIGHER_VERSION
         ),
     )
-    def test_should_fail(self, *args):
+    def test_should_fail(self, *args: Any) -> None:
         with self.assertRaises(ExitEarlyError) as e:
             PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, LOWEST_VERSION)
 
@@ -67,5 +67,5 @@ class TestPypiRemoteVersionProvider(unittest.TestCase):
             include_content=True, target_package_version=LOWEST_VERSION
         ),
     )
-    def test_should_pass(self, *args):
+    def test_should_pass(self, *args: Any) -> None:
         PypiRemoteVersionEnforcer().enforce(PACKAGE_NAME, HIGHER_VERSION)

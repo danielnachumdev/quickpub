@@ -1,4 +1,5 @@
 import unittest
+from typing import Any, List
 from unittest.mock import patch, MagicMock
 import re
 
@@ -11,25 +12,25 @@ from quickpub.enforcers import ExitEarlyError
 class TestUnittestCalculateScore(unittest.TestCase):
     """Test cases for UnittestRunner._calculate_score method."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.runner = UnittestRunner(
             target="./tests", bound=">=0.8", no_tests_score=0.5
         )
 
-    def test_perfect_score_all_tests_pass(self):
+    def test_perfect_score_all_tests_pass(self) -> None:
         """Test perfect score when all tests pass."""
         lines = ["test_module.py", ".", "Ran 5 tests in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
-    def test_perfect_score_with_skipped_tests(self):
+    def test_perfect_score_with_skipped_tests(self) -> None:
         """Test perfect score when all tests pass but some are skipped."""
         lines = ["test_module.py", ".", "Ran 5 tests in 0.001s", "", "OK (skipped=2)"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
-    def test_score_with_failures_only(self):
+    def test_score_with_failures_only(self) -> None:
         """Test score calculation with failures only."""
         lines = [
             "test_module.py",
@@ -42,7 +43,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (2 / 5)  # 1 - (2/5) = 0.6
         self.assertEqual(score, expected_score)
 
-    def test_score_with_errors_only(self):
+    def test_score_with_errors_only(self) -> None:
         """Test score calculation with errors only."""
         lines = [
             "test_module.py",
@@ -55,7 +56,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (2 / 5)  # 1 - (2/5) = 0.6
         self.assertEqual(score, expected_score)
 
-    def test_score_with_both_failures_and_errors(self):
+    def test_score_with_both_failures_and_errors(self) -> None:
         """Test score calculation with both failures and errors."""
         lines = [
             "test_module.py",
@@ -68,7 +69,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (2 + 1) / 5  # 1 - (3/5) = 0.4
         self.assertEqual(score, expected_score)
 
-    def test_score_with_failures_errors_and_skipped(self):
+    def test_score_with_failures_errors_and_skipped(self) -> None:
         """Test score calculation with failures, errors, and skipped tests."""
         lines = [
             "test_module.py",
@@ -81,7 +82,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (2 + 1) / 5  # 1 - (3/5) = 0.4
         self.assertEqual(score, expected_score)
 
-    def test_score_with_partial_failures(self):
+    def test_score_with_partial_failures(self) -> None:
         """Test score calculation with partial failures."""
         lines = [
             "test_module.py",
@@ -94,26 +95,26 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (1 / 3)  # 1 - (1/3) = 0.666...
         self.assertAlmostEqual(score, expected_score, places=6)
 
-    def test_zero_tests_returns_no_tests_score(self):
+    def test_zero_tests_returns_no_tests_score(self) -> None:
         """Test that zero tests returns the no_tests_score."""
         lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, self.runner.no_tests_score)
 
-    def test_zero_tests_with_custom_no_tests_score(self):
+    def test_zero_tests_with_custom_no_tests_score(self) -> None:
         """Test zero tests with custom no_tests_score."""
         runner = UnittestRunner(target="./tests", bound=">=0.8", no_tests_score=0.8)
         lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
         score = runner._calculate_score(0, lines)
         self.assertEqual(score, 0.8)
 
-    def test_single_test_passes(self):
+    def test_single_test_passes(self) -> None:
         """Test score calculation with single passing test."""
         lines = ["test_module.py", ".", "Ran 1 test in 0.001s", "", "OK"]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
 
-    def test_single_test_fails(self):
+    def test_single_test_fails(self) -> None:
         """Test score calculation with single failing test."""
         lines = [
             "test_module.py",
@@ -125,13 +126,13 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
-    def test_single_test_error(self):
+    def test_single_test_error(self) -> None:
         """Test score calculation with single test error."""
         lines = ["test_module.py", "E", "Ran 1 test in 0.001s", "", "FAILED (errors=1)"]
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
-    def test_all_tests_fail(self):
+    def test_all_tests_fail(self) -> None:
         """Test score calculation when all tests fail."""
         lines = [
             "test_module.py",
@@ -143,7 +144,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
-    def test_all_tests_error(self):
+    def test_all_tests_error(self) -> None:
         """Test score calculation when all tests error."""
         lines = [
             "test_module.py",
@@ -155,7 +156,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
-    def test_mixed_failures_and_errors_all_fail(self):
+    def test_mixed_failures_and_errors_all_fail(self) -> None:
         """Test score calculation when all tests fail with mixed failures and errors."""
         lines = [
             "test_module.py",
@@ -167,7 +168,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 0.0)
 
-    def test_verbose_parameter_ignored(self):
+    def test_verbose_parameter_ignored(self) -> None:
         """Test that verbose parameter doesn't affect score calculation."""
         lines = [
             "test_module.py",
@@ -180,7 +181,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score_normal = self.runner._calculate_score(1, lines, verbose=False)
         self.assertEqual(score_verbose, score_normal)
 
-    def test_ok_with_skipped_tests_different_formats(self):
+    def test_ok_with_skipped_tests_different_formats(self) -> None:
         """Test OK with various skipped test formats."""
         test_cases = [
             "OK (skipped=1)",
@@ -194,7 +195,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                 score = self.runner._calculate_score(0, lines)
                 self.assertEqual(score, 1.0)
 
-    def test_failed_line_various_formats(self):
+    def test_failed_line_various_formats(self) -> None:
         """Test various FAILED line formats."""
         test_cases = [
             ("FAILED (failures=1)", 1, 0),
@@ -218,7 +219,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                 expected_score = 1 - (expected_failures + expected_errors) / 3
                 self.assertEqual(score, expected_score)
 
-    def test_malformed_num_tests_line_raises_exception(self):
+    def test_malformed_num_tests_line_raises_exception(self) -> None:
         """Test that malformed num_tests line raises ExitEarlyError."""
         lines = ["test_module.py", ".", "Invalid tests line", "", "OK"]
 
@@ -228,7 +229,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         self.assertIn("Failed running Unittest", str(context.exception))
         self.assertIn("exit code 0", str(context.exception))
 
-    def test_malformed_failed_line_returns_perfect_score(self):
+    def test_malformed_failed_line_returns_perfect_score(self) -> None:
         """Test that malformed failed line is treated as OK and returns perfect score."""
         lines = [
             "test_module.py",
@@ -242,7 +243,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         score = self.runner._calculate_score(1, lines)
         self.assertEqual(score, 1.0)
 
-    def test_non_numeric_failure_count_raises_exception(self):
+    def test_non_numeric_failure_count_raises_exception(self) -> None:
         """Test that non-numeric failure count raises ExitEarlyError."""
         # This would require modifying the regex pattern to match non-numeric values
         # which shouldn't happen in practice, but we test the exception handling
@@ -259,7 +260,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
 
         self.assertIn("Failed running Unittest", str(context.exception))
 
-    def test_insufficient_lines_raises_exception(self):
+    def test_insufficient_lines_raises_exception(self) -> None:
         """Test that insufficient lines raises IndexError which becomes ExitEarlyError."""
         lines = ["Only one line"]
 
@@ -268,16 +269,16 @@ class TestUnittestCalculateScore(unittest.TestCase):
 
         self.assertIn("Failed running Unittest", str(context.exception))
 
-    def test_empty_lines_raises_exception(self):
+    def test_empty_lines_raises_exception(self) -> None:
         """Test that empty lines list raises IndexError which becomes ExitEarlyError."""
-        lines = []
+        lines: List[str] = []
 
         with self.assertRaises(ExitEarlyError) as context:
             self.runner._calculate_score(0, lines)
 
         self.assertIn("Failed running Unittest", str(context.exception))
 
-    def test_regex_pattern_matching_edge_cases(self):
+    def test_regex_pattern_matching_edge_cases(self) -> None:
         """Test regex pattern matching with edge cases."""
         # Test with different time formats
         test_cases = [
@@ -293,7 +294,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                 score = self.runner._calculate_score(0, lines)
                 self.assertEqual(score, 1.0)
 
-    def test_failure_pattern_edge_cases(self):
+    def test_failure_pattern_edge_cases(self) -> None:
         """Test failure pattern matching with edge cases."""
         test_cases = [
             ("FAILED (failures=0)", 0, 0),
@@ -316,7 +317,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
                 expected_score = 1 - (expected_failures + expected_errors) / 2
                 self.assertEqual(score, expected_score)
 
-    def test_score_precision(self):
+    def test_score_precision(self) -> None:
         """Test score calculation precision with various ratios."""
         # Test case that should result in repeating decimal
         lines = [
@@ -330,7 +331,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (1 / 3)  # 0.666...
         self.assertAlmostEqual(score, expected_score, places=6)
 
-    def test_large_number_of_tests(self):
+    def test_large_number_of_tests(self) -> None:
         """Test score calculation with large number of tests."""
         lines = [
             "test_module.py",
@@ -343,7 +344,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
         expected_score = 1 - (100 / 1000)  # 0.9
         self.assertEqual(score, expected_score)
 
-    def test_very_small_score(self):
+    def test_very_small_score(self) -> None:
         """Test score calculation resulting in very small score."""
         lines = [
             "test_module.py",
@@ -359,7 +360,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
     @patch(
         "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
     )
-    def test_logging_calls(self, mock_logger):
+    def test_logging_calls(self, mock_logger: Any) -> None:
         """Test that appropriate logging calls are made."""
         lines = [
             "test_module.py",
@@ -383,7 +384,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
     @patch(
         "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
     )
-    def test_logging_no_tests(self, mock_logger):
+    def test_logging_no_tests(self, mock_logger: Any) -> None:
         """Test logging when no tests are found."""
         lines = ["test_module.py", "", "Ran 0 tests in 0.001s", "", "OK"]
 
@@ -396,7 +397,7 @@ class TestUnittestCalculateScore(unittest.TestCase):
     @patch(
         "quickpub.strategies.implementations.quality_assurance_runners.unittest_qa_runner.logger"
     )
-    def test_logging_exception(self, mock_logger):
+    def test_logging_exception(self, mock_logger: Any) -> None:
         """Test logging when exception occurs."""
         lines = ["Only one line"]  # This will cause an IndexError
 

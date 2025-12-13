@@ -10,14 +10,14 @@ TEST_FILE_PATH: str = "test_foo.py"
 
 
 class TestUnittestRunner(AsyncBaseTestClass):
-    async def _setup_provider(self):
+    async def _setup_provider(self) -> tuple:
         """Helper method to set up the Python provider."""
         async for name, base in DefaultPythonProvider():
             base.prev = None
             return name, base
         raise RuntimeError("No Python provider found")
 
-    async def test_default_no_tests(self):
+    async def test_default_no_tests(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             env_name, base = await self._setup_provider()
@@ -40,7 +40,7 @@ class TestUnittestRunner(AsyncBaseTestClass):
                     env_name=env_name,  # type: ignore
                 )
 
-    async def test_default_empty_tests(self):
+    async def test_default_empty_tests(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -65,7 +65,7 @@ class TestFoo(unittest.TestCase):
                     )
                 self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
-    async def test_only_one_test_that_passes(self):
+    async def test_only_one_test_that_passes(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -90,7 +90,7 @@ class TestFoo(unittest.TestCase):
                     env_name=env_name,  # type: ignore
                 )
 
-    async def test_only_one_test_that_fails(self):
+    async def test_only_one_test_that_fails(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -117,7 +117,7 @@ class TestFoo(unittest.TestCase):
                     )
                 self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
-    async def test_combined(self):
+    async def test_combined(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -145,7 +145,7 @@ class TestFoo(unittest.TestCase):
                     env_name=env_name,  # type: ignore
                 )
 
-    async def test_combined_with_bound_should_fail(self):
+    async def test_combined_with_bound_should_fail(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -175,7 +175,7 @@ class TestFoo(unittest.TestCase):
                     )
                 self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
-    async def test_combined_with_bound_should_pass(self):
+    async def test_combined_with_bound_should_pass(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -205,7 +205,7 @@ class TestFoo(unittest.TestCase):
                     env_name=env_name,  # type: ignore
                 )
 
-    async def test_failure_and_error(self):
+    async def test_failure_and_error(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH
@@ -237,7 +237,7 @@ class TestFoo(unittest.TestCase):
                     )
                 self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
-    async def test_failure_and_error_and_success(self):
+    async def test_failure_and_error_and_success(self) -> None:
         with temporary_test_directory() as tmp_dir:
             (tmp_dir / "__init__.py").touch()
             test_file = tmp_dir / TEST_FILE_PATH

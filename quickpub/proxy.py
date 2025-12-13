@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Tuple
+from typing import Tuple, Any
 import requests
 import danielutils
 
@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 # need it like this for the testing
-def cm(*args, **kwargs) -> Tuple[int, bytes, bytes]:
+def cm(*args: Any, **kwargs: Any) -> Tuple[int, bytes, bytes]:
     """
     Execute a command and return the result.
 
@@ -22,7 +22,7 @@ def cm(*args, **kwargs) -> Tuple[int, bytes, bytes]:
     return result
 
 
-def os_system(command) -> int:
+def os_system(command: str) -> int:
     """
     Execute a system command.
 
@@ -35,7 +35,7 @@ def os_system(command) -> int:
     return result
 
 
-def get(*args, **kwargs) -> requests.models.Response:
+def get(*args: Any, **kwargs: Any) -> requests.models.Response:
     """
     Make an HTTP GET request.
 

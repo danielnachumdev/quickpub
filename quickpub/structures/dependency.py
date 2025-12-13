@@ -55,8 +55,10 @@ class Dependency:
             splits = s.split(op)
             if len(splits) == 2:
                 dep = Dependency(
-                    splits[0], op, Version.from_str(splits[-1])
-                )  # type:ignore
+                    splits[0],
+                    op,
+                    Version.from_str(splits[-1]),  # type: ignore[arg-type]
+                )
                 logger.debug("Parsed dependency: %s", dep)
                 return dep
         dep = Dependency(s, ">=", Version(0, 0, 0))

@@ -2,7 +2,7 @@ import logging
 import re
 import os
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Any
 from danielutils import (
     get_current_working_directory,
     set_current_working_directory,
@@ -43,7 +43,7 @@ class UnittestRunner(QualityAssuranceRunner):
     def _pre_command(self) -> None:
         pass
 
-    def _post_command(self):
+    def _post_command(self) -> None:
         pass
         # set_current_working_directory(self._cwd)
 
@@ -65,12 +65,13 @@ class UnittestRunner(QualityAssuranceRunner):
         )
 
     def _build_command(
-        self, src: str, *args, use_system_interpreter: bool = False
+        self, src: str, *args: Any, use_system_interpreter: bool = False
     ) -> str:
         command: str = self.get_executable()
-        rel = _removesuffix(os.path.relpath(src, self.target), src.lstrip("./\\"))
+        target = self.target or "./tests"
+        rel = _removesuffix(os.path.relpath(src, target), src.lstrip("./\\"))
         command += f" discover -s {rel}"
-        normalized_target_path = Path(os.path.join(os.getcwd(), self.target)).resolve()
+        normalized_target_path = Path(os.path.join(os.getcwd(), target)).resolve()
         # This is for concurrency reasons
         return f"cd {normalized_target_path} & {command} & cd {Path(os.getcwd()).resolve()}"
 
@@ -82,7 +83,12 @@ class UnittestRunner(QualityAssuranceRunner):
         try:
             num_tests_ran_line = lines[-3]
             num_tests_failed_line = lines[-1]
-            num_tests = int(self.NUM_TESTS_PATTERN.match(num_tests_ran_line).group(1))
+            match = self.NUM_TESTS_PATTERN.match(num_tests_ran_line)
+            if match is None:
+                raise ValueError(
+                    f"Failed to parse test count from line: {num_tests_ran_line}"
+                )
+            num_tests = int(match.group(1))
             if num_tests == 0:
                 logger.info(
                     "No tests found, returning no_tests_score: %s", self.no_tests_score

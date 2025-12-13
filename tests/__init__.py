@@ -7,12 +7,12 @@ class QuickpubFilter(logging.Filter):
     Filter that only allows logs from the quickpub package to pass through.
     """
 
-    def filter(self, record):
+    def filter(self, record: logging.LogRecord) -> bool:
         # Check if the logger name starts with 'quickpub'
         return record.name.startswith("quickpub")
 
 
-def setup_test_logging():
+def setup_test_logging() -> None:
     """
     Set up logging for tests with a stdout stream handler.
     This allows logs to be visible during test execution.

@@ -52,7 +52,9 @@ class MypyRunner(QualityAssuranceRunner):
             executable_path,
         )
 
-    def _calculate_score(self, ret, lines: List[str], verbose: bool = False) -> float:
+    def _calculate_score(
+        self, ret: int, lines: List[str], verbose: bool = False
+    ) -> float:
         from quickpub.enforcers import exit_if
 
         logger.debug("Calculating mypy score from type checking results")
@@ -76,13 +78,15 @@ class MypyRunner(QualityAssuranceRunner):
             logger.debug("Mypy type checking successful, returning score: 0.0")
             return 0.0
 
+        m = self.RATING_PATTERN.match(rating_line)
         exit_if(
-            not (m := self.RATING_PATTERN.match(rating_line)),
+            m is None,
             f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
             verbose=verbose,
             err_func=lambda msg: None,  # TODO remove
         )
-        num_failed = float(m.group(1))  # type :ignore
+        assert m is not None  # For type checker
+        num_failed = float(m.group(1))
         # active_files = float(m.group(2))  # type :ignore
         # total_files = float(m.group(3))  # type :ignore
         logger.debug("Mypy score calculated: %s type errors found", num_failed)

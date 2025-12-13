@@ -9,7 +9,7 @@ from tests.test_helpers import temporary_test_directory
 
 
 class TestDefaultPythonProvider(AsyncBaseTestClass):
-    async def test_correct_version(self):
+    async def test_correct_version(self) -> None:
         with temporary_test_directory():
             async for x in DefaultPythonProvider():
                 name, extr = x
@@ -18,6 +18,6 @@ class TestDefaultPythonProvider(AsyncBaseTestClass):
                 code, out, err = await extr.execute(f"{sys.executable} --version")
                 self.assertEqual(0, code)
                 self.assertListEqual([], err)
-                out = out[0].strip().split(" ")[1].split(".")
-                out = tuple([int(i) for i in out])
-                self.assertEqual(get_python_version(), out)
+                version_parts = out[0].strip().split(" ")[1].split(".")
+                version_tuple = tuple([int(i) for i in version_parts])
+                self.assertEqual(get_python_version(), version_tuple)

@@ -51,7 +51,7 @@ class HasOptionalExecutable:
         """
         return self.executable_path is not None
 
-    def __init__(self, name, executable_path: Optional[str] = None) -> None:
+    def __init__(self, name: str, executable_path: Optional[str] = None) -> None:
         """
         Initialize with optional executable path.
 

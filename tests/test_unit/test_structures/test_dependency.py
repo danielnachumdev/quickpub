@@ -5,7 +5,7 @@ import random
 
 
 class TestBound(unittest.TestCase):
-    def test_From_string__equality(self):
+    def test_From_string__equality(self) -> None:
         for op in ["<", "<=", "==", "<=", "<"]:
             for _ in range(1000):
                 name = RandomDataGenerator.name(10)
@@ -23,7 +23,7 @@ class TestBound(unittest.TestCase):
                     Dependency.from_string(f"{name}{op}{major}.{minor}.{patch}"),
                 )
 
-    def test_is_satisfied_by(self):
+    def test_is_satisfied_by(self) -> None:
         for _ in range(1000):
             name = RandomDataGenerator.name(10)
             major, minor, patch = (

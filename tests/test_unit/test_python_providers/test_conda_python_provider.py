@@ -20,21 +20,21 @@ async def async_enumerate(
 
 
 class TestCondaPythonProvider(AsyncBaseTestClass):
-    async def test_all_envs_should_succeed(self):
+    async def test_all_envs_should_succeed(self) -> None:
         with temporary_test_directory():
             envs = await CondaPythonProvider.get_available_envs()
             provider = CondaPythonProvider(list(envs))
             pool = AsyncWorkerPool("TestCondaPythonProvider", num_workers=5)
 
             async def wrapper(env_name, executor) -> None:
-                expected_index: int = 0
+                expected_index = 0
                 with executor:
                     code, stdout, stderr = await executor.execute("conda info")
                 self.assertEqual(0, code)
                 self.assertTrue(len(stdout) > 0, "stdout should not be empty")
                 self.assertTrue(len(stderr) == 0, "stderr should be empty")
                 if stdout[0] == "\x1b[0m\n":
-                    expected_index: int = 1
+                    expected_index = 1
 
                 indicator_line = stdout[expected_index].strip()
                 current_env = indicator_line.split(" ")[-1]

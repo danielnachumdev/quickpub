@@ -35,20 +35,26 @@ try:
     from danielutils import MultiContext  # type:ignore
 except ImportError:
 
-    class MultiContext(ContextManager):
-        def __init__(self, *contexts: ContextManager):
+    class MultiContext(ContextManager[Any]):  # type: ignore[misc,no-redef]
+        def __init__(self, *contexts: ContextManager[Any]) -> None:
             self.contexts = contexts
 
-        def __enter__(self):
+        def __enter__(self) -> Any:  # type: ignore[return-value]
             for context in self.contexts:
                 context.__enter__()
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def __exit__(
+            self,
+            exc_type: Optional[type[BaseException]],
+            exc_val: Optional[BaseException],
+            exc_tb: Optional[Any],
+        ) -> Optional[bool]:
             for context in self.contexts:
                 context.__exit__(exc_type, exc_val, exc_tb)
+            return None
 
-        def __getitem__(self, index):
+        def __getitem__(self, index: int) -> ContextManager[Any]:
             return self.contexts[index]
 
 
@@ -323,7 +329,7 @@ async def qa(
     quality_assurance_strategies: List[QualityAssuranceRunner],
     package_name: str,
     src_folder_path: str,
-    dependencies: list,
+    dependencies: List[Dependency],
     pbar: Optional[SupportsProgress] = None,
 ) -> bool:
     """

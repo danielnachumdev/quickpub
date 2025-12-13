@@ -36,7 +36,7 @@ class TestCondaPythonProvider(AsyncBaseTestClass):
                 dependencies=[],
             )
 
-    async def test_non_existing_env_should_skip(self):
+    async def test_non_existing_env_should_skip(self) -> None:
         NON_EXISTENT_ENV_NAME: str = "sdjbnglksjdgnwkerjg"
         with self.assertRaises(ExitEarlyError):
             async for x in CondaPythonProvider([NON_EXISTENT_ENV_NAME]):
