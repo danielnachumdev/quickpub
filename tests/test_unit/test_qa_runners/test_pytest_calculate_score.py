@@ -1,4 +1,5 @@
 import unittest
+from typing import List
 
 from quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner import (
     PytestRunner,
@@ -107,7 +108,7 @@ class TestPytestCalculateScore(unittest.TestCase):
 
     def test_no_output_returns_no_output_score(self) -> None:
         """Test score when there is no output."""
-        lines = []
+        lines: List[str] = []
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 0.0)
 
