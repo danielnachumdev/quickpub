@@ -25,7 +25,7 @@ class TestCondaPythonProvider(AsyncAutoCWDTestCase):
         async def wrapper(env_name, executor) -> None:
             expected_index: int = 0
             with executor:
-                code, stdout, stderr = executor.execute("conda info")
+                code, stdout, stderr = await executor.execute("conda info")
             self.assertEqual(0, code)
             self.assertTrue(len(stdout) > 0, "stdout should not be empty")
             self.assertTrue(len(stderr) == 0, "stderr should be empty")

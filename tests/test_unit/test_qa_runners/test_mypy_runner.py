@@ -29,7 +29,7 @@ runner = MypyRunner()
 
 class TestMypyRunner(AutoCWDTestCase, AlwaysTeardownTestCase):
     @patch("quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
-           return_value=f"..\{TEMP_VENV_NAME}\Scripts\python.exe -m mypy .")
+           return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .")
     def test_no_mypy(self, *args) -> int:
         with base:
             base(f"python -m venv {TEMP_VENV_NAME}")
@@ -127,7 +127,8 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
                 target="./", executor=self.base, env_name=self.env_name
             )
 
-    async def test_with_explicit_executable(self):
+    @patch("quickpub.strategies.quality_assurance_runner.file_exists")
+    async def test_with_explicit_executable(self, mock_file_exists):
         create_file("__init__.py")
         with open("mypy.ini", "w") as f:
             f.write(CONFIG)
@@ -136,6 +137,8 @@ class TestMypyRunner(AsyncAutoCWDTestCase, AsyncAlwaysTeardownTestCase):
         exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe"
         if "conda" in sys.executable:
             exe_path = exe_path.replace("mypy.exe", "Scripts\\mypy.exe")
+        # Mock file_exists to return True for the executable path
+        mock_file_exists.side_effect = lambda path: path == exe_path
         # The CODE produces more errors than NUM_ERRORS (10), so use a more lenient bound
         self.runner = MypyRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS * 10}")
         with self.base:
