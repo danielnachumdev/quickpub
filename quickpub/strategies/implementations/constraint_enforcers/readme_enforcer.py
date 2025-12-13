@@ -1,5 +1,5 @@
 import logging
-from typing import Type
+from typing import Any
 
 from danielutils import file_exists
 
@@ -14,7 +14,7 @@ class ReadmeEnforcer(ConstraintEnforcer):
     def __init__(self, path: str = "./README.md") -> None:
         self.path = path
 
-    def enforce(self, **kwargs) -> None:
+    def enforce(self, **kwargs: Any) -> None:
         logger.info("Checking for readme file at '%s'", self.path)
 
         if not file_exists(self.path):

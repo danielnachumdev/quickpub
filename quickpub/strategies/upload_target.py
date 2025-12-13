@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from typing import Any
 
 from .quickpub_strategy import QuickpubStrategy
 
@@ -10,7 +11,7 @@ class UploadTarget(QuickpubStrategy):
         self.verbose = verbose
 
     @abstractmethod
-    def upload(self, **kwargs) -> None: ...
+    def upload(self, **kwargs: Any) -> None: ...
 
 
 __all__ = [

@@ -60,7 +60,7 @@ def setup_logging(level: Optional[int] = None) -> None:
     logger.addHandler(handler)
 
 
-def set_log_level(level: int):
+def set_log_level(level: int) -> None:
     global _LOG_LEVEL
     _LOG_LEVEL = level
 

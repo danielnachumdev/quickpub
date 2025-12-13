@@ -1,9 +1,8 @@
-import asyncio
 import logging
+from abc import abstractmethod
+from typing import Tuple, Set, List, AsyncIterator
 
 from .quickpub_strategy import QuickpubStrategy
-from abc import abstractmethod
-from typing import Tuple, Set, List, AsyncIterator, Iterator, Iterable
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 logger = logging.getLogger(__name__)

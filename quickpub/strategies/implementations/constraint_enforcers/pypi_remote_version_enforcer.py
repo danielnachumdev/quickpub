@@ -1,9 +1,12 @@
 import logging
+import re
+from typing import Any
+
 from danielutils import RetryExecutor, MultiplicativeBackoff, ConstantBackOffStrategy
 from requests import Response
-import re
-from quickpub.proxy import get  # type: ignore
+
 from quickpub import Version
+from quickpub.proxy import get  # type: ignore
 from ...constraint_enforcer import ConstraintEnforcer
 
 logger = logging.getLogger(__name__)
@@ -14,7 +17,9 @@ class PypiRemoteVersionEnforcer(ConstraintEnforcer):
 
     _HTTP_FAILED_MESSAGE: str = "Failed to send http request"
 
-    def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
+    def enforce(
+        self, name: str, version: Version, demo: bool = False, **kwargs: Any
+    ) -> None:  # type: ignore[override]
         if demo:
             return
 

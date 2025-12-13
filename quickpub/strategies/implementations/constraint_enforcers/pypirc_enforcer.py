@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Any
 
 from danielutils import file_exists
 
@@ -21,7 +22,7 @@ class PypircEnforcer(ConstraintEnforcer):
         self.path = path
         self.should_enforce_expected_format = should_enforce_expected_format
 
-    def enforce(self, **kwargs) -> None:
+    def enforce(self, **kwargs: Any) -> None:
         logger.info("Validating .pypirc file at '%s'", self.path)
 
         if not file_exists(self.path):

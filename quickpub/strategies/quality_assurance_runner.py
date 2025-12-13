@@ -3,7 +3,7 @@ import sys
 import time
 from abc import abstractmethod
 from typing import Union, List, Optional, cast, Dict, Tuple
-from danielutils import LayeredCommand, get_os, OSType, file_exists
+from danielutils import LayeredCommand, file_exists
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import Bound

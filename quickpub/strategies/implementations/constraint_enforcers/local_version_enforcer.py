@@ -1,4 +1,6 @@
 import logging
+from typing import Any
+
 from danielutils import directory_exists, get_files, get_python_version
 
 from quickpub import Version
@@ -25,7 +27,9 @@ def _remove_prefix(s: str, prefix: str) -> str:
 class LocalVersionEnforcer(ConstraintEnforcer):
     """Enforces that the new version is greater than the highest version found in the local dist directory."""
 
-    def enforce(self, name: str, version: Version, demo: bool = False, **kwargs) -> None:  # type: ignore
+    def enforce(
+        self, name: str, version: Version, demo: bool = False, **kwargs: Any
+    ) -> None:  # type: ignore[override]
         if demo:
             return
 

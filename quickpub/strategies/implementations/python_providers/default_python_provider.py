@@ -1,8 +1,7 @@
 import logging
 import sys
-from typing import Set, Tuple, Iterator, AsyncIterator, Iterable, Any
+from typing import Set, Tuple, AsyncIterator, Iterable, Any
 
-from danielutils import LayeredCommand
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from ...python_provider import PythonProvider

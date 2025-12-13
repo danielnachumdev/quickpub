@@ -1,4 +1,5 @@
 import logging
+from typing import Any
 
 from ...upload_target import UploadTarget
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 class GithubUploadTarget(UploadTarget):
     """Upload target implementation for GitHub releases. Commits and pushes changes to the git repository."""
 
-    def upload(self, version: str, **kwargs) -> None:  # type: ignore
+    def upload(self, name: str, version: str, **kwargs: Any) -> None:  # type: ignore[override]
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
 

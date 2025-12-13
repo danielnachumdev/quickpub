@@ -21,7 +21,7 @@ class Version:
     minor: int = 0
     patch: int = 0
 
-    def __init__(self, major: int = 0, minor: int = 0, patch: int = 0):
+    def __init__(self, major: int = 0, minor: int = 0, patch: int = 0) -> None:
         if not all(map(lambda x: isinstance(x, int) and x >= 0, [major, minor, patch])):
             logger.error(
                 "Invalid version components: major=%s, minor=%s, patch=%s",

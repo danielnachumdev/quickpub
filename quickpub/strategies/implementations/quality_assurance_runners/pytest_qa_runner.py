@@ -31,7 +31,7 @@ class PytestRunner(QualityAssuranceRunner):
         no_output_score: float = 0.0,
         no_tests_score: float = 1.0,
         xdist_workers: Union[int, str] = "auto",
-    ):
+    ) -> None:
         super().__init__(name="pytest", bound=bound, target=target)
         if not (0.0 <= no_tests_score <= 1.0):
             raise RuntimeError(

@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import Any
 
 from danielutils import file_exists
 
@@ -14,7 +15,7 @@ class PypircUploadTarget(UploadTarget):
 
     REGEX_PATTERN: re.Pattern = PypircEnforcer.PYPIRC_REGEX
 
-    def upload(self, name: str, version: str, **kwargs) -> None:  # type: ignore
+    def upload(self, name: str, version: str, **kwargs: Any) -> None:  # type: ignore[override]
         from quickpub.proxy import cm
         from quickpub.enforcers import exit_if
 

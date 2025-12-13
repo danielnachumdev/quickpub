@@ -1,5 +1,6 @@
 import logging
 from abc import abstractmethod
+from typing import Any
 
 from .quickpub_strategy import QuickpubStrategy
 
@@ -14,7 +15,7 @@ class BuildSchema(QuickpubStrategy):
         logger.debug("BuildSchema initialized with verbose=%s", verbose)
 
     @abstractmethod
-    def build(self, *args, **kwargs) -> None: ...
+    def build(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 __all__ = ["BuildSchema"]

@@ -3,7 +3,6 @@ import re
 import sys
 import time
 from abc import abstractmethod
-from datetime import datetime
 from typing import (
     ContextManager,
     List,
