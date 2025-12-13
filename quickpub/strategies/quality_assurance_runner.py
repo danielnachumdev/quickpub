@@ -100,6 +100,44 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
 
     def _post_command(self) -> None: ...
 
+    def _handle_special_exit_codes(self, ret: int, command: str) -> None:
+        if ret in SPEICLA_EXIT_CODES:
+            title, explanation = SPEICLA_EXIT_CODES[ret]
+            unsigned_integer_ret = ret + 2**32
+            logger.error("Special exit code %d encountered: %s", ret, title)
+            raise RuntimeError(
+                title
+                + "\n\t"
+                + explanation.format(
+                    command=command, ret=ret, hex=hex(unsigned_integer_ret)
+                )
+            )
+
+    def _validate_score_against_bound(
+        self, score: float, env_name: str, verbose: bool = False
+    ) -> None:
+        from quickpub.enforcers import exit_if  # pylint: disable=import-error
+
+        logger.debug(
+            "QA runner '%s' scored %.3f (bound: %s)",
+            self.__class__.__name__,
+            score,
+            self.bound,
+        )
+
+        if not self.bound.compare_against(score):
+            logger.error(
+                "QA runner '%s' failed bound check: %s vs %s",
+                self.__class__.__name__,
+                score,
+                self.bound,
+            )
+
+        exit_if(
+            not self.bound.compare_against(score),
+            f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
+        )
+
     async def run(
         self,
         target: str,
@@ -109,9 +147,6 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         use_system_interpreter: bool = False,
         env_name: str,
     ) -> None:
-        from quickpub.proxy import os_system  # pylint: disable=import-error
-        from quickpub.enforcers import exit_if  # pylint: disable=import-error
-
         logger.debug(
             "Running %s on environment '%s' with target '%s'",
             self.__class__.__name__,
@@ -126,38 +161,10 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         start_time = time.perf_counter()
         try:
             ret, out, err = await executor(command, command_raise_on_fail=False)
-            if ret in SPEICLA_EXIT_CODES:
-                title, explanation = SPEICLA_EXIT_CODES[ret]
-                unsigned_integer_ret = ret + 2**32
-                logger.error("Special exit code %d encountered: %s", ret, title)
-                raise RuntimeError(
-                    title
-                    + "\n\t"
-                    + explanation.format(
-                        command=command, ret=ret, hex=hex(unsigned_integer_ret)
-                    )
-                )
+            self._handle_special_exit_codes(ret, command)
 
             score = self._calculate_score(ret, out + err, verbose=verbose)
-            logger.debug(
-                "QA runner '%s' scored %.3f (bound: %s)",
-                self.__class__.__name__,
-                score,
-                self.bound,
-            )
-
-            if not self.bound.compare_against(score):
-                logger.error(
-                    "QA runner '%s' failed bound check: %s vs %s",
-                    self.__class__.__name__,
-                    score,
-                    self.bound,
-                )
-
-            exit_if(
-                not self.bound.compare_against(score),
-                f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
-            )
+            self._validate_score_against_bound(score, env_name, verbose)
         except Exception as e:
             logger.error(
                 "QA runner '%s' failed on env '%s': %s",

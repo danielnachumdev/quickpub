@@ -142,6 +142,51 @@ async def global_import_sanity_check(
 VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
+async def _get_installed_packages(
+    executor: AsyncLayeredCommand, env_name: str
+) -> Dict[str, Union[str, Dependency]]:
+    logger.debug("Executing 'pip list' on environment '%s'", env_name)
+    code, out, err = await executor("pip list")
+    exit_if(
+        code != 0,
+        f"Failed executing 'pip list' at env '{env_name}'",
+    )
+    split_lines = (line.split(" ") for line in out[2:])
+    version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
+    filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
+    currently_installed: Dict[str, Union[str, Dependency]] = {
+        s[0]: Dependency(s[0], "==", Version.from_str(s[-1])) for s in filtered_tuples
+    }
+    currently_installed.update(
+        **{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])}
+    )
+    logger.debug("Found %d installed packages", len(currently_installed))
+    return currently_installed
+
+
+def _check_dependency_satisfaction(
+    required_dependencies: List[Dependency],
+    currently_installed: Dict[str, Union[str, Dependency]],
+) -> List[Tuple[Dependency, str]]:
+    not_installed_properly: List[Tuple[Dependency, str]] = []
+    for req in required_dependencies:
+        if req.name not in currently_installed:
+            not_installed_properly.append((req, "dependency not found"))
+        else:
+            v = currently_installed[req.name]
+            if isinstance(v, str):
+                not_installed_properly.append(
+                    (
+                        req,
+                        "Version format of dependency is not currently supported by quickpub",
+                    )
+                )
+            elif isinstance(v, Dependency):
+                if not req.is_satisfied_by(v.ver):
+                    not_installed_properly.append((req, "Invalid version installed"))
+    return not_installed_properly
+
+
 async def validate_dependencies(
     validation_exit_on_fail: bool,
     required_dependencies: List[Dependency],
@@ -153,42 +198,10 @@ async def validate_dependencies(
     logger.info("Validating dependencies on environment '%s'", env_name)
     try:
         if validation_exit_on_fail:
-            logger.debug("Executing 'pip list' on environment '%s'", env_name)
-            code, out, err = await executor("pip list")
-            exit_if(
-                code != 0,
-                f"Failed executing 'pip list' at env '{env_name}'",
+            currently_installed = await _get_installed_packages(executor, env_name)
+            not_installed_properly = _check_dependency_satisfaction(
+                required_dependencies, currently_installed
             )
-            split_lines = (line.split(" ") for line in out[2:])
-            version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
-            filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
-            currently_installed: Dict[str, Union[str, Dependency]] = {
-                s[0]: Dependency(s[0], "==", Version.from_str(s[-1]))
-                for s in filtered_tuples
-            }
-            currently_installed.update(
-                **{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])}
-            )
-            logger.debug("Found %d installed packages", len(currently_installed))
-
-            not_installed_properly: List[Tuple[Dependency, str]] = []
-            for req in required_dependencies:
-                if req.name not in currently_installed:
-                    not_installed_properly.append((req, "dependency not found"))
-                else:
-                    v = currently_installed[req.name]
-                    if isinstance(v, str):
-                        not_installed_properly.append(
-                            (
-                                req,
-                                "Version format of dependency is not currently supported by quickpub",
-                            )
-                        )
-                    elif isinstance(v, Dependency):
-                        if not req.is_satisfied_by(v.ver):
-                            not_installed_properly.append(
-                                (req, "Invalid version installed")
-                            )
 
             if not_installed_properly:
                 logger.error(
