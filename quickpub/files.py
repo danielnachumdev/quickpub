@@ -1,6 +1,8 @@
 import logging
+import re
+from pathlib import Path
 from typing import List, Optional, Dict, Callable
-from danielutils import get_files
+from danielutils import get_files, file_exists
 
 from .classifiers import Classifier
 from .structures import Version, Dependency
@@ -139,4 +141,54 @@ def create_manifest(*, name: str) -> None:
     logger.info("Successfully created MANIFEST.in")
 
 
-__all__ = ["create_setup", "create_toml"]
+def add_version_to_init(name: str, src_folder_path: str, version: Version) -> None:
+    init_file_path = Path(src_folder_path) / "__init__.py"
+
+    if not file_exists(str(init_file_path)):
+        logger.warning("__init__.py not found at '%s', creating it", init_file_path)
+        init_file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(init_file_path, "w", encoding="utf8") as f:
+            f.write(f'__version__ = "{version}"\n')
+        logger.info("Created __init__.py with __version__ = '%s'", version)
+        return
+
+    with open(init_file_path, "r", encoding="utf8") as f:
+        content = f.read()
+
+    version_line = f'__version__ = "{version}"'
+    version_pattern = r'__version__\s*=\s*["\'].*?["\']'
+
+    if re.search(version_pattern, content):
+        new_content = re.sub(version_pattern, version_line, content)
+        logger.info("Updated existing __version__ in __init__.py to '%s'", version)
+    else:
+        lines = content.splitlines()
+        if not lines:
+            new_content = f"{version_line}\n"
+        else:
+            import_end_index = 0
+            for i, line in enumerate(lines):
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
+                if stripped.startswith("from") or stripped.startswith("import"):
+                    import_end_index = i + 1
+                else:
+                    break
+
+            if import_end_index < len(lines):
+                lines.insert(import_end_index, version_line)
+            else:
+                lines.append(version_line)
+
+            new_content = "\n".join(lines)
+            if not content.endswith("\n"):
+                new_content += "\n"
+
+        logger.info("Added __version__ = '%s' to __init__.py", version)
+
+    with open(init_file_path, "w", encoding="utf8") as f:
+        f.write(new_content)
+
+
+__all__ = ["create_setup", "create_toml", "add_version_to_init"]

@@ -1,10 +1,18 @@
 import asyncio
+import tarfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
 
 import fire  # type: ignore[import-untyped]
 
-from quickpub import ExitEarlyError, Version, Dependency
+from quickpub import ExitEarlyError, Version, Dependency, SetuptoolsBuildSchema
+from quickpub.classifiers import (
+    DevelopmentStatusClassifier,
+    IntendedAudienceClassifier,
+    ProgrammingLanguageClassifier,
+    OperatingSystemClassifier,
+)
 from quickpub.__main__ import (
     _validate_publish_inputs,
     _run_constraint_enforcers,
@@ -473,6 +481,74 @@ class TestMain(BaseTestClass):
     def test_main_calls_fire(self, mock_fire) -> None:
         main()
         mock_fire.assert_called_once_with(publish)
+
+
+class TestBuiltDistributionHasVersion(BaseTestClass):
+    def test_built_distribution_has_version_in_init(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_name = "testpackage"
+            package_version = Version(1, 2, 3)
+            package_dir = tmp_dir / package_name
+            package_dir.mkdir()
+
+            init_file = package_dir / "__init__.py"
+            init_file.write_text("from .structures import *\n", encoding="utf8")
+
+            readme_file = tmp_dir / "README.md"
+            readme_file.write_text("# Test Package\n", encoding="utf8")
+
+            license_file = tmp_dir / "LICENSE"
+            license_file.write_text("MIT License\n", encoding="utf8")
+
+            _create_package_files(
+                name=package_name,
+                explicit_src_folder_path=f"./{package_name}",
+                readme_file_path="./README.md",
+                license_file_path="./LICENSE",
+                version=package_version,
+                author="Test Author",
+                author_email="test@example.com",
+                description="Test description",
+                homepage="https://example.com",
+                keywords=[],
+                validated_dependencies=[],
+                min_python=Version(3, 8, 0),
+                scripts=None,
+            )
+
+            source_init_content = init_file.read_text(encoding="utf8")
+            self.assertIn(f'__version__ = "{package_version}"', source_init_content)
+
+            build_schema = SetuptoolsBuildSchema(setup_file_path="./setup.py")
+            build_schema.build()
+
+            dist_dir = tmp_dir / "dist"
+            self.assertTrue(
+                dist_dir.exists(), "dist directory should exist after build"
+            )
+
+            tar_files = list(dist_dir.glob(f"{package_name}-{package_version}.tar.gz"))
+            self.assertEqual(len(tar_files), 1, "Should have exactly one .tar.gz file")
+            tar_path = tar_files[0]
+
+            with tarfile.open(tar_path, "r:gz") as tar:
+                init_path_in_archive = (
+                    f"{package_name}-{package_version}/{package_name}/__init__.py"
+                )
+                try:
+                    init_member = tar.getmember(init_path_in_archive)
+                    init_file_obj = tar.extractfile(init_member)
+                    if init_file_obj:
+                        archive_init_content = init_file_obj.read().decode("utf8")
+                        self.assertIn(
+                            f'__version__ = "{package_version}"',
+                            archive_init_content,
+                            "Built distribution __init__.py should contain __version__",
+                        )
+                except KeyError:
+                    self.fail(
+                        f"Could not find {init_path_in_archive} in built distribution"
+                    )
 
 
 if __name__ == "__main__":

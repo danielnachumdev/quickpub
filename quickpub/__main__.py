@@ -23,7 +23,7 @@ from .validators import (
     validate_source,
 )
 from .structures import Version, Dependency
-from .files import create_toml, create_setup, create_manifest
+from .files import create_toml, create_setup, create_manifest, add_version_to_init
 from .classifiers import *
 from .qa import qa, SupportsProgress
 from .logging_ import setup_logging
@@ -145,6 +145,9 @@ def _create_package_files(
         scripts=scripts,
     )
     create_manifest(name=name)
+    add_version_to_init(
+        name=name, src_folder_path=explicit_src_folder_path, version=version
+    )
 
 
 def _build_and_upload_packages(

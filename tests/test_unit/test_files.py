@@ -13,6 +13,7 @@ from quickpub.files import (
     create_toml,
     create_setup,
     create_manifest,
+    add_version_to_init,
     _format_classifiers_string,
     _build_py_typed_section,
     _build_scripts_section,
@@ -31,7 +32,9 @@ class TestFormatClassifiersString(BaseTestClass):
     def test_single_classifier(self) -> None:
         from quickpub.classifiers import Classifier
 
-        classifiers: list[Classifier] = [DevelopmentStatusClassifier.Alpha]  # type: ignore[list-item]
+        classifiers: list[Classifier] = [
+            DevelopmentStatusClassifier.Alpha
+        ]  # type: ignore[list-item]
         result = _format_classifiers_string(classifiers)
         self.assertIn('"Development Status :: 3 - Alpha"', result)
         self.assertTrue(result.startswith("\n\t"))
@@ -318,6 +321,108 @@ class TestCreateManifest(BaseTestClass):
             manifest_file = tmp_dir / "MANIFEST.in"
             content = manifest_file.read_text(encoding="utf8")
             self.assertEqual(content, "recursive-include mypackage *.py")
+
+
+class TestAddVersionToInit(BaseTestClass):
+    def test_adds_version_to_init_when_missing(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            init_file = package_dir / "__init__.py"
+            init_file.write_text(
+                "from .structures import *\nfrom .strategies import *\n",
+                encoding="utf8",
+            )
+
+            add_version_to_init(
+                name="testpackage",
+                src_folder_path="./testpackage",
+                version=Version(1, 2, 3),
+            )
+
+            content = init_file.read_text(encoding="utf8")
+            self.assertIn('__version__ = "1.2.3"', content)
+            self.assertIn("from .structures import *", content)
+            self.assertIn("from .strategies import *", content)
+
+    def test_updates_existing_version(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            init_file = package_dir / "__init__.py"
+            init_file.write_text(
+                '__version__ = "1.0.0"\nfrom .structures import *\n', encoding="utf8"
+            )
+
+            add_version_to_init(
+                name="testpackage",
+                src_folder_path="./testpackage",
+                version=Version(2, 0, 0),
+            )
+
+            content = init_file.read_text(encoding="utf8")
+            self.assertIn('__version__ = "2.0.0"', content)
+            self.assertNotIn('__version__ = "1.0.0"', content)
+            self.assertIn("from .structures import *", content)
+
+    def test_preserves_file_structure(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            original_content = """from .structures import *
+from .strategies import *
+from .enforcers import ExitEarlyError
+from .qa import SupportsProgress
+from .logging_ import set_log_level
+from .__main__ import publish, main
+"""
+            init_file = package_dir / "__init__.py"
+            init_file.write_text(original_content, encoding="utf8")
+
+            add_version_to_init(
+                name="testpackage",
+                src_folder_path="./testpackage",
+                version=Version(3, 1, 0),
+            )
+
+            content = init_file.read_text(encoding="utf8")
+            self.assertIn('__version__ = "3.1.0"', content)
+            for line in original_content.strip().split("\n"):
+                if line.strip():
+                    self.assertIn(line.strip(), content)
+
+    def test_creates_init_file_when_missing(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            init_file = package_dir / "__init__.py"
+
+            self.assertFalse(init_file.exists())
+            add_version_to_init(
+                name="testpackage",
+                src_folder_path="./testpackage",
+                version=Version(1, 0, 0),
+            )
+
+            self.assertTrue(init_file.exists())
+            content = init_file.read_text(encoding="utf8")
+            self.assertIn('__version__ = "1.0.0"', content)
+
+    def test_handles_empty_init_file(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            init_file = package_dir / "__init__.py"
+            init_file.write_text("", encoding="utf8")
+
+            add_version_to_init(
+                name="testpackage",
+                src_folder_path="./testpackage",
+                version=Version(1, 0, 0),
+            )
+
+            content = init_file.read_text(encoding="utf8")
+            self.assertIn('__version__ = "1.0.0"', content)
 
 
 if __name__ == "__main__":
