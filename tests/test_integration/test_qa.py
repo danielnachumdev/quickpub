@@ -10,9 +10,7 @@ from tests.test_helpers import temporary_test_directory
 PACKAGE_NAME: str = "foo"
 
 
-@unittest.skip("currently not working on 380")
 class TestCondaPythonProvider(AsyncBaseTestClass):
-    # @unittest.skip("Temporarily skipping this test")
     async def test_simplest_case_should_succeed(self) -> None:
         with temporary_test_directory() as tmp_dir:
             package_dir = tmp_dir / PACKAGE_NAME

@@ -45,6 +45,7 @@ def main() -> None:
         min_python="3.8.0",
         scripts={"quickpub": entry_point},
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
+        demo=True,
     )
 
 
