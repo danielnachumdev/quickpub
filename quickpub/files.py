@@ -55,6 +55,8 @@ def _build_toml_content(
     py_typed: str,
     homepage: str,
 ) -> str:
+    normalized_readme_path = readme_file_path.replace("\\", "/")
+    normalized_license_path = license_file_path.replace("\\", "/")
     return f"""[build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
@@ -67,9 +69,9 @@ authors = [
 ]
 dependencies = {[str(dep) for dep in dependencies]}
 keywords = {keywords}
-license = {{ "file" = "{license_file_path}" }}
+license = {{ "file" = "{normalized_license_path}" }}
 description = "{description}"
-readme = {{file = "{readme_file_path}", content-type = "text/markdown"}}
+readme = {{file = "{normalized_readme_path}", content-type = "text/markdown"}}
 requires-python = ">={min_python}"
 classifiers = [{classifiers_string}]{scripts_section}
 [tool.setuptools]
