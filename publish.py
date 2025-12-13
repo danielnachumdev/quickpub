@@ -37,15 +37,14 @@ def main() -> None:
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
         python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
         global_quality_assurance_runners=[
-            # MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
-            # PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
-            # PytestRunner(bound=">=0.95"),
+            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
+            PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
+            PytestRunner(bound=">=0.95"),
         ],
         dependencies=["danielutils>=1.0.0", "requests", "fire"],
         min_python="3.8.0",
         scripts={"quickpub": entry_point},
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
-        demo=True,
     )
 
 

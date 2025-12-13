@@ -16,9 +16,12 @@ logger = logging.getLogger(__name__)
 class PytestRunner(QualityAssuranceRunner):
     """Quality assurance runner for pytest testing. Scores based on the ratio of passed tests to total tests."""
 
-    PYTEST_REGEX: re.Pattern = re.compile(
-        r"=+ (?:(?P<failed>\d+) failed,? )?(?:(?P<passed>\d+) passed )?in [\d\.]+s =+"
+    PYTEST_SUMMARY_REGEX: re.Pattern = re.compile(
+        r"=+ .*?in [\d\.]+s(?: \([^)]+\))? =+"
     )
+    PYTEST_FAILED_REGEX: re.Pattern = re.compile(r"(\d+) failed")
+    PYTEST_PASSED_REGEX: re.Pattern = re.compile(r"(\d+) passed")
+    PYTEST_SKIPPED_REGEX: re.Pattern = re.compile(r"(\d+) skipped")
 
     def __init__(
         self,
@@ -110,7 +113,7 @@ class PytestRunner(QualityAssuranceRunner):
                     "No tests ran, returning no_tests_score: %s", self.no_tests_score
                 )
                 return self.no_tests_score
-            if self.PYTEST_REGEX.match(line):
+            if self.PYTEST_SUMMARY_REGEX.match(line):
                 rating_line = line
                 break
 
@@ -123,30 +126,36 @@ class PytestRunner(QualityAssuranceRunner):
                 )
                 return self.no_tests_score
 
-        if not (m := self.PYTEST_REGEX.match(rating_line)):
+        if not self.PYTEST_SUMMARY_REGEX.match(rating_line):
             logger.error("Failed to parse pytest output: %s", rating_line)
             raise ExitEarlyError(
                 f"Can't calculate score for pytest on the following line: {rating_line}"
             )
 
-        dct = m.groupdict()
-        failed = int(dct["failed"] or "0")
-        passed = int(dct["passed"] or "0")
+        failed_match = self.PYTEST_FAILED_REGEX.search(rating_line)
+        passed_match = self.PYTEST_PASSED_REGEX.search(rating_line)
+        skipped_match = self.PYTEST_SKIPPED_REGEX.search(rating_line)
+        failed = int(failed_match.group(1)) if failed_match else 0
+        passed = int(passed_match.group(1)) if passed_match else 0
+        skipped = int(skipped_match.group(1)) if skipped_match else 0
         assert failed >= 0
         assert passed >= 0
+        assert skipped >= 0
 
-        if failed + passed == 0:
+        total_tests = passed + failed + skipped
+        if total_tests == 0:
             logger.info(
                 "No test results found, returning no_tests_score: %s",
                 self.no_tests_score,
             )
             return self.no_tests_score
 
-        score = passed / (passed + failed)
+        score = passed / total_tests
         logger.info(
-            "Pytest score calculated: %.3f (passed: %d, failed: %d)",
+            "Pytest score calculated: %.3f (passed: %d, failed: %d, skipped: %d)",
             score,
             passed,
             failed,
+            skipped,
         )
         return score

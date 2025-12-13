@@ -6,7 +6,7 @@ fire
 pytest
 pytest-xdist
 pytest-asyncio
-coverage
+pytest-cov
 # ===== DEV =====
 tqdm
 twine
