@@ -57,7 +57,7 @@ def validate_keywords(keywords: Optional[List[str]]) -> List[str]:
     if keywords is None:
         logger.debug("No keywords provided, returning empty list")
         return []
-        logger.debug("Using provided keywords: %s", keywords)
+    logger.debug("Using provided keywords: %s", keywords)
     return keywords
 
 
