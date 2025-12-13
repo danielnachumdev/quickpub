@@ -292,26 +292,24 @@ async def run_config(
             pbar.update(1)
 
 
-async def qa(
+def _setup_qa_environment(
+    python_provider: PythonProvider,
+) -> bool:
+    from .strategies import DefaultPythonProvider
+
+    return isinstance(python_provider, DefaultPythonProvider)
+
+
+async def _submit_qa_tasks(
     python_provider: PythonProvider,
     quality_assurance_strategies: List[QualityAssuranceRunner],
     package_name: str,
     src_folder_path: str,
     dependencies: List[Dependency],
-    pbar: Optional[SupportsProgress] = None,
-) -> bool:
-    logger.info(
-        "Starting QA process for package '%s' with %d QA strategies",
-        package_name,
-        len(quality_assurance_strategies),
-    )
-    qa_start_time = time.perf_counter()
-    is_task_run_success.clear()
-    from .strategies import DefaultPythonProvider
-
-    is_system_interpreter = isinstance(python_provider, DefaultPythonProvider)
-
-    pool = WorkerPool(ASYNC_POOL_NAME, num_workers=5)
+    is_system_interpreter: bool,
+    pool: WorkerPool,
+    pbar: Optional[SupportsProgress],
+) -> int:
     total = 0
     task_id = 0
     with AsyncLayeredCommand() as base:
@@ -365,17 +363,52 @@ async def qa(
         pbar.total = total
     for _ in range(task_id):
         is_task_run_success.append(False)
+    return total
 
+
+async def _execute_qa_tasks(
+    pool: WorkerPool,
+    total: int,
+    qa_start_time: float,
+) -> bool:
     logger.info("Starting QA worker pool with %d total tasks", total)
     await pool.start()
     await pool.join()
-
-    # Use unified task tracking for overall success
     success = all(is_task_run_success)
     elapsed = time.perf_counter() - qa_start_time
     logger.info("QA process completed in %.3fs. Success: %s", elapsed, success)
     logger.debug("Task success breakdown: %s", is_task_run_success)
     return success
+
+
+async def qa(
+    python_provider: PythonProvider,
+    quality_assurance_strategies: List[QualityAssuranceRunner],
+    package_name: str,
+    src_folder_path: str,
+    dependencies: List[Dependency],
+    pbar: Optional[SupportsProgress] = None,
+) -> bool:
+    logger.info(
+        "Starting QA process for package '%s' with %d QA strategies",
+        package_name,
+        len(quality_assurance_strategies),
+    )
+    qa_start_time = time.perf_counter()
+    is_task_run_success.clear()
+    is_system_interpreter = _setup_qa_environment(python_provider)
+    pool = WorkerPool(ASYNC_POOL_NAME, num_workers=5)
+    total = await _submit_qa_tasks(
+        python_provider,
+        quality_assurance_strategies,
+        package_name,
+        src_folder_path,
+        dependencies,
+        is_system_interpreter,
+        pool,
+        pbar,
+    )
+    return await _execute_qa_tasks(pool, total, qa_start_time)
 
 
 __all__ = ["qa", "SupportsProgress"]
