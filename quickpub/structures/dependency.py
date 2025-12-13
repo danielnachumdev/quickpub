@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, Callable, Dict, Any
+from typing import Literal, Callable, Dict, Any, List
 
 from .version import Version
 
@@ -44,7 +44,14 @@ class Dependency:
     @staticmethod
     def from_string(s: str) -> "Dependency":
         logger.debug("Parsing dependency from string: '%s'", s)
-        for op in [">=", "<=", ">", "<", "=="]:
+        valid_operators: List[Literal["<", "<=", "==", ">", ">="]] = [
+            ">=",
+            "<=",
+            ">",
+            "<",
+            "==",
+        ]
+        for op in valid_operators:
             splits = s.split(op)
             if len(splits) == 2:
                 dep = Dependency(

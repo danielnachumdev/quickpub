@@ -19,6 +19,10 @@ def validate_version(version: Optional[Union[str, Version]] = None) -> Version:
         logger.debug("Version is already a Version object: %s", version)
         return version
     logger.debug("Converting string version to Version object: %s", version)
+    if not isinstance(version, str):
+        raise ExitEarlyError(
+            f"Version must be a string or Version object, got '{type(version)}'"
+        )
     return Version.from_str(version)
 
 

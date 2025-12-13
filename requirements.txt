@@ -1,4 +1,4 @@
-danielutils>=1.0.39
+danielutils>=1.1.23
 githooklib >= 1.0.0
 requests
 fire

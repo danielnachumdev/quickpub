@@ -3,7 +3,7 @@ import logging
 import time
 from typing import Optional, Union, List, Any, Dict, Callable, Tuple
 
-import fire
+import fire  # type: ignore[import-untyped]
 from danielutils import warning, error
 
 from quickpub import ExitEarlyError

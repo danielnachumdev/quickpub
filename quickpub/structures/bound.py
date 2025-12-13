@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, List
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,14 @@ class Bound:
     @staticmethod
     def from_string(s: str) -> "Bound":
         logger.debug("Parsing bound from string: '%s'", s)
-        for op in [">=", "<=", "==", ">", "<"]:
+        valid_operators: List[Literal["<", "<=", "==", ">", ">="]] = [
+            ">=",
+            "<=",
+            "==",
+            ">",
+            "<",
+        ]
+        for op in valid_operators:
             splits = s.split(op)
             if len(splits) == 2:
                 bound = Bound(op, float(splits[-1]))
