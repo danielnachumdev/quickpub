@@ -502,9 +502,9 @@ class TestBuiltDistributionHasVersion(BaseTestClass):
 
             _create_package_files(
                 name=package_name,
-                explicit_src_folder_path=f"./{package_name}",
-                readme_file_path="./README.md",
-                license_file_path="./LICENSE",
+                explicit_src_folder_path=str(package_dir),
+                readme_file_path=str(readme_file),
+                license_file_path=str(license_file),
                 version=package_version,
                 author="Test Author",
                 author_email="test@example.com",
@@ -519,7 +519,9 @@ class TestBuiltDistributionHasVersion(BaseTestClass):
             source_init_content = init_file.read_text(encoding="utf8")
             self.assertIn(f'__version__ = "{package_version}"', source_init_content)
 
-            build_schema = SetuptoolsBuildSchema(setup_file_path="./setup.py")
+            build_schema = SetuptoolsBuildSchema(
+                setup_file_path=str(tmp_dir / "setup.py")
+            )
             build_schema.build()
 
             dist_dir = tmp_dir / "dist"

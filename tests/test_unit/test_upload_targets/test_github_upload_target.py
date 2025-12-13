@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from quickpub import ExitEarlyError
 from quickpub.strategies.implementations.upload_targets.github_upload_target import (
@@ -15,7 +15,7 @@ class TestGithubUploadTarget(BaseTestClass):
     def test_upload_success(self, mock_cm, mock_exit_if) -> None:
         mock_cm.return_value = (0, b"success", b"")
         target = GithubUploadTarget(verbose=False)
-        target.upload(version="1.0.0")
+        target.upload(name="testpackage", version="1.0.0")
 
         self.assertEqual(mock_cm.call_count, 3)
         mock_cm.assert_any_call("git add .")
@@ -32,7 +32,7 @@ class TestGithubUploadTarget(BaseTestClass):
         ]
         target = GithubUploadTarget(verbose=False)
         with self.assertRaises(ExitEarlyError):
-            target.upload(version="1.0.0")
+            target.upload(name="testpackage", version="1.0.0")
 
     @patch("quickpub.proxy.cm")
     def test_upload_failure_at_commit(self, mock_cm) -> None:
@@ -43,7 +43,7 @@ class TestGithubUploadTarget(BaseTestClass):
         ]
         target = GithubUploadTarget(verbose=False)
         with self.assertRaises(ExitEarlyError):
-            target.upload(version="1.0.0")
+            target.upload(name="testpackage", version="1.0.0")
 
         self.assertEqual(mock_cm.call_count, 2)
 
@@ -56,7 +56,7 @@ class TestGithubUploadTarget(BaseTestClass):
         ]
         target = GithubUploadTarget(verbose=False)
         with self.assertRaises(ExitEarlyError):
-            target.upload(version="1.0.0")
+            target.upload(name="testpackage", version="1.0.0")
 
         self.assertEqual(mock_cm.call_count, 3)
 
@@ -67,7 +67,7 @@ class TestGithubUploadTarget(BaseTestClass):
     def test_upload_verbose_mode(self, mock_logger, mock_cm) -> None:
         mock_cm.return_value = (0, b"success", b"")
         target = GithubUploadTarget(verbose=True)
-        target.upload(version="1.0.0")
+        target.upload(name="testpackage", version="1.0.0")
 
         debug_calls = [str(call) for call in mock_logger.debug.call_args_list]
         debug_messages = " ".join(debug_calls)

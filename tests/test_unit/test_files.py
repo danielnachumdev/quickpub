@@ -182,11 +182,18 @@ class TestCreateToml(BaseTestClass):
     def test_create_toml_basic(self, mock_get_files) -> None:
         mock_get_files.return_value = []
         with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            readme_file = tmp_dir / "README.md"
+            readme_file.write_text("# Test Package\n", encoding="utf8")
+            license_file = tmp_dir / "LICENSE"
+            license_file.write_text("MIT License\n", encoding="utf8")
+
             create_toml(
                 name="testpackage",
-                src_folder_path="./testpackage",
-                readme_file_path="./README.md",
-                license_file_path="./LICENSE",
+                src_folder_path=str(package_dir),
+                readme_file_path=str(readme_file),
+                license_file_path=str(license_file),
                 version=Version(1, 0, 0),
                 author="Test Author",
                 author_email="test@example.com",
@@ -208,11 +215,18 @@ class TestCreateToml(BaseTestClass):
     def test_create_toml_with_py_typed(self, mock_get_files) -> None:
         mock_get_files.return_value = ["py.typed"]
         with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            readme_file = tmp_dir / "README.md"
+            readme_file.write_text("# Test Package\n", encoding="utf8")
+            license_file = tmp_dir / "LICENSE"
+            license_file.write_text("MIT License\n", encoding="utf8")
+
             create_toml(
                 name="testpackage",
-                src_folder_path="./testpackage",
-                readme_file_path="./README.md",
-                license_file_path="./LICENSE",
+                src_folder_path=str(package_dir),
+                readme_file_path=str(readme_file),
+                license_file_path=str(license_file),
                 version=Version(1, 0, 0),
                 author="Test Author",
                 author_email="test@example.com",
@@ -240,11 +254,18 @@ class TestCreateToml(BaseTestClass):
         my_script.__name__ = "my_script"
 
         with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            readme_file = tmp_dir / "README.md"
+            readme_file.write_text("# Test Package\n", encoding="utf8")
+            license_file = tmp_dir / "LICENSE"
+            license_file.write_text("MIT License\n", encoding="utf8")
+
             create_toml(
                 name="testpackage",
-                src_folder_path="./testpackage",
-                readme_file_path="./README.md",
-                license_file_path="./LICENSE",
+                src_folder_path=str(package_dir),
+                readme_file_path=str(readme_file),
+                license_file_path=str(license_file),
                 version=Version(1, 0, 0),
                 author="Test Author",
                 author_email="test@example.com",
@@ -271,11 +292,18 @@ class TestCreateToml(BaseTestClass):
         ]
 
         with temporary_test_directory() as tmp_dir:
+            package_dir = tmp_dir / "testpackage"
+            package_dir.mkdir()
+            readme_file = tmp_dir / "README.md"
+            readme_file.write_text("# Test Package\n", encoding="utf8")
+            license_file = tmp_dir / "LICENSE"
+            license_file.write_text("MIT License\n", encoding="utf8")
+
             create_toml(
                 name="testpackage",
-                src_folder_path="./testpackage",
-                readme_file_path="./README.md",
-                license_file_path="./LICENSE",
+                src_folder_path=str(package_dir),
+                readme_file_path=str(readme_file),
+                license_file_path=str(license_file),
                 version=Version(1, 0, 0),
                 author="Test Author",
                 author_email="test@example.com",
@@ -336,7 +364,7 @@ class TestAddVersionToInit(BaseTestClass):
 
             add_version_to_init(
                 name="testpackage",
-                src_folder_path="./testpackage",
+                src_folder_path=str(package_dir),
                 version=Version(1, 2, 3),
             )
 
@@ -356,7 +384,7 @@ class TestAddVersionToInit(BaseTestClass):
 
             add_version_to_init(
                 name="testpackage",
-                src_folder_path="./testpackage",
+                src_folder_path=str(package_dir),
                 version=Version(2, 0, 0),
             )
 
@@ -381,7 +409,7 @@ from .__main__ import publish, main
 
             add_version_to_init(
                 name="testpackage",
-                src_folder_path="./testpackage",
+                src_folder_path=str(package_dir),
                 version=Version(3, 1, 0),
             )
 
@@ -400,7 +428,7 @@ from .__main__ import publish, main
             self.assertFalse(init_file.exists())
             add_version_to_init(
                 name="testpackage",
-                src_folder_path="./testpackage",
+                src_folder_path=str(package_dir),
                 version=Version(1, 0, 0),
             )
 
@@ -417,7 +445,7 @@ from .__main__ import publish, main
 
             add_version_to_init(
                 name="testpackage",
-                src_folder_path="./testpackage",
+                src_folder_path=str(package_dir),
                 version=Version(1, 0, 0),
             )
 
