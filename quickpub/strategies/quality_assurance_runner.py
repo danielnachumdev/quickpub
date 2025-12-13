@@ -119,10 +119,6 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
             target,
         )
 
-        # =====================================
-        # IMPORTANT: need to explicitly override it here
-        # executor._executor = os_system  # pylint: disable=protected-access #TODO re-fix this for the tests because now this is not working with the async variant
-        # =====================================
         command = self._build_command(target, use_system_interpreter)
         logger.debug("Built command: %s", command)
 
@@ -161,8 +157,6 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
             exit_if(
                 not self.bound.compare_against(score),
                 f"On env '{env_name}' runner '{self.__class__.__name__}' failed to pass its defined bound. Got a score of {score} but expected {self.bound}",
-                verbose=verbose,
-                err_func=lambda msg: None,  # TODO remove
             )
         except Exception as e:
             logger.error(

@@ -124,9 +124,7 @@ async def global_import_sanity_check(
                     msg += f" Got error '{stderr[-1]}' when tried 'from {package_name} import *'"
             else:
                 msg += f" Try manually running the following script 'from {package_name} import *'"
-            exit_if(
-                code != 0, msg, verbose=True, err_func=lambda msg: None  # TODO remove
-            )
+            exit_if(code != 0, msg)
     except Exception as e:
         logger.error(
             "Sanity check encountered unexpected error for package '%s' on environment '%s': %s",
@@ -160,7 +158,6 @@ async def validate_dependencies(
             exit_if(
                 code != 0,
                 f"Failed executing 'pip list' at env '{env_name}'",
-                err_func=lambda msg: None,  # TODO remove
             )
             split_lines = (line.split(" ") for line in out[2:])
             version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
@@ -209,7 +206,6 @@ async def validate_dependencies(
             exit_if(
                 bool(not_installed_properly),
                 f"On env '{env_name}' the following dependencies have problems: {(not_installed_properly)}",
-                err_func=lambda msg: None,  # TODO remove
             )
     except Exception as e:
         logger.error(
@@ -274,7 +270,9 @@ async def run_config(
         )
         is_task_run_success[task_id] = False
         if validation_exit_on_fail:
-            raise RuntimeError(e) from e
+            raise RuntimeError(
+                f"QA config {config_id} failed on environment '{env_name}': {e}"
+            ) from e
         return
     finally:
         if pbar is not None:

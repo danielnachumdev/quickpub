@@ -82,8 +82,6 @@ class MypyRunner(QualityAssuranceRunner):
         exit_if(
             m is None,
             f"Failed running MyPy, got exit code {ret}. try running manually using: {self._build_command('TARGET')}",
-            verbose=verbose,
-            err_func=lambda msg: None,  # TODO remove
         )
         assert m is not None  # For type checker
         num_failed = float(m.group(1))

@@ -76,10 +76,9 @@ class PytestRunner(QualityAssuranceRunner):
             return False
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
-        if self.has_config:
-            # TODO
-            assert False
         base_command = f"{sys.executable} -m pytest"
+        if self.has_config:
+            base_command += f" -c {self.config_path}"
         if self._is_xdist_installed():
             logger.debug("pytest-xdist detected; enabling distributed execution")
             return f"{base_command} -n {self.xdist_workers} {self.target}"
