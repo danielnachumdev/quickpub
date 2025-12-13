@@ -1,14 +1,20 @@
-from danielutils import create_file, AutoCWDTestCase
 from quickpub import ReadmeEnforcer
 
-TMP_README_PATH: str = "./TMP_README.md"
+from tests.base_test_classes import BaseTestClass
+from tests.test_helpers import temporary_test_directory
+
+TMP_README_PATH: str = "TMP_README.md"
 
 
-class TestReadmeEnforcer(AutoCWDTestCase):
+class TestReadmeEnforcer(BaseTestClass):
     def test_readme_exists_should_not_fail(self) -> None:
-        create_file(TMP_README_PATH)
-        ReadmeEnforcer(TMP_README_PATH).enforce()
+        with temporary_test_directory() as tmp_dir:
+            readme_path = tmp_dir / TMP_README_PATH
+            readme_path.touch()
+            ReadmeEnforcer(str(readme_path)).enforce()
 
     def test_readme_doesnt_exists_should_fail(self) -> None:
-        with self.assertRaises(ReadmeEnforcer.EXCEPTION_TYPE):
-            ReadmeEnforcer(TMP_README_PATH).enforce()
+        with temporary_test_directory() as tmp_dir:
+            readme_path = tmp_dir / TMP_README_PATH
+            with self.assertRaises(ReadmeEnforcer.EXCEPTION_TYPE):
+                ReadmeEnforcer(str(readme_path)).enforce()
