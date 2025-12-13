@@ -74,6 +74,7 @@ class TestTqdmLoggingHandler(BaseTestClass):
     def test_emit_without_tqdm_fallback(self, mock_print) -> None:
         import sys
         from types import ModuleType
+
         original_tqdm = sys.modules.get("tqdm")
         sys.modules["tqdm"] = None  # type: ignore[assignment]
         try:
@@ -137,6 +138,7 @@ class TestSetupLogging(BaseTestClass):
     def test_setup_logging_fallback_to_stream_handler(self) -> None:
         import sys
         from types import ModuleType
+
         original_tqdm = sys.modules.get("tqdm")
         sys.modules["tqdm"] = None  # type: ignore[assignment]
         try:
@@ -176,7 +178,9 @@ class TestSetupLogging(BaseTestClass):
         logger = logging.getLogger()
         handler = logger.handlers[0]
         self.assertIsNotNone(handler.formatter)
+        assert handler.formatter is not None
         format_str = handler.formatter._fmt
+        assert format_str is not None
         self.assertIn("quickpub", format_str)
 
 

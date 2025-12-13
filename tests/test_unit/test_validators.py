@@ -1,4 +1,5 @@
 import unittest
+from typing import Union
 from unittest.mock import patch
 
 from quickpub import ExitEarlyError, Version, Dependency
@@ -39,7 +40,7 @@ class TestValidateVersion(BaseTestClass):
 
     def test_invalid_type_raises_error(self) -> None:
         with self.assertRaises(ExitEarlyError) as context:
-            validate_version(123)
+            validate_version(123)  # type: ignore[arg-type]
         self.assertIn(
             "Version must be a string or Version object", str(context.exception)
         )
@@ -97,7 +98,7 @@ class TestValidateDependencies(BaseTestClass):
         self.assertIsInstance(result, list)
 
     def test_string_dependencies_converted(self) -> None:
-        deps = ["package1>=1.0.0", "package2==2.0.0"]
+        deps: list[Union[str, Dependency]] = ["package1>=1.0.0", "package2==2.0.0"]
         result = validate_dependencies(deps)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], Dependency)
@@ -108,7 +109,7 @@ class TestValidateDependencies(BaseTestClass):
     def test_dependency_objects_preserved(self) -> None:
         dep1 = Dependency("package1", ">=", Version(1, 0, 0))
         dep2 = Dependency("package2", "==", Version(2, 0, 0))
-        deps = [dep1, dep2]
+        deps: list[Union[str, Dependency]] = [dep1, dep2]
         result = validate_dependencies(deps)
         self.assertEqual(len(result), 2)
         self.assertEqual(result[0], dep1)
@@ -116,7 +117,7 @@ class TestValidateDependencies(BaseTestClass):
 
     def test_mixed_string_and_dependency_objects(self) -> None:
         dep1 = Dependency("package1", ">=", Version(1, 0, 0))
-        deps = [dep1, "package2==2.0.0"]
+        deps: list[Union[str, Dependency]] = [dep1, "package2==2.0.0"]
         result = validate_dependencies(deps)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], Dependency)

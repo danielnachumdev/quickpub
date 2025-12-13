@@ -1,5 +1,6 @@
 import asyncio
 import unittest
+from typing import Any, AsyncIterator
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from quickpub import ExitEarlyError, Version, Dependency
@@ -125,7 +126,9 @@ class TestGetInstalledPackages(AsyncBaseTestClass):
 
         self.assertIn("package1", result)
         self.assertIsInstance(result["package1"], Dependency)
-        self.assertEqual(result["package1"].ver, Version(1, 0, 0))
+        pkg1 = result["package1"]
+        assert isinstance(pkg1, Dependency)
+        self.assertEqual(pkg1.ver, Version(1, 0, 0))
 
         self.assertIn("package2", result)
         self.assertIsInstance(result["package2"], Dependency)
@@ -150,15 +153,21 @@ class TestGetInstalledPackages(AsyncBaseTestClass):
 
 class TestCheckDependencySatisfaction(unittest.TestCase):
     def test_all_satisfied(self) -> None:
+        from typing import Dict, Union
+
         required = [Dependency("pkg1", ">=", Version(1, 0, 0))]
-        installed = {"pkg1": Dependency("pkg1", "==", Version(2, 0, 0))}
+        installed: Dict[str, Union[str, Dependency]] = {
+            "pkg1": Dependency("pkg1", "==", Version(2, 0, 0))
+        }
 
         result = _check_dependency_satisfaction(required, installed)
         self.assertEqual(len(result), 0)
 
     def test_missing_dependency(self) -> None:
+        from typing import Dict, Union
+
         required = [Dependency("pkg1", ">=", Version(1, 0, 0))]
-        installed = {}
+        installed: Dict[str, Union[str, Dependency]] = {}
 
         result = _check_dependency_satisfaction(required, installed)
         self.assertEqual(len(result), 1)
@@ -166,16 +175,22 @@ class TestCheckDependencySatisfaction(unittest.TestCase):
         self.assertEqual(result[0][1], "dependency not found")
 
     def test_version_mismatch(self) -> None:
+        from typing import Dict, Union
+
         required = [Dependency("pkg1", ">=", Version(2, 0, 0))]
-        installed = {"pkg1": Dependency("pkg1", "==", Version(1, 0, 0))}
+        installed: Dict[str, Union[str, Dependency]] = {
+            "pkg1": Dependency("pkg1", "==", Version(1, 0, 0))
+        }
 
         result = _check_dependency_satisfaction(required, installed)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0][1], "Invalid version installed")
 
     def test_unsupported_format(self) -> None:
+        from typing import Dict, Union
+
         required = [Dependency("pkg1", ">=", Version(1, 0, 0))]
-        installed = {"pkg1": "unsupported format"}
+        installed: Dict[str, Union[str, Dependency]] = {"pkg1": "unsupported format"}
 
         result = _check_dependency_satisfaction(required, installed)
         self.assertEqual(len(result), 1)
@@ -385,7 +400,9 @@ class TestSubmitQaTasks(AsyncBaseTestClass):
     async def test_submit_tasks(self) -> None:
         is_task_run_success.clear()
 
-        async def mock_provider_iter():
+        async def mock_provider_iter() -> AsyncIterator[tuple[str, Any]]:
+            from typing import AsyncIterator, Any
+
             executor = AsyncMock()
             executor.__enter__ = AsyncMock(return_value=executor)
             executor.__exit__ = AsyncMock(return_value=None)
@@ -394,7 +411,7 @@ class TestSubmitQaTasks(AsyncBaseTestClass):
 
         provider = MagicMock()
         provider.exit_on_fail = True
-        provider.__aiter__ = lambda self: mock_provider_iter()
+        provider.__aiter__ = lambda self: mock_provider_iter()  # type: ignore[assignment]
 
         pool = MagicMock()
         pool.submit = AsyncMock()
@@ -459,8 +476,10 @@ class TestQa(AsyncBaseTestClass):
         mock_submit.return_value = 5
         mock_execute.return_value = True
 
+        from quickpub.strategies import QualityAssuranceRunner
+
         provider = MagicMock()
-        runners = []
+        runners: list[QualityAssuranceRunner] = []
 
         result = await qa(
             python_provider=provider,

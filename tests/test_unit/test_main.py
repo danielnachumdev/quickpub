@@ -2,7 +2,7 @@ import asyncio
 import unittest
 from unittest.mock import patch, MagicMock, AsyncMock
 
-import fire
+import fire  # type: ignore[import-untyped]
 
 from quickpub import ExitEarlyError, Version, Dependency
 from quickpub.__main__ import (
@@ -128,7 +128,7 @@ class TestRunConstraintEnforcers(BaseTestClass):
         enforcers = [enforcer1, enforcer2]
 
         _run_constraint_enforcers(
-            enforcers=enforcers,
+            enforcers=enforcers,  # type: ignore[arg-type]
             name="testpackage",
             version=Version(1, 0, 0),
             demo=False,
@@ -273,7 +273,12 @@ class TestCreatePackageFiles(BaseTestClass):
     def test_with_scripts(
         self, mock_create_setup, mock_create_toml, mock_create_manifest
     ) -> None:
-        scripts = {"myscript": MagicMock()}
+        from typing import Callable, Dict, Any
+
+        def dummy_script() -> None:
+            pass
+
+        scripts: Dict[str, Callable[..., Any]] = {"myscript": dummy_script}
         _create_package_files(
             name="testpackage",
             explicit_src_folder_path="./testpackage",

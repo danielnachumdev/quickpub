@@ -29,7 +29,9 @@ class TestFormatClassifiersString(BaseTestClass):
         self.assertEqual(result, "")
 
     def test_single_classifier(self) -> None:
-        classifiers = [DevelopmentStatusClassifier.Alpha]
+        from quickpub.classifiers import Classifier
+
+        classifiers: list[Classifier] = [DevelopmentStatusClassifier.Alpha]  # type: ignore[list-item]
         result = _format_classifiers_string(classifiers)
         self.assertIn('"Development Status :: 3 - Alpha"', result)
         self.assertTrue(result.startswith("\n\t"))
