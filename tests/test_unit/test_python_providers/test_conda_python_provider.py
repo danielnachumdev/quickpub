@@ -22,7 +22,7 @@ async def async_enumerate(
 class TestCondaPythonProvider(AsyncBaseTestClass):
     async def test_all_envs_should_succeed(self) -> None:
         with temporary_test_directory():
-            envs = await CondaPythonProvider.get_available_envs()
+            envs = await CondaPythonProvider([])._get_available_envs()
             provider = CondaPythonProvider(list(envs))
             pool = AsyncWorkerPool("TestCondaPythonProvider", num_workers=5)
 

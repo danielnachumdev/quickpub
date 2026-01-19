@@ -21,8 +21,7 @@ class CondaPythonProvider(PythonProvider):
         self._cached_available_envs: Optional[Set[str]] = None
         logger.info("Initialized CondaPythonProvider with environments: %s", env_names)
 
-    @classmethod
-    async def _get_available_envs_impl(cls) -> Set[str]:
+    async def _get_available_envs_impl(self) -> Set[str]:
         logger.info("Fetching available conda environments")
         with AsyncLayeredCommand() as base:
             code, out, err = await base("conda env list")
@@ -32,7 +31,7 @@ class CondaPythonProvider(PythonProvider):
         if self.aiter_index >= len(self.requested_envs):
             raise StopAsyncIteration
 
-        available_envs = await self.get_available_envs()
+        available_envs = await self._get_available_envs()
         self.aiter_index += 1
         name = self.requested_envs[self.aiter_index - 1]
 

@@ -32,21 +32,23 @@ class PythonProvider(AsyncIterator, QuickpubStrategy):
     @abstractmethod
     async def __anext__(self) -> Tuple[str, AsyncLayeredCommand]: ...
 
-    @classmethod
-    async def get_available_envs(cls) -> Set[str]:
+    async def _get_available_envs(self) -> Set[str]:
         KEY = "__available_envs__"
-        if (res := getattr(cls, KEY, None)) is not None:
-            logger.debug("Using cached available environments for %s", cls.__name__)
+        if (res := getattr(self, KEY, None)) is not None:
+            logger.debug(
+                "Using cached available environments for %s", self.__class__.__name__
+            )
             return res
 
-        logger.debug("Fetching available environments for %s", cls.__name__)
-        setattr(cls, KEY, res := await cls._get_available_envs_impl())
-        logger.debug("Found %d available environments for %s", len(res), cls.__name__)
+        logger.debug("Fetching available environments for %s", self.__class__.__name__)
+        setattr(self, KEY, res := await self._get_available_envs_impl())
+        logger.debug(
+            "Found %d available environments for %s", len(res), self.__class__.__name__
+        )
         return res
 
-    @classmethod
     @abstractmethod
-    async def _get_available_envs_impl(cls) -> Set[str]: ...
+    async def _get_available_envs_impl(self) -> Set[str]: ...
 
     def __len__(self) -> int:
         return len(self.requested_envs)

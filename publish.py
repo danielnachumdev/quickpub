@@ -15,6 +15,8 @@ from quickpub import (
     PypiRemoteVersionEnforcer,
     LocalVersionEnforcer,
     PytestRunner,
+    UnionProvider,
+    DefaultPythonProvider,
 )
 
 
@@ -35,7 +37,14 @@ def main() -> None:
         ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
-        python_interpreter_provider=CondaPythonProvider(["base", "390", "380"]),
+        python_interpreter_provider=UnionProvider(
+            [
+                # CondaPythonProvider(["base", "390", "380"]),
+                CondaPythonProvider(["base"]),
+                CondaPythonProvider(["380"]),
+                DefaultPythonProvider(),
+            ]
+        ),
         global_quality_assurance_runners=[
             MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
             PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
@@ -45,6 +54,7 @@ def main() -> None:
         min_python="3.8.0",
         scripts={"quickpub": entry_point},
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
+        demo=True,
     )
 
 
