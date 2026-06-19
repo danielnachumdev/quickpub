@@ -2,6 +2,7 @@ import unittest
 from typing import AsyncIterator, Tuple, TypeVar
 
 from danielutils import AsyncWorkerPool
+from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import CondaPythonProvider
 
@@ -46,5 +47,8 @@ class TestCondaPythonProvider(AsyncBaseTestClass):
                 env_name, executor = tup
                 await pool.submit(wrapper, args=[env_name, executor])
 
-            await pool.start()
-            await pool.join()
+            try:
+                await pool.start()
+                await pool.join()
+            finally:
+                AsyncLayeredCommand._class_prev_instance = None

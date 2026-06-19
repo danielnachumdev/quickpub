@@ -27,7 +27,9 @@ class UvPythonProvider(PythonProvider):
         if self.aiter_index == 0:
             self.aiter_index += 1
             logger.info("Using uv-managed Python environment")
-            return "uv", AsyncLayeredCommand()
+            executor = AsyncLayeredCommand()
+            executor.prev = None
+            return "uv", executor
         raise StopAsyncIteration
 
     async def _get_available_envs_impl(self) -> Set[str]:
