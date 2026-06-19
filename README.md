@@ -3,50 +3,33 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-Run quality checks, tests, and packaging locally before you publish a Python package.
+Catch publish failures on your machine before they hit CI or PyPI.
 
-QuickPub validates versions and project files, runs QA tools (mypy, pylint, pytest, unittest), builds the sdist, and uploads to PyPI/GitHub — so failures show up on your machine, not in CI.
+QuickPub runs pre-publish checks, quality tools, tests, packaging, and upload in one pipeline — so broken releases fail locally with fast feedback.
 
-## Requirements
+## The problem
 
-- Python **3.8+**
-- Tested on **3.8, 3.9, 3.10, 3.11, 3.12, 3.13** (see [CI](.github/workflows/ci.yml))
+Publishing a Python package usually means juggling several steps: validate project files, run mypy/pylint/pytest, bump the version, generate packaging files, build the sdist, upload to PyPI. Miss a step and you find out in CI — or worse, after a bad release.
+
+QuickPub wires those steps together. You define your package once; it enforces constraints, runs QA across Python environments, builds, and uploads.
 
 ## Install
 
-[uv](https://docs.astral.sh/uv/) is the recommended workflow:
-
 ```bash
-git clone https://github.com/danielnachumdev/quickpub.git
-cd quickpub
-uv sync
+pip install quickpub
 ```
 
-Runtime-only install:
-
-```bash
-uv sync --no-group dev --no-group test
-```
-
-Use as a CLI in another project:
+With [uv](https://docs.astral.sh/uv/):
 
 ```bash
 uv add quickpub
 ```
 
-## Usage
+Requires Python **3.8+** (tested on 3.8–3.13).
 
-### Publish this repo
+## Quick start
 
-```bash
-uv run python publish.py
-```
-
-Requires a valid `.pypirc` for PyPI upload. Set `demo=True` in `publish.py` to run checks without building or uploading.
-
-### Publish your own package
-
-`publish()` runs enforcers, QA, file generation, build, and upload in one call:
+Add a `publish.py` in your project root:
 
 ```python
 from quickpub import (
@@ -56,7 +39,6 @@ from quickpub import (
     PytestRunner,
     SetuptoolsBuildSchema,
     PypircUploadTarget,
-    GithubUploadTarget,
     PypircEnforcer,
     ReadmeEnforcer,
     LicenseEnforcer,
@@ -86,11 +68,38 @@ publish(
         PytestRunner(bound=">=0.95"),
     ],
     build_schemas=[SetuptoolsBuildSchema()],
-    upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
+    upload_targets=[PypircUploadTarget()],
 )
 ```
 
-Omit `python_interpreter_provider` and `package_manager` to auto-detect the environment:
+Run it:
+
+```bash
+python publish.py
+```
+
+**Dry run** — validate and run QA without building or uploading:
+
+```python
+publish(..., demo=True)
+```
+
+PyPI upload needs a valid `.pypirc`. See [this repo's `publish.py`](publish.py) for a full working example.
+
+## What runs
+
+When you call `publish()`, QuickPub runs these stages in order:
+
+1. **Enforcers** — checks README, LICENSE, `.pypirc`, and local/PyPI version consistency
+2. **Quality assurance** — mypy, pylint, pytest, and unittest with configurable score bounds, in parallel across detected Python environments
+3. **File generation** — writes `setup.py`, `pyproject.toml`, `MANIFEST.in`, and updates `__init__.py` with the version
+4. **Build & upload** — builds the sdist and uploads via twine (and optionally pushes to GitHub)
+
+Skip build and upload with `demo=True`.
+
+## Environment detection
+
+By default, QuickPub detects your toolchain from the project root:
 
 | Project layout | Package manager | Python provider |
 |---|---|---|
@@ -110,26 +119,22 @@ publish(
 )
 ```
 
-Manual control: `resolve_publish_environment()` or explicit `package_manager` / `python_interpreter_provider` arguments.
+For full control, pass `package_manager` and `python_interpreter_provider` explicitly, or call `resolve_publish_environment()` before `publish()`.
 
-## What it does
+## CLI
 
-**Enforcers** — README, LICENSE, `.pypirc`, local/PyPI version checks.
-
-**QA runners** — mypy, pylint, pytest, unittest with configurable score bounds; runs in parallel across environments.
-
-**Build & upload** — generates `setup.py` / `pyproject.toml` / `MANIFEST.in`, builds sdist, uploads via twine and/or git push.
-
-**Environment providers** — `DefaultPythonProvider`, `UvPythonProvider`, `CondaPythonProvider`, or `UnionProvider` to combine them.
+QuickPub installs a `quickpub` command that wraps `publish()` via [Fire](https://github.com/google/python-fire). For most projects, a `publish.py` script is easier to maintain than long CLI invocations.
 
 ## Development
 
-```bash
-uv run pytest          # full test suite
-uv run python publish.py  # publish quickpub itself
-```
+To work on QuickPub itself, clone the repo and use uv:
 
-Tool config lives in `pyproject.toml` (`pytest`, `mypy`, `pylint`, `coverage`).
+```bash
+git clone https://github.com/danielnachumdev/quickpub.git
+cd quickpub
+uv sync
+uv run pytest
+```
 
 ## License
 
