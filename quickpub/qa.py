@@ -1,5 +1,4 @@
 import logging
-import re
 import sys
 import time
 from abc import abstractmethod
@@ -23,6 +22,8 @@ from .enforcers import ExitEarlyError
 from .strategies import (
     PythonProvider,
     QualityAssuranceRunner,
+    PackageManager,
+    PipPackageManager,
 )  # pylint: disable=relative-beyond-top-level
 from .structures import Dependency, Version  # pylint: disable=relative-beyond-top-level
 from .enforcers import exit_if  # pylint: disable=relative-beyond-top-level
@@ -138,52 +139,10 @@ async def global_import_sanity_check(
             pbar.update(1)
 
 
-VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
-
-
 async def _get_installed_packages(
     executor: AsyncLayeredCommand, env_name: str
 ) -> Dict[str, Union[str, Dependency]]:
-    logger.debug("Executing 'pip list' on environment '%s'", env_name)
-    code, out, err = await executor("pip list")
-    exit_if(
-        code != 0,
-        f"Failed executing 'pip list' at env '{env_name}'",
-    )
-    split_lines = (line.split(" ") for line in out[2:])
-    version_tuples = [(s[0], s[-1].strip()) for s in split_lines]
-    filtered_tuples = [t for t in version_tuples if VERSION_REGEX.match(t[1])]
-    currently_installed: Dict[str, Union[str, Dependency]] = {
-        s[0]: Dependency(s[0], "==", Version.from_str(s[-1])) for s in filtered_tuples
-    }
-    currently_installed.update(
-        **{t[0]: t[1] for t in version_tuples if not VERSION_REGEX.match(t[1])}
-    )
-    logger.debug("Found %d installed packages", len(currently_installed))
-    return currently_installed
-
-
-def _check_dependency_satisfaction(
-    required_dependencies: List[Dependency],
-    currently_installed: Dict[str, Union[str, Dependency]],
-) -> List[Tuple[Dependency, str]]:
-    not_installed_properly: List[Tuple[Dependency, str]] = []
-    for req in required_dependencies:
-        if req.name not in currently_installed:
-            not_installed_properly.append((req, "dependency not found"))
-        else:
-            v = currently_installed[req.name]
-            if isinstance(v, str):
-                not_installed_properly.append(
-                    (
-                        req,
-                        "Version format of dependency is not currently supported by quickpub",
-                    )
-                )
-            elif isinstance(v, Dependency):
-                if not req.is_satisfied_by(v.ver):
-                    not_installed_properly.append((req, "Invalid version installed"))
-    return not_installed_properly
+    return await PipPackageManager().list_installed(executor, env_name)
 
 
 async def validate_dependencies(
@@ -193,11 +152,16 @@ async def validate_dependencies(
     env_name: str,
     task_id: int,
     pbar: Optional[SupportsProgress] = None,
+    package_manager: Optional[PackageManager] = None,
 ) -> None:
+    if package_manager is None:
+        package_manager = PipPackageManager()
     logger.info("Validating dependencies on environment '%s'", env_name)
     try:
         if validation_exit_on_fail:
-            currently_installed = await _get_installed_packages(executor, env_name)
+            currently_installed = await package_manager.list_installed(
+                executor, env_name
+            )
             not_installed_properly = _check_dependency_satisfaction(
                 required_dependencies, currently_installed
             )
@@ -230,6 +194,29 @@ async def validate_dependencies(
     finally:
         if pbar is not None:
             pbar.update(1)
+
+
+def _check_dependency_satisfaction(
+    required_dependencies: List[Dependency],
+    currently_installed: Dict[str, Union[str, Dependency]],
+) -> List[Tuple[Dependency, str]]:
+    not_installed_properly: List[Tuple[Dependency, str]] = []
+    for req in required_dependencies:
+        if req.name not in currently_installed:
+            not_installed_properly.append((req, "dependency not found"))
+        else:
+            v = currently_installed[req.name]
+            if isinstance(v, str):
+                not_installed_properly.append(
+                    (
+                        req,
+                        "Version format of dependency is not currently supported by quickpub",
+                    )
+                )
+            elif isinstance(v, Dependency):
+                if not req.is_satisfied_by(v.ver):
+                    not_installed_properly.append((req, "Invalid version installed"))
+    return not_installed_properly
 
 
 # Track all QA tasks (dependencies, sanity checks, QA runners)
@@ -308,7 +295,10 @@ async def _submit_qa_tasks(
     is_system_interpreter: bool,
     pool: WorkerPool,
     pbar: Optional[SupportsProgress],
+    package_manager: Optional[PackageManager] = None,
 ) -> int:
+    if package_manager is None:
+        package_manager = PipPackageManager()
     total = 0
     task_id = 0
     with AsyncLayeredCommand() as base:
@@ -316,6 +306,7 @@ async def _submit_qa_tasks(
             logger.debug("Setting up QA tasks for environment '%s'", env_name)
             with async_executor:
                 async_executor.prev = base
+                await package_manager.prepare(async_executor)
                 await pool.submit(
                     validate_dependencies,
                     args=[
@@ -326,6 +317,7 @@ async def _submit_qa_tasks(
                         task_id,
                         pbar,
                     ],
+                    kwargs={"package_manager": package_manager},
                     name=f"Validate dependencies for env '{env_name}'",
                 )
                 total += 1
@@ -387,7 +379,10 @@ async def qa(
     src_folder_path: str,
     dependencies: List[Dependency],
     pbar: Optional[SupportsProgress] = None,
+    package_manager: Optional[PackageManager] = None,
 ) -> bool:
+    if package_manager is None:
+        package_manager = PipPackageManager()
     logger.info(
         "Starting QA process for package '%s' with %d QA strategies",
         package_name,
@@ -406,6 +401,7 @@ async def qa(
         is_system_interpreter,
         pool,
         pbar,
+        package_manager,
     )
     return await _execute_qa_tasks(pool, total, qa_start_time)
 

@@ -5,7 +5,6 @@ from quickpub import (
     publish,
     MypyRunner,
     PylintRunner,
-    CondaPythonProvider,
     PypircUploadTarget,
     SetuptoolsBuildSchema,
     GithubUploadTarget,
@@ -15,15 +14,13 @@ from quickpub import (
     PypiRemoteVersionEnforcer,
     LocalVersionEnforcer,
     PytestRunner,
-    UnionProvider,
-    DefaultPythonProvider,
 )
 
 
 def main() -> None:
     publish(
         name="quickpub",
-        version="4.0.0",
+        version="4.1.0",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A local CI/CD simulation tool that runs quality checks, tests, and validations locally before publishing Python packages, ensuring higher build pass rates and faster feedback loops",
@@ -37,24 +34,16 @@ def main() -> None:
         ],
         build_schemas=[SetuptoolsBuildSchema()],
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
-        python_interpreter_provider=UnionProvider(
-            [
-                # CondaPythonProvider(["base", "390", "380"]),
-                CondaPythonProvider(["base"]),
-                CondaPythonProvider(["380"]),
-                DefaultPythonProvider(),
-            ]
-        ),
         global_quality_assurance_runners=[
-            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
-            PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
+            MypyRunner(bound="<=20"),
+            PylintRunner(bound=">=0.8"),
             PytestRunner(bound=">=0.95"),
         ],
-        dependencies=["danielutils>=1.0.0", "requests", "fire"],
+        dependencies=["danielutils>=1.1.23", "requests", "fire", "twine"],
         min_python="3.8.0",
         scripts={"quickpub": entry_point},
         pbar=tqdm(desc="QA task", leave=False),  # type: ignore
-        demo=True,
+        demo=False,
     )
 
 

@@ -72,9 +72,68 @@
 
 ## 🛠️ Installation
 
+Install [uv](https://docs.astral.sh/uv/), then:
+
 ```bash
-pip install quickpub
+git clone https://github.com/danielnachumdev/quickpub.git
+cd quickpub
+uv sync
 ```
+
+`uv sync` installs runtime dependencies (`danielutils`, `requests`, `fire`, `twine`) plus the `dev` and `test` groups. For a production-only install:
+
+```bash
+uv sync --no-group dev --no-group test
+```
+
+Run tests:
+
+```bash
+uv run pytest
+```
+
+Run QuickPub locally:
+
+```bash
+uv run python publish.py
+```
+
+To install quickpub as a library in another project:
+
+```bash
+uv add quickpub
+```
+
+### Package manager support
+
+QuickPub auto-detects **pip** vs **native uv** when you call `publish()` without explicit environment arguments:
+
+- **`uv.lock` present** → `UvPackageManager` + `UvPythonProvider`
+- **otherwise** → `PipPackageManager` + `DefaultPythonProvider`
+
+```python
+from quickpub import publish
+
+publish(
+    name="my-package",
+    ...,
+)
+```
+
+Override only when you need a custom setup (e.g. conda environments):
+
+```python
+from quickpub import publish, CondaPythonProvider, UnionProvider
+
+publish(
+    ...,
+    python_interpreter_provider=UnionProvider([
+        CondaPythonProvider(["base"]),
+    ]),
+)
+```
+
+For manual control, use `resolve_publish_environment()` or pass `package_manager` / `python_interpreter_provider` explicitly.
 
 ## 📖 Quick Start
 
@@ -97,8 +156,8 @@ def main() -> None:
         
         # Local Quality Assurance (simulates cloud CI/CD)
         global_quality_assurance_runners=[
-            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
-            PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
+            MypyRunner(bound="<=20"),
+            PylintRunner(bound=">=0.8"),
             UnittestRunner(bound=">=0.95"),
         ],
         
@@ -136,7 +195,6 @@ if __name__ == '__main__':
 ```python
 MypyRunner(
     bound="<=20",                    # Maximum number of errors allowed
-    configuration_path="./mypy.ini", # Custom mypy configuration
     target="./src"                   # Target directory to check
 )
 ```
@@ -145,7 +203,6 @@ MypyRunner(
 ```python
 PylintRunner(
     bound=">=0.8",                   # Minimum score required (0-10 scale)
-    configuration_path="./.pylintrc", # Custom pylint configuration
     target="./src"                   # Target directory to analyze
 )
 ```
@@ -183,6 +240,13 @@ CondaPythonProvider(
 ```python
 DefaultPythonProvider()  # Uses system Python interpreter
 ```
+
+#### Uv Provider
+```python
+UvPythonProvider(project_root=Path("."))  # Uses uv-managed .venv
+```
+
+Pair `UvPythonProvider` with `UvPackageManager`. Both are selected automatically when `uv.lock` exists and you omit the provider arguments to `publish()`.
 
 ### Upload Targets
 
@@ -256,7 +320,7 @@ class CustomQARunner(QualityAssuranceRunner):
     
     def _install_dependencies(self, base: LayeredCommand) -> None:
         with base:
-            base("pip install custom-tool")
+            base(self.package_manager.install_command("custom-tool"))
     
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         # Custom score calculation logic

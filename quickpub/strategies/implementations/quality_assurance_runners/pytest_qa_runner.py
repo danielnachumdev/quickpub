@@ -2,7 +2,7 @@ import logging
 import re
 import subprocess
 import sys
-from typing import List, Union, Literal
+from typing import List, Union, Literal, Optional
 
 from danielutils import LayeredCommand
 
@@ -19,9 +19,13 @@ class PytestRunner(QualityAssuranceRunner):
     PYTEST_SUMMARY_REGEX: re.Pattern = re.compile(
         r"=+ .*?in [\d\.]+s(?: \([^)]+\))? =+"
     )
+    PYTEST_QUIET_SUMMARY_REGEX: re.Pattern = re.compile(
+        r".*\d+ (?:failed|passed).+in [\d\.]+s(?: \([^)]+\))?"
+    )
     PYTEST_FAILED_REGEX: re.Pattern = re.compile(r"(\d+) failed")
     PYTEST_PASSED_REGEX: re.Pattern = re.compile(r"(\d+) passed")
     PYTEST_SKIPPED_REGEX: re.Pattern = re.compile(r"(\d+) skipped")
+    ANSI_ESCAPE_REGEX: re.Pattern = re.compile(r"\x1b\[[0-9;]*m")
 
     def __init__(
         self,
@@ -31,8 +35,18 @@ class PytestRunner(QualityAssuranceRunner):
         no_output_score: float = 0.0,
         no_tests_score: float = 1.0,
         xdist_workers: Union[int, Literal["auto"]] = "auto",
+        configuration_path: Optional[str] = None,
+        executable_path: Optional[str] = None,
+        package_manager=None,
     ) -> None:
-        super().__init__(name="pytest", bound=bound, target=target)
+        super().__init__(
+            name="pytest",
+            bound=bound,
+            target=target,
+            configuration_path=configuration_path,
+            executable_path=executable_path,
+            package_manager=package_manager,
+        )
         if not (0.0 <= no_tests_score <= 1.0):
             raise RuntimeError(
                 "no_tests_score should be between 0.0 and 1.0 (including both)."
@@ -58,11 +72,11 @@ class PytestRunner(QualityAssuranceRunner):
             no_output_score,
         )
 
-    @staticmethod
-    def _is_xdist_installed() -> bool:
+    def _is_xdist_installed(self) -> bool:
         try:
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "show", "pytest-xdist"],
+                self.package_manager.show_command("pytest-xdist"),
+                shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=False,
@@ -88,10 +102,20 @@ class PytestRunner(QualityAssuranceRunner):
         logger.debug("pytest-xdist not detected; running without distribution")
         return f"{base_command} {self.target}"
 
+    def _strip_ansi(self, text: str) -> str:
+        return self.ANSI_ESCAPE_REGEX.sub("", text)
+
+    def _is_summary_line(self, line: str) -> bool:
+        cleaned = self._strip_ansi(line)
+        return bool(
+            self.PYTEST_SUMMARY_REGEX.match(cleaned)
+            or self.PYTEST_QUIET_SUMMARY_REGEX.match(cleaned)
+        )
+
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pytest dependencies")
         with base:
-            base(f"{sys.executable} -m pip install pytest")
+            base(self.package_manager.install_command("pytest"))
 
     def _calculate_score(
         self, ret: int, command_output: List[str], *, verbose: bool = False
@@ -108,25 +132,28 @@ class PytestRunner(QualityAssuranceRunner):
         # (pytest output may have warnings or other lines after the summary)
         rating_line = None
         for line in reversed(command_output):
-            if "no tests ran" in line.lower():
+            cleaned_line = self._strip_ansi(line)
+            if "no tests ran" in cleaned_line.lower():
                 logger.info(
                     "No tests ran, returning no_tests_score: %s", self.no_tests_score
                 )
                 return self.no_tests_score
-            if self.PYTEST_SUMMARY_REGEX.match(line):
-                rating_line = line
+            if self._is_summary_line(line):
+                rating_line = cleaned_line
                 break
 
         if rating_line is None:
-            # Fallback to last line if no match found
-            rating_line = command_output[-1]
+            rating_line = self._strip_ansi(command_output[-1])
             if "no tests ran" in rating_line.lower():
                 logger.info(
                     "No tests ran, returning no_tests_score: %s", self.no_tests_score
                 )
                 return self.no_tests_score
 
-        if not self.PYTEST_SUMMARY_REGEX.match(rating_line):
+        if not (
+            self.PYTEST_SUMMARY_REGEX.match(rating_line)
+            or self.PYTEST_QUIET_SUMMARY_REGEX.match(rating_line)
+        ):
             logger.error("Failed to parse pytest output: %s", rating_line)
             raise ExitEarlyError(
                 f"Can't calculate score for pytest on the following line: {rating_line}"
