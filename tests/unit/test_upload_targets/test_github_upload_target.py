@@ -6,7 +6,7 @@ from quickpub.strategies.implementations.upload_targets.github_upload_target imp
     GithubUploadTarget,
 )
 
-from tests.base_test_classes import BaseTestClass
+from tests.common.base_test_classes import BaseTestClass
 
 
 class TestGithubUploadTarget(BaseTestClass):

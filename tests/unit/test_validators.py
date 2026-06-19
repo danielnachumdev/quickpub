@@ -11,7 +11,7 @@ from quickpub.validators import (
     validate_source,
 )
 
-from tests.base_test_classes import BaseTestClass
+from tests.common.base_test_classes import BaseTestClass
 
 
 class TestValidateVersion(BaseTestClass):

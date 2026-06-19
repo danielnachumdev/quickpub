@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from quickpub.worker_pool import WorkerPool
 
-from tests.base_test_classes import BaseTestClass
+from tests.common.base_test_classes import BaseTestClass
 
 
 class TestWorkerPool(BaseTestClass):

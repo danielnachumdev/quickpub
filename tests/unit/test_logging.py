@@ -10,7 +10,7 @@ from quickpub.logging_ import (
     TqdmLoggingHandler,
 )
 
-from tests.base_test_classes import BaseTestClass
+from tests.common.base_test_classes import BaseTestClass
 
 
 class TestQuickpubLogFilter(BaseTestClass):

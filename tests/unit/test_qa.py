@@ -17,7 +17,7 @@ from quickpub.qa import (
     is_task_run_success,
 )
 
-from tests.base_test_classes import AsyncBaseTestClass
+from tests.common.base_test_classes import AsyncBaseTestClass
 
 
 class TestGlobalImportSanityCheck(AsyncBaseTestClass):

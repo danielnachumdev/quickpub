@@ -6,7 +6,7 @@ from quickpub.strategies.implementations.package_managers.uv_package_manager imp
     UvPackageManager,
 )
 
-from tests.base_test_classes import AsyncBaseTestClass
+from tests.common.base_test_classes import AsyncBaseTestClass
 
 
 class TestUvPackageManager(AsyncBaseTestClass):

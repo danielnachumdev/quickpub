@@ -7,8 +7,8 @@ from unittest.mock import patch
 
 from quickpub import PylintRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
-from tests.base_test_classes import AsyncBaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import AsyncBaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 CODE: str = """

@@ -1,7 +1,7 @@
 from quickpub import LicenseEnforcer
 
-from tests.base_test_classes import BaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import BaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 TMP_LICENSE_PATH: str = "TMP_LICENSE"
 

@@ -1,7 +1,7 @@
 from quickpub import LocalVersionEnforcer, Version
 
-from tests.base_test_classes import BaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import BaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 PACKAGE_NAME: str = "foo"
 LOWEST_VERSION: Version = Version.from_str("0.0.0")

@@ -7,7 +7,7 @@ from quickpub.strategies.implementations.python_providers.uv_python_provider imp
     UvPythonProvider,
 )
 
-from tests.base_test_classes import AsyncBaseTestClass, BaseTestClass
+from tests.common.base_test_classes import AsyncBaseTestClass, BaseTestClass
 
 
 class TestUvPythonProviderSync(BaseTestClass):

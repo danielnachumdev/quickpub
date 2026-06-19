@@ -7,8 +7,8 @@ from quickpub.strategies.implementations.upload_targets.pypirc_upload_target imp
     PypircUploadTarget,
 )
 
-from tests.base_test_classes import BaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import BaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 
 class TestPypircUploadTarget(BaseTestClass):

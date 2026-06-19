@@ -3,8 +3,8 @@ import unittest
 
 from quickpub import UnittestRunner, DefaultPythonProvider, ExitEarlyError
 
-from tests.base_test_classes import AsyncBaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import AsyncBaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 TEST_FILE_PATH: str = "test_foo.py"
 

@@ -18,8 +18,8 @@ from quickpub.strategies.implementations.python_providers.uv_python_provider imp
     UvPythonProvider,
 )
 
-from tests.base_test_classes import BaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import BaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 
 class TestDetectPackageManager(BaseTestClass):

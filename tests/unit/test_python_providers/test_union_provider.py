@@ -4,7 +4,7 @@ from quickpub.strategies.implementations.python_providers.union_provider import 
     UnionProvider,
 )
 
-from tests.base_test_classes import AsyncBaseTestClass
+from tests.common.base_test_classes import AsyncBaseTestClass
 
 
 class TestUnionProvider(AsyncBaseTestClass):

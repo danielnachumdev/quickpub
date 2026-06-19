@@ -23,8 +23,8 @@ from quickpub.__main__ import (
     main,
 )
 
-from tests.base_test_classes import BaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import BaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 
 class TestValidatePublishInputs(BaseTestClass):

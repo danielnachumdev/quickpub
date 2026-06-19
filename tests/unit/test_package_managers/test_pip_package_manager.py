@@ -6,7 +6,7 @@ from quickpub.strategies.implementations.package_managers.pip_package_manager im
 )
 from quickpub.structures import Dependency
 
-from tests.base_test_classes import AsyncBaseTestClass
+from tests.common.base_test_classes import AsyncBaseTestClass
 
 
 class TestPipPackageManager(AsyncBaseTestClass):

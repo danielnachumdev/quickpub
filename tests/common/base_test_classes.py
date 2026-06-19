@@ -5,7 +5,7 @@ from danielutils test classes, making it easier to manage test infrastructure.
 
 Note: These classes do NOT inherit from AutoCWDTestCase/AsyncAutoCWDTestCase
 to avoid leaving residual files in the project directory. Instead, use
-temporary_test_directory() context manager from tests.test_helpers.
+temporary_test_directory() context manager from tests.common.helpers.
 """
 
 import unittest

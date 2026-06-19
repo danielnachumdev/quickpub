@@ -4,8 +4,8 @@ import unittest
 from quickpub import CondaPythonProvider, ExitEarlyError
 from quickpub.qa import qa
 
-from tests.base_test_classes import AsyncBaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import AsyncBaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 PACKAGE_NAME: str = "foo"
 

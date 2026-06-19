@@ -6,7 +6,7 @@ import requests
 
 from quickpub.proxy import cm, os_system, get
 
-from tests.base_test_classes import BaseTestClass
+from tests.common.base_test_classes import BaseTestClass
 
 
 class TestCm(BaseTestClass):

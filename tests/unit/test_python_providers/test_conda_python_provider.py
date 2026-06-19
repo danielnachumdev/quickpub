@@ -4,8 +4,8 @@ from danielutils import AsyncWorkerPool
 
 from quickpub import CondaPythonProvider
 
-from tests.base_test_classes import AsyncBaseTestClass
-from tests.test_helpers import temporary_test_directory
+from tests.common.base_test_classes import AsyncBaseTestClass
+from tests.common.helpers import temporary_test_directory
 
 T = TypeVar("T")
 
