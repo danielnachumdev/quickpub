@@ -8,7 +8,11 @@ from unittest.mock import patch
 from quickpub import PylintRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
 from tests.common.base_test_classes import AsyncBaseTestClass
-from tests.common.helpers import temporary_test_directory
+from tests.common.helpers import (
+    resolve_tool_executable,
+    temporary_test_directory,
+    venv_python_executable,
+)
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 CODE: str = """
@@ -50,25 +54,27 @@ class TestPylintRunner(AsyncBaseTestClass):
             return name, base
         raise RuntimeError("No Python provider found")
 
-    @patch(
-        "quickpub.strategies.implementations.quality_assurance_runners.pylint_qa_runner.PylintRunner._build_command",
-        return_value=f".\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m pylint .\\",
-    )
     async def test_no_pylint(self, *args: Any) -> None:
         with temporary_test_directory() as tmp_dir:
             env_name, base = await self._setup_provider()
             with base:
                 venv_path = tmp_dir / TEMP_VENV_NAME
                 await base(f"{sys.executable} -m venv {venv_path}")
-                runner = PylintRunner(
-                    bound=f"<{NUM_ERRORS + 1}",
-                    executable_path=str(venv_path / "Scripts" / "python.exe"),
-                )
-                with self.assertRaises(RuntimeError) as e:
-                    await runner.run(
-                        target=str(tmp_dir), executor=base, env_name=env_name
+                python_path = venv_python_executable(venv_path)
+                with patch.object(
+                    PylintRunner,
+                    "_build_command",
+                    return_value=f"{python_path} -m pylint {tmp_dir}",
+                ):
+                    runner = PylintRunner(
+                        bound=f"<{NUM_ERRORS + 1}",
+                        executable_path=str(python_path),
                     )
-                self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
+                    with self.assertRaises(RuntimeError) as e:
+                        await runner.run(
+                            target=str(tmp_dir), executor=base, env_name=env_name
+                        )
+                    self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self) -> None:
         with temporary_test_directory() as tmp_dir:
@@ -134,9 +140,7 @@ class TestPylintRunner(AsyncBaseTestClass):
             (tmp_dir / "mypy.ini").write_text(CONFIG)
             (tmp_dir / "main.py").write_text(CODE)
             env_name, base = await self._setup_provider()
-            exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\pylint.exe"
-            if "conda" in sys.executable:
-                exe_path = exe_path.replace("pylint.exe", "Scripts\\pylint.exe")
+            exe_path = resolve_tool_executable("pylint")
             # Mock file_exists to return True for the executable path
             mock_file_exists.side_effect = lambda path: path == exe_path
             runner = PylintRunner(executable_path=exe_path, bound=f"<={NUM_ERRORS}")

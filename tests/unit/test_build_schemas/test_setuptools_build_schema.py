@@ -23,11 +23,11 @@ class TestSetupToolsBuildSchema(BaseTestClass):
             setup_path = tmp_dir / TMP_SETUP_FILE_PATH
             setup_path.write_text(EXPECTED_CONTENTS)
             SetuptoolsBuildSchema(str(setup_path), "toml").build()
-            subdirs = [d.name for d in tmp_dir.iterdir() if d.is_dir()]
+            subdirs = {d.name for d in tmp_dir.iterdir() if d.is_dir()}
             self.assertEqual(2, len(subdirs), "Expected only 2 subdirectories")
-            self.assertTrue(subdirs[0] == "dist", "dist folder does not exist")
+            self.assertIn("dist", subdirs, "dist folder does not exist")
             self.assertTrue(
-                subdirs[1].endswith(".egg-info"),
+                any(name.endswith(".egg-info") for name in subdirs),
                 "folder that ends with '.egg-info' does not exist ",
             )
 

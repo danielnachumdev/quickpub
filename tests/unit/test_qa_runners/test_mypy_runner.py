@@ -7,7 +7,11 @@ from unittest.mock import patch
 from quickpub import MypyRunner, DefaultPythonProvider, Bound, ExitEarlyError
 
 from tests.common.base_test_classes import AsyncBaseTestClass
-from tests.common.helpers import temporary_test_directory
+from tests.common.helpers import (
+    resolve_tool_executable,
+    temporary_test_directory,
+    venv_python_executable,
+)
 
 TEMP_VENV_NAME: str = "temp_clean_venv"
 CODE: str = """
@@ -49,25 +53,27 @@ class TestMypyRunner(AsyncBaseTestClass):
             return name, base
         raise RuntimeError("No Python provider found")
 
-    @patch(
-        "quickpub.strategies.implementations.quality_assurance_runners.mypy_qa_runner.MypyRunner._build_command",
-        return_value=f"..\\{TEMP_VENV_NAME}\\Scripts\\python.exe -m mypy .\\",
-    )
     async def test_no_mypy(self, *args: Any) -> None:
         with temporary_test_directory() as tmp_dir:
             env_name, base = await self._setup_provider()
             with base:
                 venv_path = tmp_dir / TEMP_VENV_NAME
                 await base(f"{sys.executable} -m venv {venv_path}")
-                runner = MypyRunner(
-                    bound=f"<{NUM_ERRORS + 1}",
-                    executable_path=str(venv_path / "Scripts" / "python.exe"),
-                )
-                with self.assertRaises(RuntimeError) as e:
-                    await runner.run(
-                        target=str(tmp_dir), executor=base, env_name=env_name
+                python_path = venv_python_executable(venv_path)
+                with patch.object(
+                    MypyRunner,
+                    "_build_command",
+                    return_value=f"{python_path} -m mypy {tmp_dir}",
+                ):
+                    runner = MypyRunner(
+                        bound=f"<{NUM_ERRORS + 1}",
+                        executable_path=str(python_path),
                     )
-                self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
+                    with self.assertRaises(RuntimeError) as e:
+                        await runner.run(
+                            target=str(tmp_dir), executor=base, env_name=env_name
+                        )
+                    self.assertIsInstance(e.exception.__cause__, ExitEarlyError)
 
     async def test_no_package(self) -> None:
         with temporary_test_directory() as tmp_dir:
@@ -132,9 +138,7 @@ class TestMypyRunner(AsyncBaseTestClass):
             (tmp_dir / "mypy.ini").write_text(CONFIG)
             (tmp_dir / "main.py").write_text(CODE)
             env_name, base = await self._setup_provider()
-            exe_path = "\\".join(sys.executable.split("\\")[:-1]) + "\\mypy.exe"
-            if "conda" in sys.executable:
-                exe_path = exe_path.replace("mypy.exe", "Scripts\\mypy.exe")
+            exe_path = resolve_tool_executable("mypy")
             # Mock file_exists to return True for the executable path
             mock_file_exists.side_effect = lambda path: path == exe_path
             # The CODE produces more errors than NUM_ERRORS (10), so use a more lenient bound
