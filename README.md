@@ -80,6 +80,12 @@ cd quickpub
 uv sync
 ```
 
+`uv sync` installs runtime dependencies (`danielutils`, `requests`, `fire`, `twine`) plus the `dev` and `test` groups. For a production-only install:
+
+```bash
+uv sync --no-group dev --no-group test
+```
+
 Run tests:
 
 ```bash
@@ -150,8 +156,8 @@ def main() -> None:
         
         # Local Quality Assurance (simulates cloud CI/CD)
         global_quality_assurance_runners=[
-            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
-            PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
+            MypyRunner(bound="<=20"),
+            PylintRunner(bound=">=0.8"),
             UnittestRunner(bound=">=0.95"),
         ],
         
@@ -189,7 +195,6 @@ if __name__ == '__main__':
 ```python
 MypyRunner(
     bound="<=20",                    # Maximum number of errors allowed
-    configuration_path="./mypy.ini", # Custom mypy configuration
     target="./src"                   # Target directory to check
 )
 ```
@@ -198,7 +203,6 @@ MypyRunner(
 ```python
 PylintRunner(
     bound=">=0.8",                   # Minimum score required (0-10 scale)
-    configuration_path="./.pylintrc", # Custom pylint configuration
     target="./src"                   # Target directory to analyze
 )
 ```

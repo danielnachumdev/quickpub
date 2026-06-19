@@ -43,8 +43,8 @@ def main() -> None:
             ]
         ),
         global_quality_assurance_runners=[
-            MypyRunner(bound="<=20", configuration_path="./mypy.ini"),
-            PylintRunner(bound=">=0.8", configuration_path="./.pylintrc"),
+            MypyRunner(bound="<=20"),
+            PylintRunner(bound=">=0.8"),
             PytestRunner(bound=">=0.95"),
         ],
         dependencies=["danielutils>=1.0.0", "requests", "fire"],
