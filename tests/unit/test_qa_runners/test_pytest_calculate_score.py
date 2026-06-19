@@ -145,3 +145,12 @@ class TestPytestCalculateScore(unittest.TestCase):
         ]
         score = self.runner._calculate_score(0, lines)
         self.assertEqual(score, 1.0)
+
+    def test_quiet_colored_output_with_subtests(self) -> None:
+        lines = [
+            "\x1b[31m\x1b[1m6 failed\x1b[0m, \x1b[32m296 passed\x1b[0m, "
+            "\x1b[33m3 warnings\x1b[0m, \x1b[32m18 subtests passed\x1b[0m"
+            "\x1b[31m in 14.37s\x1b[0m"
+        ]
+        score = self.runner._calculate_score(1, lines)
+        self.assertAlmostEqual(score, 296 / 302)

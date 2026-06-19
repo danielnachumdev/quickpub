@@ -6,4 +6,4 @@ from .logging_ import set_log_level
 from .package_manager_detection import detect_package_manager, resolve_publish_environment
 from .__main__ import publish, main
 
-__version__ = "4.0.0"
+__version__ = "4.1.0"
