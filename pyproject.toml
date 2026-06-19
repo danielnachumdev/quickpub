@@ -8,7 +8,12 @@ version = "4.1.0"
 authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
-dependencies = ['danielutils>=1.1.23', 'requests', 'fire', 'twine']
+dependencies = [
+    "danielutils>=1.1.23",
+    "requests",
+    "fire",
+    "twine",
+]
 keywords = []
 license = { "file" = "./LICENSE" }
 description = "A local CI/CD simulation tool that runs quality checks, tests, and validations locally before publishing Python packages, ensuring higher build pass rates and faster feedback loops"
@@ -32,3 +37,114 @@ packages = ["quickpub"]
 [project.urls]
 "Homepage" = "https://github.com/danielnachumdev/quickpub"
 "Bug Tracker" = "https://github.com/danielnachumdev/quickpub/issues"
+
+[dependency-groups]
+dev = [
+    "githooklib>=1.0.0",
+    "tqdm",
+    "pylint",
+    "mypy",
+    "types-tqdm",
+    "types-requests",
+    "beautifulsoup4",
+    "setuptools",
+    "black",
+]
+test = [
+    "pytest",
+    "pytest-xdist",
+    "pytest-asyncio",
+    "pytest-cov",
+]
+
+[tool.uv]
+default-groups = ["dev", "test"]
+
+[tool.pytest.ini_options]
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-q",
+    "--strict-markers",
+    "--tb=short",
+    "--cov",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+    "--color=yes",
+    "--durations=10",
+    "--maxfail=10",
+    "-n",
+    "auto",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests",
+]
+
+[tool.coverage.run]
+source = ["quickpub"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+fail_under = 50
+sort = "Cover"
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.mypy]
+disallow_untyped_calls = true
+check_untyped_defs = true
+no_implicit_optional = true
+strict_optional = true
+namespace_packages = true
+explicit_package_bases = true
+files = ["quickpub/*.py", "tests", "publish.py"]
+
+[[tool.mypy.overrides]]
+module = "*"
+ignore_missing_imports = true
+
+[tool.pylint.main]
+ignore-paths = ["^tests/.*", "^tmp/.*"]
+
+[tool.pylint.basic]
+good-names = ["foo", "bar"]
+good-names-rgxs = ["^[a-zA-Z]"]
+
+[tool.pylint.naming]
+class-rgx = "^(_)?[A-Z][a-zA-Z0-9]*$"
+module-rgx = "^[a-zA-Z][a-zA-Z0-9_]*$"
+
+[tool.pylint.messages_control]
+disable = [
+    "W0211",
+    "C0114",
+    "E1120",
+    "E0611",
+    "W0702",
+    "W0612",
+    "R0913",
+    "C0415",
+    "R0912",
+    "R0903",
+    "R0914",
+    "R0911",
+    "R1716",
+    "W0401",
+    "R0801",
+    "C0116",
+    "W0212",
+    "C0115",
+]
+
+[tool.pylint.format]
+max-line-length = 120
