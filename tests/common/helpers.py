@@ -6,11 +6,38 @@ including temporary directory management to replace AutoCWD functionality.
 
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Set
+
+
+def conda_is_available() -> bool:
+    return shutil.which("conda") is not None
+
+
+def list_conda_envs() -> Set[str]:
+    if not conda_is_available():
+        return set()
+    result = subprocess.run(
+        ["conda", "env", "list"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return set()
+    return {
+        line.split()[0]
+        for line in result.stdout.splitlines()[2:]
+        if line.split()
+    }
+
+
+def conda_base_env_available() -> bool:
+    return "base" in list_conda_envs()
 
 
 def venv_python_executable(venv_path: Path) -> Path:

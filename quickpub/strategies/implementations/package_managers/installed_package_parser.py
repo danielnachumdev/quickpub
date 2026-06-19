@@ -1,5 +1,5 @@
 import re
-from typing import Dict, Union
+from typing import Dict, List, Union
 
 from ....structures import Dependency, Version
 
@@ -7,7 +7,7 @@ VERSION_REGEX: re.Pattern = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def parse_installed_packages_output(
-    output_lines: list[str],
+    output_lines: List[str],
 ) -> Dict[str, Union[str, Dependency]]:
     split_lines = (line.split(" ") for line in output_lines[2:])
     version_tuples = [(s[0], s[-1].strip()) for s in split_lines if s[0]]

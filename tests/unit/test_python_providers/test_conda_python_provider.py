@@ -1,11 +1,13 @@
+import unittest
 from typing import AsyncIterator, Tuple, TypeVar
 
 from danielutils import AsyncWorkerPool
+from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import CondaPythonProvider
 
 from tests.common.base_test_classes import AsyncBaseTestClass
-from tests.common.helpers import temporary_test_directory
+from tests.common.helpers import conda_is_available, temporary_test_directory
 
 T = TypeVar("T")
 
@@ -20,6 +22,7 @@ async def async_enumerate(
 
 
 class TestCondaPythonProvider(AsyncBaseTestClass):
+    @unittest.skipUnless(conda_is_available(), "conda required")
     async def test_all_envs_should_succeed(self) -> None:
         with temporary_test_directory():
             envs = await CondaPythonProvider([])._get_available_envs()
@@ -44,5 +47,8 @@ class TestCondaPythonProvider(AsyncBaseTestClass):
                 env_name, executor = tup
                 await pool.submit(wrapper, args=[env_name, executor])
 
-            await pool.start()
-            await pool.join()
+            try:
+                await pool.start()
+                await pool.join()
+            finally:
+                AsyncLayeredCommand._class_prev_instance = None

@@ -18,7 +18,7 @@ class PylintRunner(QualityAssuranceRunner):
         with base:
             base(self.package_manager.install_command("pylint"))
 
-    RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
+    RATING_PATTERN: re.Pattern = re.compile(r"([\d.]+)/([\d.]+)")
 
     def __init__(
         self,
@@ -52,13 +52,36 @@ class PylintRunner(QualityAssuranceRunner):
     def _calculate_score(
         self, ret: int, lines: List[str], verbose: bool = False
     ) -> float:
-        from quickpub.enforcers import exit_if
-
         logger.debug("Calculating pylint score from analysis results")
 
         if len(lines) == 0:
             logger.debug("No pylint output, returning perfect score: 1.0")
             return 1
+
+        for line in reversed(lines):
+            match = self.RATING_PATTERN.search(line)
+            if match:
+                numerator = float(match.group(1))
+                denominator = float(match.group(2))
+                score = numerator / denominator
+                logger.debug(
+                    "Pylint score calculated: %.3f (%s/%s)",
+                    score,
+                    match.group(1),
+                    match.group(2),
+                )
+                return score
+
+        if ret == 0:
+            return 1.0
+
+        joined_output = "\n".join(lines)
+        if ret == 1 and "parse-error" in joined_output:
+            logger.debug(
+                "Pylint reported parse-error with an empty target, returning perfect score: 1.0"
+            )
+            return 1.0
+
         if len(lines) == 1:
             if lines[0].endswith("No module named pylint"):
                 logger.error("Pylint module not found")
@@ -73,20 +96,9 @@ class PylintRunner(QualityAssuranceRunner):
             logger.error("Unexpected pylint error: %s", lines[0])
             raise ExitEarlyError(f"Got an unexpected error: {lines[0]}")
 
-        index = -2
-        if lines[-1] == "\x1b[0m":
-            index += -1
-        rating_line = lines[index]
-        m = self.RATING_PATTERN.match(rating_line)
         msg = f"Failed running Pylint, got exit code {ret}. Try running manually using: {self._build_command('TARGET')}"
-        exit_if(not m, msg)
-        rating_string = m.group(1)  # type:ignore
-        numerator, denominator = rating_string.split("/")
-        score = float(numerator) / float(denominator)
-        logger.debug(
-            "Pylint score calculated: %.3f (%s/%s)", score, numerator, denominator
-        )
-        return score
+        logger.error("Failed to parse pylint rating from output: %s", joined_output)
+        raise ExitEarlyError(msg)
 
 
 __all__ = [

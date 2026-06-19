@@ -90,7 +90,7 @@ def _run_quality_assurance(
     if package_manager is None:
         package_manager = PipPackageManager()
     try:
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             qa(
                 python_interpreter_provider,
                 global_quality_assurance_runners or [],

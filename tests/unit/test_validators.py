@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 from typing import Union
 from unittest.mock import patch

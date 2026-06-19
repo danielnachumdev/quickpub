@@ -32,7 +32,9 @@ class DefaultPythonProvider(PythonProvider):
         if self.aiter_index == 0:
             self.aiter_index += 1
             logger.info("Using system Python environment")
-            return "system", AsyncLayeredCommand()
+            executor = AsyncLayeredCommand()
+            executor.prev = None
+            return "system", executor
         raise StopAsyncIteration
 
     @classmethod
