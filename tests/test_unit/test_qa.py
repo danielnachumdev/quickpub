@@ -15,7 +15,6 @@ from quickpub.qa import (
     _execute_qa_tasks,
     qa,
     is_task_run_success,
-    VERSION_REGEX,
 )
 
 from tests.base_test_classes import AsyncBaseTestClass
@@ -279,6 +278,32 @@ class TestValidateDependencies(AsyncBaseTestClass):
         self.assertFalse(is_task_run_success[0])
 
 
+class TestValidateDependenciesWithPackageManager(AsyncBaseTestClass):
+    async def test_uses_package_manager_list_installed(self) -> None:
+        is_task_run_success.clear()
+        is_task_run_success.append(False)
+
+        package_manager = AsyncMock()
+        package_manager.list_installed.return_value = {
+            "pkg1": Dependency("pkg1", "==", Version(2, 0, 0))
+        }
+        executor = AsyncMock()
+        required = [Dependency("pkg1", ">=", Version(1, 0, 0))]
+
+        await validate_dependencies(
+            validation_exit_on_fail=True,
+            required_dependencies=required,
+            executor=executor,
+            env_name="testenv",
+            task_id=0,
+            pbar=None,
+            package_manager=package_manager,
+        )
+
+        package_manager.list_installed.assert_called_once_with(executor, "testenv")
+        executor.assert_not_called()
+
+
 class TestRunConfig(AsyncBaseTestClass):
     async def test_success(self) -> None:
         is_task_run_success.clear()
@@ -494,6 +519,39 @@ class TestQa(AsyncBaseTestClass):
         mock_setup.assert_called_once_with(provider)
         mock_submit.assert_called_once()
         mock_execute.assert_called_once()
+
+    @patch("quickpub.qa._execute_qa_tasks")
+    @patch("quickpub.qa._submit_qa_tasks")
+    @patch("quickpub.qa.WorkerPool")
+    @patch("quickpub.qa._setup_qa_environment")
+    async def test_qa_passes_package_manager_to_submit(
+        self, mock_setup, mock_worker_pool, mock_submit, mock_execute
+    ) -> None:
+        is_task_run_success.clear()
+
+        mock_setup.return_value = False
+        mock_worker_pool.return_value = MagicMock()
+        mock_submit.return_value = 0
+        mock_execute.return_value = True
+        package_manager = MagicMock()
+
+        from quickpub.strategies import QualityAssuranceRunner
+
+        provider = MagicMock()
+        runners: list[QualityAssuranceRunner] = []
+
+        await qa(
+            python_provider=provider,
+            quality_assurance_strategies=runners,
+            package_name="testpackage",
+            src_folder_path="./testpackage",
+            dependencies=[],
+            pbar=None,
+            package_manager=package_manager,
+        )
+
+        mock_submit.assert_called_once()
+        self.assertIs(mock_submit.call_args.args[8], package_manager)
 
 
 if __name__ == "__main__":

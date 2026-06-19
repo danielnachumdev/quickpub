@@ -16,7 +16,7 @@ class PylintRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pylint dependencies")
         with base:
-            base("pip install pylint")
+            base(self.package_manager.install_command("pylint"))
 
     RATING_PATTERN: re.Pattern = re.compile(r".*?([\d\.\/]+)")
 
@@ -25,6 +25,7 @@ class PylintRunner(QualityAssuranceRunner):
         bound: str = ">=0.8",
         configuration_path: Optional[str] = None,
         executable_path: Optional[str] = None,
+        package_manager=None,
     ) -> None:
         QualityAssuranceRunner.__init__(
             self,
@@ -32,6 +33,7 @@ class PylintRunner(QualityAssuranceRunner):
             bound=bound,
             configuration_path=configuration_path,
             executable_path=executable_path,
+            package_manager=package_manager,
         )
         logger.info(
             "Initialized PylintRunner with bound='%s', config='%s', executable='%s'",

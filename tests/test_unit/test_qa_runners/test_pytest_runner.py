@@ -228,3 +228,59 @@ class TestPytestRunnerBuildCommand(BaseTestClass):
 
             self.assertIn("-n 4", command)
             mock_run.assert_called_once()
+
+
+class TestPytestRunnerPackageManager(BaseTestClass):
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner.subprocess.run"
+    )
+    def test_build_command_wraps_with_uv_package_manager(self, mock_run) -> None:
+        from pathlib import Path
+        from unittest.mock import MagicMock
+
+        from quickpub.strategies.implementations.package_managers.uv_package_manager import (
+            UvPackageManager,
+        )
+
+        mock_run.return_value = Mock(returncode=1)
+        package_manager = UvPackageManager(project_root=Path("."))
+        runner = PytestRunner(package_manager=package_manager)
+
+        command = runner._build_command(target="./tests")
+        wrapped_command = runner.package_manager.wrap_command(command)
+
+        self.assertTrue(wrapped_command.startswith("uv run --"))
+
+    @patch(
+        "quickpub.strategies.implementations.quality_assurance_runners.pytest_qa_runner.subprocess.run"
+    )
+    def test_is_xdist_installed_uses_package_manager_show_command(self, mock_run) -> None:
+        from unittest.mock import MagicMock
+
+        package_manager = MagicMock()
+        package_manager.show_command.return_value = "uv pip show pytest-xdist"
+        mock_run.return_value = Mock(returncode=0)
+        runner = PytestRunner(package_manager=package_manager)
+
+        installed = runner._is_xdist_installed()
+
+        package_manager.show_command.assert_called_once_with("pytest-xdist")
+        mock_run.assert_called_once()
+        call_args = mock_run.call_args[0][0]
+        self.assertEqual(call_args, "uv pip show pytest-xdist")
+        self.assertTrue(installed)
+
+    def test_install_dependencies_uses_package_manager(self) -> None:
+        from unittest.mock import MagicMock
+
+        package_manager = MagicMock()
+        package_manager.install_command.return_value = "uv add --dev pytest"
+        runner = PytestRunner(package_manager=package_manager)
+        base = MagicMock()
+        base.__enter__ = MagicMock(return_value=base)
+        base.__exit__ = MagicMock(return_value=False)
+
+        runner._install_dependencies(base)
+
+        package_manager.install_command.assert_called_once_with("pytest")
+        base.assert_called_once_with("uv add --dev pytest")

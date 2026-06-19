@@ -72,9 +72,62 @@
 
 ## 🛠️ Installation
 
+Install [uv](https://docs.astral.sh/uv/), then:
+
 ```bash
-pip install quickpub
+git clone https://github.com/danielnachumdev/quickpub.git
+cd quickpub
+uv sync
 ```
+
+Run tests:
+
+```bash
+uv run pytest
+```
+
+Run QuickPub locally:
+
+```bash
+uv run python publish.py
+```
+
+To install quickpub as a library in another project:
+
+```bash
+uv add quickpub
+```
+
+### Package manager support
+
+QuickPub auto-detects **pip** vs **native uv** when you call `publish()` without explicit environment arguments:
+
+- **`uv.lock` present** → `UvPackageManager` + `UvPythonProvider`
+- **otherwise** → `PipPackageManager` + `DefaultPythonProvider`
+
+```python
+from quickpub import publish
+
+publish(
+    name="my-package",
+    ...,
+)
+```
+
+Override only when you need a custom setup (e.g. conda environments):
+
+```python
+from quickpub import publish, CondaPythonProvider, UnionProvider
+
+publish(
+    ...,
+    python_interpreter_provider=UnionProvider([
+        CondaPythonProvider(["base"]),
+    ]),
+)
+```
+
+For manual control, use `resolve_publish_environment()` or pass `package_manager` / `python_interpreter_provider` explicitly.
 
 ## 📖 Quick Start
 
@@ -184,6 +237,13 @@ CondaPythonProvider(
 DefaultPythonProvider()  # Uses system Python interpreter
 ```
 
+#### Uv Provider
+```python
+UvPythonProvider(project_root=Path("."))  # Uses uv-managed .venv
+```
+
+Pair `UvPythonProvider` with `UvPackageManager`. Both are selected automatically when `uv.lock` exists and you omit the provider arguments to `publish()`.
+
 ### Upload Targets
 
 #### PyPI Upload
@@ -256,7 +316,7 @@ class CustomQARunner(QualityAssuranceRunner):
     
     def _install_dependencies(self, base: LayeredCommand) -> None:
         with base:
-            base("pip install custom-tool")
+            base(self.package_manager.install_command("custom-tool"))
     
     def _calculate_score(self, ret: int, command_output: List[str], *, verbose: bool = False) -> float:
         # Custom score calculation logic

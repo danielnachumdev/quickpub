@@ -2,7 +2,7 @@ import logging
 import re
 import subprocess
 import sys
-from typing import List, Union, Literal
+from typing import List, Union, Literal, Optional
 
 from danielutils import LayeredCommand
 
@@ -31,8 +31,18 @@ class PytestRunner(QualityAssuranceRunner):
         no_output_score: float = 0.0,
         no_tests_score: float = 1.0,
         xdist_workers: Union[int, Literal["auto"]] = "auto",
+        configuration_path: Optional[str] = None,
+        executable_path: Optional[str] = None,
+        package_manager=None,
     ) -> None:
-        super().__init__(name="pytest", bound=bound, target=target)
+        super().__init__(
+            name="pytest",
+            bound=bound,
+            target=target,
+            configuration_path=configuration_path,
+            executable_path=executable_path,
+            package_manager=package_manager,
+        )
         if not (0.0 <= no_tests_score <= 1.0):
             raise RuntimeError(
                 "no_tests_score should be between 0.0 and 1.0 (including both)."
@@ -58,11 +68,11 @@ class PytestRunner(QualityAssuranceRunner):
             no_output_score,
         )
 
-    @staticmethod
-    def _is_xdist_installed() -> bool:
+    def _is_xdist_installed(self) -> bool:
         try:
             result = subprocess.run(
-                [sys.executable, "-m", "pip", "show", "pytest-xdist"],
+                self.package_manager.show_command("pytest-xdist"),
+                shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 check=False,
@@ -91,7 +101,7 @@ class PytestRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing pytest dependencies")
         with base:
-            base(f"{sys.executable} -m pip install pytest")
+            base(self.package_manager.install_command("pytest"))
 
     def _calculate_score(
         self, ret: int, command_output: List[str], *, verbose: bool = False

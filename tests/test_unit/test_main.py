@@ -248,6 +248,27 @@ class TestRunQualityAssurance(BaseTestClass):
         self.assertIn("Quality assurance stage has failed", str(context.exception))
 
 
+    @patch("quickpub.__main__.qa", new_callable=AsyncMock)
+    def test_qa_passes_package_manager(self, mock_qa) -> None:
+        mock_qa.return_value = True
+        mock_provider = MagicMock()
+        mock_pbar = MagicMock()
+        package_manager = MagicMock()
+
+        _run_quality_assurance(
+            python_interpreter_provider=mock_provider,
+            global_quality_assurance_runners=[],
+            name="testpackage",
+            explicit_src_folder_path="./testpackage",
+            validated_dependencies=[],
+            pbar=mock_pbar,
+            package_manager=package_manager,
+        )
+
+        mock_qa.assert_called_once()
+        self.assertIs(mock_qa.call_args.kwargs["package_manager"], package_manager)
+
+
 class TestCreatePackageFiles(BaseTestClass):
     @patch("quickpub.__main__.add_version_to_init")
     @patch("quickpub.__main__.create_manifest")
@@ -413,6 +434,51 @@ class TestPublish(BaseTestClass):
         mock_qa.assert_called_once()
         mock_create_files.assert_called_once()
         mock_build_upload.assert_called_once()
+
+    @patch("quickpub.__main__._build_and_upload_packages")
+    @patch("quickpub.__main__._create_package_files")
+    @patch("quickpub.__main__._run_quality_assurance")
+    @patch("quickpub.__main__._run_constraint_enforcers")
+    @patch("quickpub.__main__._validate_publish_inputs")
+    @patch("quickpub.__main__.resolve_publish_environment")
+    def test_publish_auto_resolves_environment_when_not_provided(
+        self,
+        mock_resolve,
+        mock_validate,
+        mock_enforcers,
+        mock_qa,
+        mock_create_files,
+        mock_build_upload,
+    ) -> None:
+        mock_validate.return_value = (
+            Version(1, 0, 0),
+            "./testpackage",
+            Version(3, 8, 0),
+            [],
+            [],
+        )
+        mock_provider = MagicMock()
+        mock_manager = MagicMock()
+        mock_resolve.return_value = (mock_manager, mock_provider)
+
+        publish(
+            name="testpackage",
+            author="Test Author",
+            author_email="test@example.com",
+            description="Test description",
+            homepage="https://example.com",
+            build_schemas=[MagicMock()],
+            upload_targets=[MagicMock()],
+        )
+
+        mock_resolve.assert_called_once_with(
+            Path("."),
+            python_interpreter_provider=None,
+            package_manager=None,
+        )
+        mock_qa.assert_called_once()
+        self.assertIs(mock_qa.call_args.args[0], mock_provider)
+        self.assertIs(mock_qa.call_args.args[6], mock_manager)
 
     @patch("quickpub.__main__._build_and_upload_packages")
     @patch("quickpub.__main__._create_package_files")

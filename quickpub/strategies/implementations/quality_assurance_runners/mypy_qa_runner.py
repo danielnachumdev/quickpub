@@ -23,7 +23,7 @@ class MypyRunner(QualityAssuranceRunner):
     def _install_dependencies(self, base: LayeredCommand) -> None:
         logger.info("Installing mypy dependencies")
         with base:
-            base("pip install mypy")
+            base(self.package_manager.install_command("mypy"))
 
     def _build_command(self, target: str, use_system_interpreter: bool = False) -> str:
         command: str = self.get_executable(use_system_interpreter)
@@ -37,6 +37,7 @@ class MypyRunner(QualityAssuranceRunner):
         bound: str = "<15",
         configuration_path: Optional[str] = None,
         executable_path: Optional[str] = None,
+        package_manager=None,
     ) -> None:
         QualityAssuranceRunner.__init__(
             self,
@@ -44,6 +45,7 @@ class MypyRunner(QualityAssuranceRunner):
             bound=bound,
             configuration_path=configuration_path,
             executable_path=executable_path,
+            package_manager=package_manager,
         )
         logger.info(
             "Initialized MypyRunner with bound='%s', config='%s', executable='%s'",

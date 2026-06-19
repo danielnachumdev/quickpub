@@ -1,12 +1,16 @@
 import logging
+import subprocess
 import sys
 import time
 from abc import abstractmethod
-from typing import Union, List, Optional, cast, Dict, Tuple
+from typing import Union, List, Optional, cast, Dict, Tuple, TYPE_CHECKING
 from danielutils import LayeredCommand, file_exists
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
 from quickpub import Bound
+
+if TYPE_CHECKING:
+    from .package_manager import PackageManager
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +78,18 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         target: Optional[str] = None,
         configuration_path: Optional[str] = None,
         executable_path: Optional[str] = None,
+        package_manager: Optional["PackageManager"] = None,
     ) -> None:
+        from .package_manager import PackageManager as PackageManagerType
+        from .implementations.package_managers.pip_package_manager import (
+            PipPackageManager,
+        )
+
         Configurable.__init__(self, configuration_path)
         HasOptionalExecutable.__init__(self, name, executable_path)
+        self.package_manager: PackageManagerType = (
+            package_manager if package_manager is not None else PipPackageManager()
+        )
         self.bound: Bound = (
             bound if isinstance(bound, Bound) else Bound.from_string(bound)
         )
@@ -155,6 +168,7 @@ class QualityAssuranceRunner(Configurable, HasOptionalExecutable):
         )
 
         command = self._build_command(target, use_system_interpreter)
+        command = self.package_manager.wrap_command(command)
         logger.debug("Built command: %s", command)
 
         self._pre_command()

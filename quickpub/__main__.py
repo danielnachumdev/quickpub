@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import time
+from pathlib import Path
 from typing import Optional, Union, List, Any, Dict, Callable, Tuple
 
 import fire  # type: ignore[import-untyped]
@@ -13,7 +14,8 @@ from .strategies import (
     UploadTarget,
     QualityAssuranceRunner,
     PythonProvider,
-    DefaultPythonProvider,
+    PackageManager,
+    PipPackageManager,
 )
 from .validators import (
     validate_version,
@@ -27,6 +29,7 @@ from .files import create_toml, create_setup, create_manifest, add_version_to_in
 from .classifiers import *
 from .qa import qa, SupportsProgress
 from .logging_ import setup_logging
+from .package_manager_detection import resolve_publish_environment
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -82,7 +85,10 @@ def _run_quality_assurance(
     explicit_src_folder_path: str,
     validated_dependencies: List[Dependency],
     pbar: Optional[SupportsProgress],
+    package_manager: Optional[PackageManager] = None,
 ) -> None:
+    if package_manager is None:
+        package_manager = PipPackageManager()
     try:
         result = asyncio.get_event_loop().run_until_complete(
             qa(
@@ -91,7 +97,8 @@ def _run_quality_assurance(
                 name,
                 explicit_src_folder_path,
                 validated_dependencies,
-                pbar,
+                pbar=pbar,
+                package_manager=package_manager,
             )
         )
         if not result:
@@ -173,7 +180,9 @@ def publish(
     upload_targets: List[UploadTarget],
     enforcers: Optional[List[ConstraintEnforcer]] = None,
     global_quality_assurance_runners: Optional[List[QualityAssuranceRunner]] = None,
-    python_interpreter_provider: PythonProvider = DefaultPythonProvider(),
+    python_interpreter_provider: Optional[PythonProvider] = None,
+    package_manager: Optional[PackageManager] = None,
+    project_root: Path = Path("."),
     readme_file_path: str = "./README.md",
     license_file_path: str = "./LICENSE",
     version: Optional[Union[Version, str]] = None,
@@ -198,6 +207,11 @@ def publish(
         ) = _validate_publish_inputs(
             name, version, explicit_src_folder_path, min_python, keywords, dependencies
         )
+        package_manager, python_interpreter_provider = resolve_publish_environment(
+            project_root,
+            python_interpreter_provider=python_interpreter_provider,
+            package_manager=package_manager,
+        )
         _run_constraint_enforcers(enforcers, name, validated_version, demo)
         _run_quality_assurance(
             python_interpreter_provider,
@@ -206,6 +220,7 @@ def publish(
             validated_src_path,
             validated_deps,
             pbar,
+            package_manager,
         )
         _create_package_files(
             name,

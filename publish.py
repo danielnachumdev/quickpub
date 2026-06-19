@@ -16,7 +16,6 @@ from quickpub import (
     LocalVersionEnforcer,
     PytestRunner,
     UnionProvider,
-    DefaultPythonProvider,
 )
 
 
@@ -39,10 +38,8 @@ def main() -> None:
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
         python_interpreter_provider=UnionProvider(
             [
-                # CondaPythonProvider(["base", "390", "380"]),
                 CondaPythonProvider(["base"]),
                 CondaPythonProvider(["380"]),
-                DefaultPythonProvider(),
             ]
         ),
         global_quality_assurance_runners=[
