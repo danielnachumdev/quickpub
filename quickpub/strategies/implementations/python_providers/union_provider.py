@@ -1,5 +1,5 @@
 import logging
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 from danielutils.async_.async_layered_command import AsyncLayeredCommand
 
@@ -42,8 +42,8 @@ class UnionProvider(PythonProvider):
 
         raise StopAsyncIteration
 
-    async def _get_available_envs_impl(self) -> set[str]:
-        available_envs: set[str] = set()
+    async def _get_available_envs_impl(self) -> Set[str]:
+        available_envs: Set[str] = set()
         for provider in self.providers:
             available_envs.update(await provider._get_available_envs())
         return available_envs
