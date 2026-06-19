@@ -5,12 +5,13 @@ from quickpub import CondaPythonProvider, ExitEarlyError
 from quickpub.qa import qa
 
 from tests.common.base_test_classes import AsyncBaseTestClass
-from tests.common.helpers import temporary_test_directory
+from tests.common.helpers import conda_base_env_available, conda_is_available, temporary_test_directory
 
 PACKAGE_NAME: str = "foo"
 
 
 class TestCondaPythonProvider(AsyncBaseTestClass):
+    @unittest.skipUnless(conda_base_env_available(), "conda base env required")
     async def test_simplest_case_should_succeed(self) -> None:
         with temporary_test_directory() as tmp_dir:
             package_dir = tmp_dir / PACKAGE_NAME
@@ -24,6 +25,7 @@ class TestCondaPythonProvider(AsyncBaseTestClass):
                 dependencies=[],
             )
 
+    @unittest.skipUnless(conda_base_env_available(), "conda base env required")
     async def test_wrong_src_folder_path_should_fail(self) -> None:
         with temporary_test_directory() as tmp_dir:
             await qa(
@@ -34,6 +36,7 @@ class TestCondaPythonProvider(AsyncBaseTestClass):
                 dependencies=[],
             )
 
+    @unittest.skipUnless(conda_is_available(), "conda required")
     async def test_non_existing_env_should_skip(self) -> None:
         NON_EXISTENT_ENV_NAME: str = "sdjbnglksjdgnwkerjg"
         with self.assertRaises(ExitEarlyError):

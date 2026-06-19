@@ -27,4 +27,6 @@ jobs:
           uv pip install -e .
 
       - name: Run tests
-        run: uv run pytest -n 0
+        run: |
+          find . -maxdepth 1 -name '.coverage*' -delete
+          uv run pytest
