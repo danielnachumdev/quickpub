@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `LocalVersionEnforcer` no longer crashes on uv wheel filenames in `dist/`
+
 ### Changed
 - Trove classifiers now match PyPI (Production/Stable, OS Independent, Python 3.8–3.13, MIT, topics)
 - `publish(classifiers=...)` is configurable; generated defaults no longer claim Windows-only
