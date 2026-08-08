@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.2] - 2026-08-08
+
 ### Added
 - `UvBuildSchema` — build with `uv build` from `pyproject.toml`
 - `publish(generate_project_files=False)` — keep existing packaging files; bump `[project].version` only

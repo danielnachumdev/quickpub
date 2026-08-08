@@ -20,7 +20,7 @@ from quickpub import (
 def main() -> None:
     publish(
         name="quickpub",
-        version="4.1.1",
+        version="4.1.2",
         author="danielnachumdev",
         author_email="danielnachumdev@gmail.com",
         description="A local CI/CD simulation tool that runs quality checks, tests, and validations locally before publishing Python packages, ensuring higher build pass rates and faster feedback loops",
