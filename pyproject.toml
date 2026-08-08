@@ -20,10 +20,24 @@ description = "A local CI/CD simulation tool that runs quality checks, tests, an
 readme = {file = "./README.md", content-type = "text/markdown"}
 requires-python = ">=3.8.0"
 classifiers = [
-	"Development Status :: 3 - Alpha",
+	"Development Status :: 5 - Production/Stable",
+	"Environment :: Console",
 	"Intended Audience :: Developers",
+	"License :: OSI Approved :: MIT License",
+	"Operating System :: OS Independent",
+	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
-	"Operating System :: Microsoft :: Windows"
+	"Programming Language :: Python :: 3 :: Only",
+	"Programming Language :: Python :: 3.8",
+	"Programming Language :: Python :: 3.9",
+	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
+	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
+	"Topic :: Software Development :: Build Tools",
+	"Topic :: Software Development :: Libraries :: Python Modules",
+	"Topic :: Software Development :: Quality Assurance",
+	"Typing :: Typed",
 ]
 [project.scripts]
     quickpub = "quickpub.__main__:main"

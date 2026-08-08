@@ -1,7 +1,18 @@
 import logging
 from enum import Enum
+from typing import List
 
 logger = logging.getLogger(__name__)
+
+_DEVELOPMENT_STATUS_LABELS = {
+    1: "Planning",
+    2: "Pre-Alpha",
+    3: "Alpha",
+    4: "Beta",
+    5: "Production/Stable",
+    6: "Mature",
+    7: "Inactive",
+}
 
 
 class Classifier(Enum):
@@ -36,8 +47,6 @@ class Classifier(Enum):
 
 
 class DevelopmentStatusClassifier(Classifier):
-    """Classifier for package development status. Use values like Alpha, Beta, Production, etc."""
-
     Planning = 1
     PreAlpha = 2
     Alpha = 3
@@ -48,26 +57,71 @@ class DevelopmentStatusClassifier(Classifier):
     Inactive = 7
 
     def _str(self) -> str:
-        return f"{self.value} - {self.name}"
+        return f"{self.value} - {_DEVELOPMENT_STATUS_LABELS[self.value]}"
 
 
 class IntendedAudienceClassifier(Classifier):
-    """Classifier for intended audience of the package."""
-
-    CustomerService = "CustomerService"
+    CustomerService = "Customer Service"
     Developers = "Developers"
+    Education = "Education"
+    EndUsersDesktop = "End Users/Desktop"
+    InformationTechnology = "Information Technology"
+    ScienceResearch = "Science/Research"
+    SystemAdministrators = "System Administrators"
 
 
 class ProgrammingLanguageClassifier(Classifier):
-    """Classifier for programming languages supported by the package."""
-
+    Python = "Python"
     Python3 = "Python :: 3"
+    Python3Only = "Python :: 3 :: Only"
+    Python38 = "Python :: 3.8"
+    Python39 = "Python :: 3.9"
+    Python310 = "Python :: 3.10"
+    Python311 = "Python :: 3.11"
+    Python312 = "Python :: 3.12"
+    Python313 = "Python :: 3.13"
 
 
 class OperatingSystemClassifier(Classifier):
-    """Classifier for operating systems supported by the package."""
-
+    OSIndependent = "OS Independent"
     MicrosoftWindows = "Microsoft :: Windows"
+    POSIX = "POSIX"
+    Linux = "POSIX :: Linux"
+    MacOS = "MacOS"
+    Unix = "Unix"
+
+
+class LicenseClassifier(Classifier):
+    MIT = "OSI Approved :: MIT License"
+    Apache2 = "OSI Approved :: Apache Software License"
+    BSD = "OSI Approved :: BSD License"
+    GPLv3 = "OSI Approved :: GNU General Public License v3 (GPLv3)"
+
+
+class TopicClassifier(Classifier):
+    SoftwareDevelopment = "Software Development"
+    BuildTools = "Software Development :: Build Tools"
+    Libraries = "Software Development :: Libraries"
+    PythonModules = "Software Development :: Libraries :: Python Modules"
+    QualityAssurance = "Software Development :: Quality Assurance"
+    Testing = "Software Development :: Testing"
+
+
+class TypingClassifier(Classifier):
+    Typed = "Typed"
+
+
+class EnvironmentClassifier(Classifier):
+    Console = "Console"
+
+
+def default_publish_classifiers() -> List[Classifier]:
+    return [
+        DevelopmentStatusClassifier.Alpha,
+        IntendedAudienceClassifier.Developers,
+        ProgrammingLanguageClassifier.Python3,
+        OperatingSystemClassifier.OSIndependent,
+    ]
 
 
 __all__ = [
@@ -76,4 +130,9 @@ __all__ = [
     "IntendedAudienceClassifier",
     "ProgrammingLanguageClassifier",
     "OperatingSystemClassifier",
+    "LicenseClassifier",
+    "TopicClassifier",
+    "TypingClassifier",
+    "EnvironmentClassifier",
+    "default_publish_classifiers",
 ]

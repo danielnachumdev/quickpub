@@ -9,7 +9,6 @@ from quickpub.classifiers import (
     DevelopmentStatusClassifier,
     IntendedAudienceClassifier,
     ProgrammingLanguageClassifier,
-    OperatingSystemClassifier,
 )
 from quickpub.files import (
     create_toml,

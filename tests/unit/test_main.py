@@ -7,12 +7,6 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import fire  # type: ignore[import-untyped]
 
 from quickpub import ExitEarlyError, Version, Dependency, SetuptoolsBuildSchema
-from quickpub.classifiers import (
-    DevelopmentStatusClassifier,
-    IntendedAudienceClassifier,
-    ProgrammingLanguageClassifier,
-    OperatingSystemClassifier,
-)
 from quickpub.__main__ import (
     _validate_publish_inputs,
     _run_constraint_enforcers,
@@ -302,6 +296,14 @@ class TestCreatePackageFiles(BaseTestClass):
         mock_create_toml.assert_called_once()
         mock_create_manifest.assert_called_once_with(name="testpackage")
         mock_add_version_to_init.assert_called_once()
+        created_classifiers = [
+            str(classifier)
+            for classifier in mock_create_toml.call_args.kwargs["classifiers"]
+        ]
+        self.assertIn("Operating System :: OS Independent", created_classifiers)
+        self.assertNotIn(
+            "Operating System :: Microsoft :: Windows", created_classifiers
+        )
 
     @patch("quickpub.__main__.add_version_to_init")
     @patch("quickpub.__main__.create_manifest")
@@ -338,6 +340,47 @@ class TestCreatePackageFiles(BaseTestClass):
 
         call_args = mock_create_toml.call_args
         self.assertEqual(call_args.kwargs["scripts"], scripts)
+
+    @patch("quickpub.__main__.add_version_to_init")
+    @patch("quickpub.__main__.create_manifest")
+    @patch("quickpub.__main__.create_toml")
+    @patch("quickpub.__main__.create_setup")
+    def test_explicit_classifiers_are_used(
+        self,
+        mock_create_setup,
+        mock_create_toml,
+        mock_create_manifest,
+        mock_add_version_to_init,
+    ) -> None:
+        from quickpub import (
+            DevelopmentStatusClassifier,
+            OperatingSystemClassifier,
+        )
+
+        explicit = [
+            DevelopmentStatusClassifier.Beta,
+            OperatingSystemClassifier.Linux,
+        ]
+        _create_package_files(
+            name="testpackage",
+            explicit_src_folder_path="./testpackage",
+            readme_file_path="./README.md",
+            license_file_path="./LICENSE",
+            version=Version(1, 0, 0),
+            author="Test Author",
+            author_email="test@example.com",
+            description="Test description",
+            homepage="https://example.com",
+            keywords=[],
+            validated_dependencies=[],
+            min_python=Version(3, 8, 0),
+            scripts=None,
+            classifiers=explicit,
+        )
+
+        self.assertEqual(
+            mock_create_toml.call_args.kwargs["classifiers"], explicit
+        )
 
 
 class TestSyncExistingPackageMetadata(BaseTestClass):
