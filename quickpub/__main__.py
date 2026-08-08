@@ -32,7 +32,7 @@ from .files import (
     add_version_to_init,
     update_pyproject_version,
 )
-from .classifiers import *
+from .classifiers import Classifier, default_publish_classifiers
 from .qa import qa, SupportsProgress
 from .logging_ import setup_logging
 from .package_manager_detection import resolve_publish_environment
@@ -134,6 +134,7 @@ def _create_package_files(
     validated_dependencies: List[Dependency],
     min_python: Version,
     scripts: Optional[Dict[str, Callable]],
+    classifiers: Optional[List[Classifier]] = None,
 ) -> None:
     create_setup()
     create_toml(
@@ -148,12 +149,7 @@ def _create_package_files(
         homepage=homepage,
         keywords=keywords,
         dependencies=validated_dependencies,
-        classifiers=[
-            DevelopmentStatusClassifier.Alpha,
-            IntendedAudienceClassifier.Developers,
-            ProgrammingLanguageClassifier.Python3,
-            OperatingSystemClassifier.MicrosoftWindows,
-        ],
+        classifiers=classifiers or default_publish_classifiers(),
         min_python=min_python,
         scripts=scripts,
     )
@@ -206,6 +202,7 @@ def publish(
     keywords: Optional[List[str]] = None,
     explicit_src_folder_path: Optional[str] = None,
     scripts: Optional[Dict[str, Callable]] = None,
+    classifiers: Optional[List[Classifier]] = None,
     pbar: Optional[SupportsProgress] = None,
     demo: bool = False,
     generate_project_files: bool = True,
@@ -253,6 +250,7 @@ def publish(
                 validated_deps,
                 validated_min_python,
                 scripts,
+                classifiers,
             )
         else:
             _sync_existing_package_metadata(
