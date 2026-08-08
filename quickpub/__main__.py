@@ -25,7 +25,13 @@ from .validators import (
     validate_source,
 )
 from .structures import Version, Dependency
-from .files import create_toml, create_setup, create_manifest, add_version_to_init
+from .files import (
+    create_toml,
+    create_setup,
+    create_manifest,
+    add_version_to_init,
+    update_pyproject_version,
+)
 from .classifiers import *
 from .qa import qa, SupportsProgress
 from .logging_ import setup_logging
@@ -155,6 +161,15 @@ def _create_package_files(
     add_version_to_init(src_folder_path=explicit_src_folder_path, version=version)
 
 
+def _sync_existing_package_metadata(
+    explicit_src_folder_path: str,
+    version: Version,
+    pyproject_path: str = "./pyproject.toml",
+) -> None:
+    update_pyproject_version(version=version, pyproject_path=pyproject_path)
+    add_version_to_init(src_folder_path=explicit_src_folder_path, version=version)
+
+
 def _build_and_upload_packages(
     build_schemas: List[BuildSchema],
     upload_targets: List[UploadTarget],
@@ -193,6 +208,7 @@ def publish(
     scripts: Optional[Dict[str, Callable]] = None,
     pbar: Optional[SupportsProgress] = None,
     demo: bool = False,
+    generate_project_files: bool = True,
     config: Optional[Any] = None,
 ) -> None:
     start_time = time.perf_counter()
@@ -222,21 +238,27 @@ def publish(
             pbar,
             package_manager,
         )
-        _create_package_files(
-            name,
-            validated_src_path,
-            readme_file_path,
-            license_file_path,
-            validated_version,
-            author,
-            author_email,
-            description,
-            homepage,
-            validated_keywords,
-            validated_deps,
-            validated_min_python,
-            scripts,
-        )
+        if generate_project_files:
+            _create_package_files(
+                name,
+                validated_src_path,
+                readme_file_path,
+                license_file_path,
+                validated_version,
+                author,
+                author_email,
+                description,
+                homepage,
+                validated_keywords,
+                validated_deps,
+                validated_min_python,
+                scripts,
+            )
+        else:
+            _sync_existing_package_metadata(
+                validated_src_path,
+                validated_version,
+            )
         _build_and_upload_packages(
             build_schemas, upload_targets, name, validated_version, demo
         )

@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Literal
 
 from danielutils import file_exists, LayeredCommand, delete_file
 
@@ -14,10 +13,7 @@ logger = logging.getLogger(__name__)
 class SetuptoolsBuildSchema(BuildSchema):
     """Build schema implementation using setuptools. Creates source distributions via setup.py."""
 
-    def __init__(
-        self, setup_file_path: str = "./setup.py", backend: Literal["toml"] = "toml"
-    ) -> None:
-        self._backend = backend
+    def __init__(self, setup_file_path: str = "./setup.py") -> None:
         self._setup_file_path = setup_file_path
 
     def build(self, verbose: bool = False, *args, **kwargs) -> None:

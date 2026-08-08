@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
-from quickpub import Version, Dependency
+from quickpub import Version, Dependency, ExitEarlyError
 from quickpub.classifiers import (
     DevelopmentStatusClassifier,
     IntendedAudienceClassifier,
@@ -16,6 +16,7 @@ from quickpub.files import (
     create_setup,
     create_manifest,
     add_version_to_init,
+    update_pyproject_version,
     _format_classifiers_string,
     _build_py_typed_section,
     _build_scripts_section,
@@ -351,6 +352,75 @@ class TestCreateManifest(BaseTestClass):
             manifest_file = tmp_dir / "MANIFEST.in"
             content = manifest_file.read_text(encoding="utf8")
             self.assertEqual(content, "recursive-include mypackage *.py")
+
+
+class TestUpdatePyprojectVersion(BaseTestClass):
+    def test_bumps_project_version_and_keeps_tool_sections(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            pyproject_path = tmp_dir / "pyproject.toml"
+            pyproject_path.write_text(
+                """[project]
+name = "samplepkg"
+version = "1.0.0"
+requires-python = ">=3.8"
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.mypy]
+strict = true
+""",
+                encoding="utf8",
+            )
+
+            update_pyproject_version(
+                version=Version(2, 3, 4),
+                pyproject_path=str(pyproject_path),
+            )
+
+            content = pyproject_path.read_text(encoding="utf8")
+            self.assertIn('version = "2.3.4"', content)
+            self.assertNotIn('version = "1.0.0"', content)
+            self.assertIn("[dependency-groups]", content)
+            self.assertIn('dev = ["pytest"]', content)
+            self.assertIn("[tool.uv]", content)
+            self.assertIn("[tool.mypy]", content)
+            self.assertIn("strict = true", content)
+
+    def test_missing_file_raises(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            pyproject_path = tmp_dir / "pyproject.toml"
+            with self.assertRaises(ExitEarlyError):
+                update_pyproject_version(
+                    version=Version(1, 0, 0),
+                    pyproject_path=str(pyproject_path),
+                )
+
+    def test_missing_project_section_raises(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            pyproject_path = tmp_dir / "pyproject.toml"
+            pyproject_path.write_text("[tool.uv]\ndefault-groups = []\n", encoding="utf8")
+            with self.assertRaises(ExitEarlyError):
+                update_pyproject_version(
+                    version=Version(1, 0, 0),
+                    pyproject_path=str(pyproject_path),
+                )
+
+    def test_missing_version_raises(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            pyproject_path = tmp_dir / "pyproject.toml"
+            pyproject_path.write_text(
+                '[project]\nname = "samplepkg"\n',
+                encoding="utf8",
+            )
+            with self.assertRaises(ExitEarlyError):
+                update_pyproject_version(
+                    version=Version(1, 0, 0),
+                    pyproject_path=str(pyproject_path),
+                )
 
 
 class TestAddVersionToInit(BaseTestClass):

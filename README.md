@@ -72,6 +72,19 @@ publish(
 )
 ```
 
+For a uv / PEP 621 project that already has `pyproject.toml`:
+
+```python
+from quickpub import publish, UvBuildSchema, PypircUploadTarget
+
+publish(
+    ...,
+    build_schemas=[UvBuildSchema()],
+    generate_project_files=False,
+    upload_targets=[PypircUploadTarget()],
+)
+```
+
 Run it:
 
 ```bash
@@ -92,8 +105,8 @@ When you call `publish()`, QuickPub runs these stages in order:
 
 1. **Enforcers** — checks README, LICENSE, `.pypirc`, and local/PyPI version consistency
 2. **Quality assurance** — mypy, pylint, pytest, and unittest with configurable score bounds, in parallel across detected Python environments
-3. **File generation** — writes `setup.py`, `pyproject.toml`, `MANIFEST.in`, and updates `__init__.py` with the version
-4. **Build & upload** — builds the sdist and uploads via twine (and optionally pushes to GitHub)
+3. **File generation** — by default writes `setup.py`, `pyproject.toml`, `MANIFEST.in`, and updates `__init__.py`. Pass `generate_project_files=False` to keep an existing `pyproject.toml` (only `[project].version` and `__init__.__version__` are updated).
+4. **Build & upload** — builds the sdist (`SetuptoolsBuildSchema` or `UvBuildSchema`) and uploads via twine (and optionally pushes to GitHub)
 
 Skip build and upload with `demo=True`.
 
