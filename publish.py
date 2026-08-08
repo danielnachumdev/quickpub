@@ -6,7 +6,7 @@ from quickpub import (
     MypyRunner,
     PylintRunner,
     PypircUploadTarget,
-    SetuptoolsBuildSchema,
+    UvBuildSchema,
     GithubUploadTarget,
     PypircEnforcer,
     ReadmeEnforcer,
@@ -32,7 +32,8 @@ def main() -> None:
             LocalVersionEnforcer(),
             PypiRemoteVersionEnforcer(),
         ],
-        build_schemas=[SetuptoolsBuildSchema()],
+        build_schemas=[UvBuildSchema()],
+        generate_project_files=False,
         upload_targets=[PypircUploadTarget(), GithubUploadTarget()],
         global_quality_assurance_runners=[
             MypyRunner(bound="<=20"),

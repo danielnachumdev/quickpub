@@ -1,9 +1,11 @@
 import logging
 import re
+from pathlib import Path
 from typing import Any
 
 from danielutils import file_exists
 
+from ....dist_files import find_sdist
 from ..constraint_enforcers import PypircEnforcer
 from ...upload_target import UploadTarget
 
@@ -27,19 +29,21 @@ class PypircUploadTarget(UploadTarget):
         if self.verbose:
             logger.info("Uploading package to PyPI")
 
+        sdist_path = find_sdist(Path("dist"), name, version)
         ret, stdout, stderr = cm(
             "twine",
             "upload",
             "--config-file",
             ".pypirc",
-            f"dist/{name}-{version}.tar.gz",
+            sdist_path.as_posix(),
         )
 
         if ret != 0:
             logger.error("PyPI upload failed with return code %d: %s", ret, stderr)
             exit_if(
                 ret != 0,
-                f"Failed uploading the package to pypi. Try running the following command manually:\n\ttwine upload --config-file .pypirc dist/{name}-{version}.tar.gz",
+                f"Failed uploading the package to pypi. Try running the following command manually:\n"
+                f"\ttwine upload --config-file .pypirc {sdist_path.as_posix()}",
             )
 
         logger.info(

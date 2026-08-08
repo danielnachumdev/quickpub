@@ -5,6 +5,7 @@ from typing import List, Optional, Dict, Callable
 from danielutils import get_files, file_exists
 
 from .classifiers import Classifier
+from .enforcers import ExitEarlyError
 from .structures import Version, Dependency
 
 logger = logging.getLogger(__name__)
@@ -143,6 +144,48 @@ def create_manifest(*, name: str) -> None:
     logger.info("Successfully created MANIFEST.in")
 
 
+_PROJECT_SECTION_HEADER = re.compile(r"^\[project]\s*$", re.MULTILINE)
+_NEXT_SECTION = re.compile(r"^\[", re.MULTILINE)
+_PROJECT_VERSION_LINE = re.compile(
+    r"^(\s*version\s*=\s*)([\"'])([^\"']*)\2",
+    re.MULTILINE,
+)
+
+
+def update_pyproject_version(
+    version: Version,
+    pyproject_path: str = "./pyproject.toml",
+) -> None:
+    path = Path(pyproject_path)
+    if not path.exists():
+        raise ExitEarlyError(f"pyproject.toml not found at '{path}'")
+
+    content = path.read_text(encoding="utf8")
+    header_match = _PROJECT_SECTION_HEADER.search(content)
+    if header_match is None:
+        raise ExitEarlyError(f"No [project] section in '{path}'")
+
+    section_start = header_match.end()
+    next_section = _NEXT_SECTION.search(content, section_start)
+    section_end = next_section.start() if next_section else len(content)
+    project_section = content[section_start:section_end]
+    version_match = _PROJECT_VERSION_LINE.search(project_section)
+    if version_match is None:
+        raise ExitEarlyError(f"No project.version in '{path}'")
+
+    quote = version_match.group(2)
+    updated_section = (
+        project_section[: version_match.start()]
+        + f"{version_match.group(1)}{quote}{version}{quote}"
+        + project_section[version_match.end() :]
+    )
+    path.write_text(
+        content[:section_start] + updated_section + content[section_end:],
+        encoding="utf8",
+    )
+    logger.info("Updated [project].version in '%s' to '%s'", path, version)
+
+
 def add_version_to_init(src_folder_path: str, version: Version) -> None:
     src_path = Path(src_folder_path).resolve()
     init_file_path = src_path / "__init__.py"
@@ -194,4 +237,10 @@ def add_version_to_init(src_folder_path: str, version: Version) -> None:
         f.write(new_content)
 
 
-__all__ = ["create_setup", "create_toml", "add_version_to_init"]
+__all__ = [
+    "create_setup",
+    "create_toml",
+    "create_manifest",
+    "add_version_to_init",
+    "update_pyproject_version",
+]

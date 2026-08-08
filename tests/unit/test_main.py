@@ -18,6 +18,7 @@ from quickpub.__main__ import (
     _run_constraint_enforcers,
     _run_quality_assurance,
     _create_package_files,
+    _sync_existing_package_metadata,
     _build_and_upload_packages,
     publish,
     main,
@@ -339,6 +340,29 @@ class TestCreatePackageFiles(BaseTestClass):
         self.assertEqual(call_args.kwargs["scripts"], scripts)
 
 
+class TestSyncExistingPackageMetadata(BaseTestClass):
+    @patch("quickpub.__main__.add_version_to_init")
+    @patch("quickpub.__main__.update_pyproject_version")
+    def test_syncs_toml_and_init(
+        self,
+        mock_update_pyproject_version,
+        mock_add_version_to_init,
+    ) -> None:
+        _sync_existing_package_metadata(
+            explicit_src_folder_path="./testpackage",
+            version=Version(1, 0, 0),
+        )
+
+        mock_update_pyproject_version.assert_called_once_with(
+            version=Version(1, 0, 0),
+            pyproject_path="./pyproject.toml",
+        )
+        mock_add_version_to_init.assert_called_once_with(
+            src_folder_path="./testpackage",
+            version=Version(1, 0, 0),
+        )
+
+
 class TestBuildAndUploadPackages(BaseTestClass):
     def test_demo_mode_skips_build_and_upload(self) -> None:
         build_schema = MagicMock()
@@ -551,6 +575,43 @@ class TestPublish(BaseTestClass):
 
         call_args = mock_build_upload.call_args
         self.assertEqual(call_args.args[4], True)
+
+    @patch("quickpub.__main__._build_and_upload_packages")
+    @patch("quickpub.__main__._sync_existing_package_metadata")
+    @patch("quickpub.__main__._create_package_files")
+    @patch("quickpub.__main__._run_quality_assurance")
+    @patch("quickpub.__main__._run_constraint_enforcers")
+    @patch("quickpub.__main__._validate_publish_inputs")
+    def test_publish_skips_file_generation_when_disabled(
+        self,
+        mock_validate,
+        mock_enforcers,
+        mock_qa,
+        mock_create_files,
+        mock_sync,
+        mock_build_upload,
+    ) -> None:
+        mock_validate.return_value = (
+            Version(1, 0, 0),
+            "./testpackage",
+            Version(3, 8, 0),
+            [],
+            [],
+        )
+
+        publish(
+            name="testpackage",
+            author="Test Author",
+            author_email="test@example.com",
+            description="Test description",
+            homepage="https://example.com",
+            build_schemas=[],
+            upload_targets=[],
+            generate_project_files=False,
+        )
+
+        mock_create_files.assert_not_called()
+        mock_sync.assert_called_once()
 
 
 class TestMain(BaseTestClass):
