@@ -1,7 +1,7 @@
 import logging
-from typing import Any
+from typing import Any, Optional
 
-from danielutils import directory_exists, get_files, get_python_version
+from danielutils import directory_exists, get_files
 
 from quickpub import Version
 from ...constraint_enforcer import ConstraintEnforcer
@@ -9,19 +9,20 @@ from ...constraint_enforcer import ConstraintEnforcer
 logger = logging.getLogger(__name__)
 
 
-def _remove_suffix(s: str, suffix: str) -> str:
-    if get_python_version() >= (3, 9):
-        return s.removesuffix(suffix)  # type:ignore
-    return _remove_prefix(s[::-1], suffix[::-1])[::-1]
-
-
-def _remove_prefix(s: str, prefix: str) -> str:
-    if get_python_version() >= (3, 9):
-        return s.removeprefix(prefix)  # type:ignore
-
-    if s.startswith(prefix):
-        return s[len(prefix) :]
-    return s
+def _version_from_dist_filename(name: str, filename: str) -> Optional[Version]:
+    prefix = f"{name}-"
+    if not filename.startswith(prefix):
+        return None
+    if filename.endswith(".tar.gz"):
+        version_str = filename[len(prefix) : -len(".tar.gz")]
+    elif filename.endswith(".whl"):
+        version_str = filename[len(prefix) : -len(".whl")].split("-")[0]
+    else:
+        return None
+    try:
+        return Version.from_str(version_str)
+    except ValueError:
+        return None
 
 
 class LocalVersionEnforcer(ConstraintEnforcer):
@@ -49,10 +50,17 @@ class LocalVersionEnforcer(ConstraintEnforcer):
             return
 
         max_local_version = Version(0, 0, 0)
-        for d in prev_builds:
-            d = _remove_suffix(_remove_prefix(d, f"{name}-"), ".tar.gz")
-            v: Version = Version.from_str(d)
-            max_local_version = max(max_local_version, v)
+        found_artifact = False
+        for filename in prev_builds:
+            parsed = _version_from_dist_filename(name, filename)
+            if parsed is None:
+                continue
+            found_artifact = True
+            max_local_version = max(max_local_version, parsed)
+
+        if not found_artifact:
+            logger.info("No sdist or wheel artifacts found in dist directory")
+            return
 
         if version <= max_local_version:
             logger.error(

@@ -35,3 +35,21 @@ class TestLocalVersionEnforcer(BaseTestClass):
                 LocalVersionEnforcer().enforce(
                     name=PACKAGE_NAME, version=LOWEST_VERSION
                 )
+
+    def test_uv_sdist_and_wheel_do_not_crash(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            dist_dir = tmp_dir / "dist"
+            dist_dir.mkdir()
+            (dist_dir / f"{PACKAGE_NAME}-0.0.0.tar.gz").touch()
+            (dist_dir / f"{PACKAGE_NAME}-0.0.0-py3-none-any.whl").touch()
+            LocalVersionEnforcer().enforce(name=PACKAGE_NAME, version=HIGHER_VERSION)
+
+    def test_wheel_version_is_enforced(self) -> None:
+        with temporary_test_directory() as tmp_dir:
+            dist_dir = tmp_dir / "dist"
+            dist_dir.mkdir()
+            (dist_dir / f"{PACKAGE_NAME}-0.0.0-py3-none-any.whl").touch()
+            with self.assertRaises(LocalVersionEnforcer.EXCEPTION_TYPE):
+                LocalVersionEnforcer().enforce(
+                    name=PACKAGE_NAME, version=LOWEST_VERSION
+                )
