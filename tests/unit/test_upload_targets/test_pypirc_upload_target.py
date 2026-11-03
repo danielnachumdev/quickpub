@@ -77,19 +77,19 @@ class TestPypircUploadTarget(BaseTestClass):
 
         with temporary_test_directory() as tmp_dir:
             pypirc_path = write_pypirc(tmp_dir)
-            write_sdist(tmp_dir, "gp-wrapper-1.0.0.tar.gz")
+            write_sdist(tmp_dir, "demo-app-1.0.0.tar.gz")
 
             target = PypircUploadTarget(
                 pypirc_file_path=str(pypirc_path), verbose=False
             )
-            target.upload(name="gp_wrapper", version="1.0.0")
+            target.upload(name="demo_app", version="1.0.0")
 
             mock_cm.assert_called_once_with(
                 "twine",
                 "upload",
                 "--config-file",
                 ".pypirc",
-                "dist/gp-wrapper-1.0.0.tar.gz",
+                "dist/demo-app-1.0.0.tar.gz",
             )
 
     def test_upload_missing_sdist(self) -> None:

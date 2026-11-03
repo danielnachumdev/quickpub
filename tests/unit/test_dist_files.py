@@ -7,7 +7,7 @@ from tests.common.helpers import temporary_test_directory
 
 class TestNormalizeDistName(BaseTestClass):
     def test_underscores_become_hyphens(self) -> None:
-        self.assertEqual(normalize_dist_name("gp_wrapper"), "gp-wrapper")
+        self.assertEqual(normalize_dist_name("demo_app"), "demo-app")
 
     def test_mixed_separators(self) -> None:
         self.assertEqual(normalize_dist_name("My.Package_Name"), "my-package-name")
@@ -28,10 +28,10 @@ class TestFindSdist(BaseTestClass):
         with temporary_test_directory() as tmp_dir:
             dist_dir = tmp_dir / "dist"
             dist_dir.mkdir()
-            sdist = dist_dir / "gp-wrapper-1.0.0.tar.gz"
+            sdist = dist_dir / "demo-app-1.0.0.tar.gz"
             sdist.write_bytes(b"dummy")
 
-            found = find_sdist(dist_dir, "gp_wrapper", Version(1, 0, 0))
+            found = find_sdist(dist_dir, "demo_app", Version(1, 0, 0))
             self.assertEqual(found, sdist)
 
     def test_missing_sdist_raises(self) -> None:
