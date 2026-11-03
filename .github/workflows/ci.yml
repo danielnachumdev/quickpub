@@ -29,4 +29,4 @@ jobs:
     if: github.event_name == 'pull_request'
     uses: danielnachumdev/actions/.github/workflows/semver-ci.yml@latest
     with:
-      standards-ref: v1
+      standards-ref: latest
