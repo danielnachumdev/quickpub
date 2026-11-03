@@ -1,31 +1,33 @@
 # QuickPub
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+**Local CI/CD before you publish** — run enforcers, QA, packaging, and upload in one pipeline so broken releases fail on your machine, not on PyPI.
 
-Catch publish failures on your machine before they hit CI or PyPI.
+[![CI](https://github.com/danielnachumdev/quickpub/actions/workflows/ci.yml/badge.svg)](https://github.com/danielnachumdev/quickpub/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/quickpub.svg)](https://pypi.org/project/quickpub/)
+[![Python](https://img.shields.io/pypi/pyversions/quickpub.svg)](https://pypi.org/project/quickpub/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-QuickPub runs pre-publish checks, quality tools, tests, packaging, and upload in one pipeline — so broken releases fail locally with fast feedback.
+Requires **Python 3.11+** (CI-tested on **3.11–3.13**).
 
-## The problem
+## Why QuickPub?
 
-Publishing a Python package usually means juggling several steps: validate project files, run mypy/pylint/pytest, bump the version, generate packaging files, build the sdist, upload to PyPI. Miss a step and you find out in CI — or worse, after a bad release.
+Publishing a Python package usually means juggling several steps: validate project files, run mypy/pylint/pytest, bump the version, build, upload. Miss a step and you find out in CI — or after a bad release.
 
-QuickPub wires those steps together. You define your package once; it enforces constraints, runs QA across Python environments, builds, and uploads.
+**QuickPub** wires those steps together. You define the package once; it enforces constraints, runs QA across detected Python environments, builds, and uploads.
+
+- **Enforcers** for README, LICENSE, `.pypirc`, and local/PyPI version consistency
+- **Bounded QA runners** — mypy, pylint, pytest, unittest with configurable score floors
+- **Build schemas** — setuptools sdist or `uv build` for PEP 621 / uv projects
+- **Upload targets** — twine via `.pypirc`, optional GitHub push
+- **MIT licensed**, CI-tested on Python **3.11–3.13**
 
 ## Install
 
 ```bash
 pip install quickpub
-```
-
-With [uv](https://docs.astral.sh/uv/):
-
-```bash
+# or
 uv add quickpub
 ```
-
-Requires Python **3.11+** (tested on 3.11–3.13).
 
 ## Quick start
 
@@ -120,7 +122,7 @@ publish(
 )
 ```
 
-That keeps the existing `pyproject.toml`, bumps only `[project].version` and `__init__.__version__`, and builds with `uv build`. See [this repo's `publish.py`](publish.py).
+That keeps the existing `pyproject.toml`, bumps only `[project].version` and `__init__.__version__`, and builds with `uv build`.
 
 Run it:
 
@@ -134,7 +136,18 @@ python publish.py
 publish(..., demo=True)
 ```
 
-PyPI upload needs a valid `.pypirc`. See [this repo's `publish.py`](publish.py) for a full working example.
+PyPI upload needs a valid `.pypirc` (never commit it).
+
+## What you get
+
+| Surface | Role |
+| -------- | ---- |
+| `publish` | Orchestrates enforcers → QA → optional file gen → build → upload |
+| Enforcers | README, LICENSE, `.pypirc`, local/PyPI version gates |
+| QA runners | `MypyRunner`, `PylintRunner`, `PytestRunner`, `UnittestRunner` with bounds |
+| Build schemas | `SetuptoolsBuildSchema`, `UvBuildSchema` |
+| Upload targets | `PypircUploadTarget`, GitHub upload target |
+| Providers | uv / pip package managers; default, uv, conda, union Python providers |
 
 ## What runs
 
@@ -152,7 +165,7 @@ Skip build and upload with `demo=True`.
 By default, QuickPub detects your toolchain from the project root:
 
 | Project layout | Package manager | Python provider |
-|---|---|---|
+| --- | --- | --- |
 | `uv.lock` present | `UvPackageManager` | `UvPythonProvider` |
 | otherwise | `PipPackageManager` | `DefaultPythonProvider` |
 
@@ -164,7 +177,7 @@ from quickpub import CondaPythonProvider, UnionProvider
 publish(
     ...,
     python_interpreter_provider=UnionProvider([
-        CondaPythonProvider(["base", "py39", "py38"]),
+        CondaPythonProvider(["base", "py311", "py312"]),
     ]),
 )
 ```
@@ -175,17 +188,12 @@ For full control, pass `package_manager` and `python_interpreter_provider` expli
 
 QuickPub installs a `quickpub` command that wraps `publish()` via [Fire](https://github.com/google/python-fire). For most projects, a `publish.py` script is easier to maintain than long CLI invocations.
 
-## Development
+## Contributing & development
 
-To work on QuickPub itself, clone the repo and use uv:
+Agent/developer workflow (uv, tests, CI/CD labels, secrets): see [`AGENTS.md`](./AGENTS.md).
 
-```bash
-git clone https://github.com/danielnachumdev/quickpub.git
-cd quickpub
-uv sync
-uv run pytest
-```
+Report security issues privately via [GitHub advisories](https://github.com/danielnachumdev/quickpub/security/advisories/new) — please do not open a public issue for vulnerabilities.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [`LICENSE`](./LICENSE).
