@@ -1,6 +1,6 @@
 # QuickPub
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 Catch publish failures on your machine before they hit CI or PyPI.
@@ -25,7 +25,7 @@ With [uv](https://docs.astral.sh/uv/):
 uv add quickpub
 ```
 
-Requires Python **3.8+** (tested on 3.8–3.13).
+Requires Python **3.11+** (tested on 3.11–3.13).
 
 ## Quick start
 
@@ -54,7 +54,7 @@ publish(
     description="My package",
     homepage="https://github.com/you/my-package",
     dependencies=["requests>=2.25.0"],
-    min_python="3.8.0",
+    min_python="3.11.0",
     enforcers=[
         PypircEnforcer(),
         ReadmeEnforcer(),
@@ -101,7 +101,7 @@ publish(
     description="My package",
     homepage="https://github.com/you/my-package",
     dependencies=["requests>=2.25.0"],
-    min_python="3.8.0",
+    min_python="3.11.0",
     enforcers=[
         PypircEnforcer(),
         ReadmeEnforcer(),

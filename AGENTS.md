@@ -27,6 +27,8 @@ When adding QuickPub to another uv / PEP 621 project, use the same flags. `Setup
 
 ## Development
 
+Requires Python **≥3.11** (CI matrix 3.11–3.13 via `danielnachumdev/actions@v1`).
+
 ```bash
 uv sync
 uv run pytest
