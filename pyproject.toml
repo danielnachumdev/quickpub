@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=84.1.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,16 +9,16 @@ authors = [
     { name = "danielnachumdev", email = "danielnachumdev@gmail.com" },
 ]
 dependencies = [
-    "danielutils>=1.1.23",
-    "requests",
+    "danielutils>=1.2.0",
+    "requests>=2.33.0",
     "fire",
-    "twine",
+    "twine>=6.1.0",
 ]
 keywords = []
 license = { "file" = "./LICENSE" }
 description = "A local CI/CD simulation tool that runs quality checks, tests, and validations locally before publishing Python packages, ensuring higher build pass rates and faster feedback loops"
 readme = {file = "./README.md", content-type = "text/markdown"}
-requires-python = ">=3.8.0"
+requires-python = ">=3.11"
 classifiers = [
 	"Development Status :: 5 - Production/Stable",
 	"Environment :: Console",
@@ -28,9 +28,6 @@ classifiers = [
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: Python :: 3 :: Only",
-	"Programming Language :: Python :: 3.8",
-	"Programming Language :: Python :: 3.9",
-	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
@@ -56,16 +53,16 @@ packages = ["quickpub"]
 dev = [
     "githooklib>=1.0.0",
     "tqdm",
-    "pylint",
+    "pylint>=4.0.9",
     "mypy",
     "types-tqdm",
     "types-requests",
     "beautifulsoup4",
-    "setuptools",
-    "black",
+    "setuptools>=84.1.0",
+    "black>=26.10.1",
 ]
 test = [
-    "pytest",
+    "pytest>=9.0.3",
     "pytest-xdist",
     "pytest-asyncio",
     "pytest-cov",
@@ -73,6 +70,14 @@ test = [
 
 [tool.uv]
 default-groups = ["dev", "test"]
+# Security floors for Dependabot-fixed transitive deps (regen with: uv lock)
+constraint-dependencies = [
+    "pygments>=2.20.0",
+    "requests>=2.33.0",
+    "setuptools>=84.1.0",
+    "urllib3>=2.8.0",
+    "wheel>=0.46.2",
+]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
@@ -119,7 +124,7 @@ no_implicit_optional = true
 strict_optional = true
 namespace_packages = true
 explicit_package_bases = true
-files = ["quickpub/*.py", "tests", "publish.py"]
+files = ["quickpub/*.py", "tests"]
 
 [[tool.mypy.overrides]]
 module = "*"
