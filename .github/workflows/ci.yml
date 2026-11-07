@@ -18,6 +18,9 @@ concurrency:
 permissions:
   contents: read
   pull-requests: read
+  # Nested terraform lane in actions@latest declares id-token: write; GitHub
+  # validates that at startup for every caller, even when the lane is skipped.
+  id-token: write
 
 jobs:
   ci:
