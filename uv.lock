@@ -468,7 +468,7 @@ wheels = [
 
 [[package]]
 name = "danielutils"
-version = "1.2.0"
+version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pydantic" },
@@ -477,7 +477,7 @@ dependencies = [
     { name = "tqdm" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/08/ff9165ae04eb5d82f868f7921d08a423aa5014d09541ce1e3716f92d0b5b/danielutils-1.2.0-py3-none-any.whl", hash = "sha256:fc673e71aec3107644607f2375ea4ef45f50e26a329c732e7182d238d6346abc", size = 276050, upload-time = "2026-11-03T10:48:08.441Z" },
+    { url = "https://files.pythonhosted.org/packages/5c/7b/fdf99aee7d2f36bc828639b314e61d89866b4b51f6e0db89713d8d40ef24/danielutils-1.2.1-py3-none-any.whl", hash = "sha256:0de1566fa3787827d4cb34584f4afe02b4903821325f6c7ee5f2e5184d9f86c5", size = 276184, upload-time = "2026-11-03T13:35:15.901Z" },
 ]
 
 [[package]]
